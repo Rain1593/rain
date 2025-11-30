@@ -4560,13 +4560,16 @@
             justify-content: space-between;
             align-items: center;
             transform: translateY(100%);
-            transition: transform 0.3s ease-in-out;
+            /* 新增 visibility 控制，防止被误卷入视图 */
+            visibility: hidden; 
+            transition: transform 0.3s ease-in-out, visibility 0.3s;
             z-index: 200;
             min-height: 100px; /* 设置一个最小高度来覆盖输入区 */
             box-sizing: border-box; /* 确保内边距不会影响总高度 */
         }
         #chat-selection-bar.visible {
             transform: translateY(0);
+            visibility: visible; /* 激活时可见 */
         }
         #chat-selection-bar .selection-info {
             font-size: 0.9rem;
@@ -6171,7 +6174,59 @@
 
 </style>
 <style id="exclusive-bubble-style"></style>
+<script>
+// 智能禁用右键菜单，保留输入框功能
+document.addEventListener('contextmenu', function(e) {
+    // 获取被长按或右键点击的元素的标签名
+    const targetTagName = e.target.tagName.toUpperCase();
 
+    // 如果是输入框(INPUT)、文本域(TEXTAREA)或下拉选择框(SELECT)，则不禁用
+    if (targetTagName === 'INPUT' || targetTagName === 'TEXTAREA' || targetTagName === 'SELECT') {
+        return; // 允许默认的上下文菜单出现
+    }
+
+    // 对于其他所有元素，禁用右键菜单
+    e.preventDefault();
+});
+
+    // 禁用特定的开发者工具快捷键
+    document.addEventListener('keydown', function(e) {
+        // F12
+        if (e.keyCode === 123) {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+I
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+J
+        if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
+            e.preventDefault();
+        }
+        // Ctrl+U
+        if (e.ctrlKey && e.keyCode === 85) {
+            e.preventDefault();
+        }
+    });
+
+    // 通过debugger语句检测开发者工具
+    (function() {
+        function checkDevTools() {
+            const startTime = new Date();
+            debugger;
+            const endTime = new Date();
+            
+            // 如果执行时间差很长，说明在debugger处暂停了
+            if (endTime - startTime > 100) {
+                // 替换页面内容，阻止查看
+                document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:white;display:flex;justify-content:center;align-items:center;font-size:24px;color:black;z-index:999999;">请关闭开发者工具后刷新页面。</div>';
+            }
+        }
+
+        // 定期执行检测
+        setInterval(checkDevTools, 1000);
+    })();
+</script>
 </head>
 <body>
     <!-- 开屏动画 -->
@@ -7745,13 +7800,9 @@
                 bottomNav.style.display = 'flex';
             }
 
-            // 音乐页面特殊处理：Home Bar 变色及状态清理
+            // 音乐页面特殊处理：Home Bar 变色
             if (pageId === 'music') {
                 appContainer.classList.add('on-music-page');
-                // 强制退出聊天多选模式，防止状态残留导致显示多选操作栏
-                if (appState.selectionMode && appState.selectionMode.active) {
-                    this.toggleSelectionMode();
-                }
             } else {
                 appContainer.classList.remove('on-music-page');
             }
@@ -14856,23 +14907,14 @@ ${globalPromptsSection}
                 });
 
                 // 播放列表内点击切歌
-                const playlistBody = $('#music-playlist-body');
-                // 先移除可能存在的旧监听器，防止重复
-                playlistBody.onclick = null;
-                
-                // 使用 addEventListener 并强制阻断一切冒泡
-                playlistBody.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation(); // [修复] 彻底阻止事件传播给同一元素上的其他监听器
-                    
+                $('#music-playlist-body').onclick = (e) => {
                     const item = e.target.closest('.music-queue-item');
                     if (!item) return;
                     const index = parseInt(item.dataset.index);
                     this.currentIndex = index;
                     this.loadSong(this.currentPlaylist[index], true);
                     this.renderPlaylistQueue(); // 刷新高亮
-                });
+                };
 
                 // 清空播放列表 (仅UI逻辑，简单实现为停止播放)
                 $('#music-clear-playlist-btn').onclick = () => {
@@ -14959,6 +15001,9 @@ ${globalPromptsSection}
 
             renderPlaylistQueue() {
                 const listBody = $('#music-playlist-body');
+                // 关键修复：确保 listBody 是定位基准，防止 offsetTop 计算错误
+                listBody.style.position = 'relative'; 
+
                 if (this.currentPlaylist.length === 0) {
                     listBody.innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-size:0.9rem;">播放列表为空</div>';
                     return;
@@ -14977,10 +15022,21 @@ ${globalPromptsSection}
                     `;
                 }).join('');
                 
-                // 自动滚动到当前播放歌曲
+                // 自动滚动到当前播放歌曲 (修复版：使用 scrollTop 代替 scrollIntoView)
                 const activeItem = listBody.querySelector('.music-queue-item.active');
                 if (activeItem) {
-                    activeItem.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    // 延时一点点确保渲染完成
+                    setTimeout(() => {
+                        const containerHeight = listBody.clientHeight;
+                        const itemTop = activeItem.offsetTop;
+                        const itemHeight = activeItem.clientHeight;
+                        
+                        // 手动计算滚动位置，将元素居中，且绝不影响父级容器
+                        listBody.scrollTo({
+                            top: itemTop - (containerHeight / 2) + (itemHeight / 2),
+                            behavior: 'smooth'
+                        });
+                    }, 50);
                 }
             },
 
@@ -26877,9 +26933,6 @@ async showGiftDetailsModal(messageId) {
                 }
             },
             toggleSelectionMode() {
-                // [修复] 如果当前是音乐页面，强制禁止触发聊天多选模式
-                if (appState.currentPage === 'music') return;
-
                 const pageChat = $('#page-chat');
                 const selectionBar = $('#chat-selection-bar');
                 const selectionInfo = $('#selection-info');
