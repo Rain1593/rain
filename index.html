@@ -243,7 +243,7 @@
             
             height: 95px;
             background: rgba(255, 255, 255, 0.45); /* 白色磨砂质感 */
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(25px);
             border-radius: 32px;
             border: 1px solid rgba(255, 255, 255, 0.4); /* 细细的轮廓线增强质感 */
@@ -755,11 +755,13 @@
             display: flex;
             align-items: center;
             padding: 18px 15px;
-            background-color: var(--text-color-white);
+            background-color: rgba(255, 255, 255, 0.65); /* 修改：增加透明度 */
+            backdrop-filter: blur(5px); /* 新增：增加毛玻璃模糊效果 */
+            -webkit-backdrop-filter: blur(10px); /* 新增：兼容 Safari */
             margin: 0 10px 12px;
             border-radius: 12px;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
         }
         .setting-item:hover {
             transform: translateY(-2px);
@@ -4822,7 +4824,8 @@
         }
 
         #page-api-settings .settings-list {
-            background-color: var(--text-color-white); /* 整个列表使用白色背景 */
+            background-color: rgba(255, 255, 255, 0.75); /* 修改：增加透明度 */
+            -webkit-backdrop-filter: blur(10px); /* 兼容 Safari */
             border-radius: 12px;
             margin: 0;
             padding: 0 15px; /* 内部左右留白 */
@@ -5511,7 +5514,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 15px;
-            background: white;
+            background: rgba(255, 255, 255, 0.75); /* 修改：增加透明度 */
+            -webkit-backdrop-filter: blur(10px); /* 新增：兼容 Safari */
             border-bottom: 1px solid var(--border-color);
         }
         .app-icon-row:first-child { border-top-left-radius: 12px; border-top-right-radius: 12px; }
