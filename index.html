@@ -818,11 +818,11 @@
         }
         .chat-area {
             flex-grow: 1;
-            padding: 20px 15px;
+            padding: 15px 15px; /* 稍微减小一点上下内边距 */
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 8px; /* 修改：将气泡间距从 20px 缩小到 8px */
             /* 关键让聊天区域拥有自己的背景，而不是透明 */
             background-color: var(--theme-color-1); 
             background-size: cover;
@@ -1704,13 +1704,15 @@
         .emoji-item span {
             font-size: 0.7rem;
             color: var(--text-color-light);
-            max-width: 100%;
+            /* 修改：设置固定的最大宽度(例如62px)，强制超出显示省略号 */
+            max-width: 72px; 
+            width: 72px; /* 确保宽度固定 */
             overflow: hidden;
-            text-overflow: ellipsis;
+            text-overflow: ellipsis; /* 超出显示... */
             white-space: nowrap;
             text-align: center;
             display: block;
-            width: 100%;
+            margin: 0 auto; /* 确保文字水平居中 */
         }
         /* 调整表情面板高度以适应文字 */
         .emoji-card {
@@ -28525,7 +28527,43 @@ async showGiftDetailsModal(messageId) {
             }
         }
         
+        // --- 新增：解决移动端键盘遮挡输入框问题 ---
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', () => {
+                const appContainer = document.getElementById('app-container');
+                const chatArea = document.getElementById('chat-area');
+                
+                // 当键盘弹出时，将容器高度设置为实际可视高度
+                appContainer.style.height = window.visualViewport.height + 'px';
+                
+                // 如果在聊天页面，键盘弹出时自动滚动到底部
+                if (appState.currentPage === 'chat') {
+                    // 延时一点点确保布局调整完毕
+                    setTimeout(() => {
+                        chatArea.scrollTop = chatArea.scrollHeight;
+                        // 确保输入框在视图内
+                        const input = document.getElementById('message-input');
+                        if (document.activeElement === input) {
+                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+                }
+            });
+        }
         
+        // 额外的输入框聚焦监听，确保万无一失
+        const msgInput = document.getElementById('message-input');
+        if (msgInput) {
+            msgInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    const chatArea = document.getElementById('chat-area');
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                    msgInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300); // 留出键盘弹出的动画时间
+            });
+        }
+        // --- 新增结束 ---
+
         document.addEventListener('DOMContentLoaded', initApp);
 
     })();
