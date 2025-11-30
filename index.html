@@ -5565,6 +5565,162 @@
             background: #e5e5e7;
         }
         
+        /* --- 小组件样式扩展 --- */
+        
+        /* 通用清除默认背景 (用于时钟和短信组件) */
+        .ios-widget-large.transparent-bg {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        /* 2. 时间组件 */
+        .widget-time-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            color: var(--text-color-dark);
+            text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+        }
+        .widget-time-large {
+            font-size: 4rem;
+            font-weight: 300;
+            line-height: 1;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            letter-spacing: -2px;
+        }
+        .widget-date-small {
+            font-size: 1.2rem;
+            margin-top: 5px;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        /* 3. 日历+倒计时组件 */
+        .widget-cal-count-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85); /* 恢复一点背景 */
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            overflow: hidden;
+        }
+        .widget-cal-part {
+            flex: 3; /* 3:2比例 */
+            padding: 10px;
+            border-right: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        .widget-count-part {
+            flex: 2;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(245, 245, 247, 0.5);
+            cursor: pointer; /* 可点击修改 */
+        }
+        /* 日历网格 */
+        .cal-month-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #ff3b30;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            font-size: 0.6rem;
+            text-align: center;
+            flex-grow: 1;
+        }
+        .cal-day-header { color: #8e8e93; font-weight: 600; }
+        .cal-day { color: #333; display: flex; justify-content: center; align-items: center; border-radius: 50%; width: 18px; height: 18px; margin: 0 auto;}
+        .cal-day.today { background-color: #ff3b30; color: white; font-weight: bold; }
+        
+        /* 倒计时 */
+        .count-days { font-size: 2.2rem; font-weight: bold; line-height: 1; color: #333; }
+        .count-label { font-size: 0.7rem; color: #8e8e93; margin-top: 5px; text-align: center;}
+        .count-target { font-size: 0.8rem; color: #ff3b30; margin-bottom: 2px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+        /* 4. 短信风组件 */
+        .widget-sms-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 10px 20px; /* 两侧留白 */
+            gap: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .widget-sms-row {
+            display: flex;
+            align-items: flex-end;
+            width: 100%;
+            position: relative;
+        }
+        .widget-sms-row.left { justify-content: flex-start; }
+        .widget-sms-row.right { justify-content: flex-end; }
+
+        .sms-name-tag {
+            font-size: 0.75rem;
+            color: #888;
+            position: absolute;
+            top: -18px;
+            left: 0;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        .sms-name-line { width: 2px; height: 10px; background-color: #ccc; border-radius: 1px;}
+
+        .sms-bubble-box {
+            padding: 10px 14px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            max-width: 80%;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            line-height: 1.4;
+        }
+        .widget-sms-row.left .sms-bubble-box {
+            border-bottom-left-radius: 4px;
+        }
+        .widget-sms-row.right .sms-bubble-box {
+            border-bottom-right-radius: 4px;
+        }
+
+        .sms-time-tag {
+            font-size: 0.6rem;
+            color: #aaa; /* 时间颜色 */
+            margin-left: 6px;
+            margin-right: 6px;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+        
+        /* 短信配色方案类 */
+        .sms-theme-bw .left .sms-bubble-box { background: white; color: black; }
+        .sms-theme-bw .right .sms-bubble-box { background: black; color: white; }
+        
+        .sms-theme-pink .left .sms-bubble-box { background: white; color: black; }
+        .sms-theme-pink .right .sms-bubble-box { background: #FFC0CB; color: #5D534A; } /* 浅粉 */
+
+        .sms-theme-blue .left .sms-bubble-box { background: #E1F5FE; color: #0277BD; } /* 浅蓝 */
+        .sms-theme-blue .right .sms-bubble-box { background: white; color: black; }
+
+        .sms-theme-green .left .sms-bubble-box { background: white; color: black; }
+        .sms-theme-green .right .sms-bubble-box { background: #C8E6C9; color: #2E7D32; } /* 浅绿 */
 </style>
 <style id="exclusive-bubble-style"></style>
 <script>
@@ -18748,6 +18904,11 @@ async showMomentsSettingsModal() {
                             <span>修改桌面壁纸</span>
                             <i class="fas fa-chevron-right"></i>
                         </div>
+                        <div class="setting-item" id="desktop-set-widget">
+                            <i class="fas fa-th-large" style="background: #FF9500; color: white; padding: 5px; border-radius: 6px; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; margin-right: 15px;"></i>
+                            <span>小组件设置</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
                         <div class="setting-item" id="desktop-set-icons">
                             <i class="fas fa-icons" style="background: #5856D6; color: white; padding: 5px; border-radius: 6px; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; margin-right: 15px;"></i>
                             <span>修改APP图标</span>
@@ -18757,6 +18918,7 @@ async showMomentsSettingsModal() {
                 `;
 
                 $('#desktop-set-wallpaper').onclick = () => this.showDesktopWallpaperModal();
+                $('#desktop-set-widget').onclick = () => this.showWidgetSettingsModal();
                 $('#desktop-set-icons').onclick = () => this.renderDesktopAppIconsSubPage();
             },
 
@@ -18813,6 +18975,280 @@ async showMomentsSettingsModal() {
                     $('#desktop-wp-placeholder').style.display = 'flex';
                     UIManager.showToast("壁纸已重置");
                 };
+            },
+
+            async showWidgetSettingsModal() {
+                const settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
+                const currentType = settings.desktopWidgetType || 'photo'; // photo, time, calendar, sms
+
+                UIManager.showBottomSheet({
+                    title: '选择桌面小组件样式',
+                    items: [
+                        { value: 'photo', text: '相册' },
+                        { value: 'time', text: '时钟' },
+                        { value: 'calendar', text: '日历 + 倒计时' },
+                        { value: 'sms', text: '短信' }
+                    ],
+                    onSelect: async (value, text) => {
+                        const settingsToSave = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
+                        settingsToSave.desktopWidgetType = value;
+                        // 初始化默认数据(如果不存在)
+                        if (!settingsToSave.desktopWidgetData) settingsToSave.desktopWidgetData = {};
+                        if (value === 'sms' && !settingsToSave.desktopWidgetData.sms) {
+                            settingsToSave.desktopWidgetData.sms = {
+                                theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥'
+                            };
+                        }
+                        if (value === 'calendar' && !settingsToSave.desktopWidgetData.countdown) {
+                            settingsToSave.desktopWidgetData.countdown = {
+                                title: '纪念日', date: new Date().toISOString().split('T')[0]
+                            };
+                        }
+
+                        await DBHelper.put('apiConfig', settingsToSave);
+                        await this.renderDesktopWidget(); // 立即渲染
+                        UIManager.showToast(`已切换为: ${text}`);
+                    }
+                });
+            },
+
+
+            async renderDesktopWidget() {
+                const widgetEl = document.getElementById('desktop-widget');
+                if (!widgetEl) return;
+
+                const settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
+                const type = settings.desktopWidgetType || 'photo';
+                const widgetData = settings.desktopWidgetData || {};
+
+                // 清除旧类和内容
+                widgetEl.className = 'ios-widget-large'; 
+                widgetEl.innerHTML = '';
+                
+                // 移除之前的事件监听器 (通过克隆节点)
+                const newWidgetEl = widgetEl.cloneNode(true);
+                widgetEl.parentNode.replaceChild(newWidgetEl, widgetEl);
+                const container = newWidgetEl;
+
+                if (type === 'photo') {
+                    // 1. 相册组件 (旧逻辑)
+                    const img = document.createElement('img');
+                    const savedImg = localStorage.getItem('ios_widget_img');
+                    img.style.display = savedImg ? 'block' : 'none';
+                    img.src = savedImg || '';
+                    img.id = 'widget-img';
+                    
+                    const placeholder = document.createElement('span');
+                    placeholder.className = 'widget-placeholder';
+                    placeholder.innerHTML = '<i class="fas fa-plus"></i> 点击上传图片';
+                    placeholder.style.display = savedImg ? 'none' : 'block';
+
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.style.display = 'none';
+                    input.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            try {
+                                const base64 = await Utils.compressImage(file, 800, 800, 0.8);
+                                img.src = base64;
+                                img.style.display = 'block';
+                                placeholder.style.display = 'none';
+                                localStorage.setItem('ios_widget_img', base64);
+                            } catch (err) { UIManager.showToast("图片处理失败"); }
+                        }
+                    });
+
+                    container.appendChild(img);
+                    container.appendChild(placeholder);
+                    container.appendChild(input);
+                    container.onclick = () => input.click();
+
+                } else if (type === 'time') {
+                    // 2. 时间组件
+                    container.classList.add('transparent-bg');
+                    
+                    const updateTime = () => {
+                        const now = new Date();
+                        const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                        const dateStr = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+                        container.innerHTML = `
+                            <div class="widget-time-container">
+                                <div class="widget-time-large">${timeStr}</div>
+                                <div class="widget-date-small">${dateStr}</div>
+                            </div>
+                        `;
+                    };
+                    updateTime();
+                    // 存储 interval ID 以便清理 (这里简单处理，实际应用可能需要全局管理timer)
+                    if (window.desktopClockTimer) clearInterval(window.desktopClockTimer);
+                    window.desktopClockTimer = setInterval(updateTime, 1000);
+
+                } else if (type === 'calendar') {
+                    // 3. 日历+倒计时组件
+                    const countData = widgetData.countdown || { title: '纪念日', date: new Date().toISOString().split('T')[0] };
+                    
+                    // 计算倒计时天数
+                    const targetDate = new Date(countData.date);
+                    const today = new Date();
+                    targetDate.setHours(0,0,0,0);
+                    today.setHours(0,0,0,0);
+                    const diffTime = targetDate - today;
+                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    let dayLabel = "天";
+                    if (diffDays < 0) { diffDays = Math.abs(diffDays); dayLabel = "天已过"; }
+                    if (diffDays === 0) { diffDays = "今天"; dayLabel = ""; }
+
+                    // 生成日历HTML
+                    const now = new Date();
+                    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+                    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay(); // 0 is Sunday
+                    
+                    let calGridHtml = '';
+                    // 表头
+                    ['S','M','T','W','T','F','S'].forEach(d => calGridHtml += `<div class="cal-day-header">${d}</div>`);
+                    // 空白
+                    for(let i=0; i<firstDay; i++) calGridHtml += `<div></div>`;
+                    // 日期
+                    for(let i=1; i<=daysInMonth; i++) {
+                        const isToday = i === now.getDate();
+                        calGridHtml += `<div class="cal-day ${isToday ? 'today' : ''}">${i}</div>`;
+                    }
+
+                    container.innerHTML = `
+                        <div class="widget-cal-count-container">
+                            <div class="widget-cal-part">
+                                <div class="cal-month-title">${monthNames[now.getMonth()]}</div>
+                                <div class="cal-grid">${calGridHtml}</div>
+                            </div>
+                            <div class="widget-count-part" id="widget-count-click">
+                                <div class="count-target">${countData.title}</div>
+                                <div class="count-days">${diffDays}</div>
+                                <div class="count-label">${dayLabel}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    // 绑定倒计时点击修改
+                    setTimeout(() => {
+                        const countPart = document.getElementById('widget-count-click');
+                        if(countPart) countPart.onclick = (e) => {
+                            e.stopPropagation();
+                            this.showCountdownEditModal(countData);
+                        }
+                    }, 0);
+
+                } else if (type === 'sms') {
+                    // 4. 短信风组件
+                    container.classList.add('transparent-bg');
+                    const smsData = widgetData.sms || { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
+                    
+                    // 映射主题到class
+                    const themeClass = `sms-theme-${smsData.theme}`; // bw, pink, blue, green
+
+                    container.innerHTML = `
+                        <div class="widget-sms-container ${themeClass}">
+                            <div class="widget-sms-row left">
+                                <div class="sms-name-tag">
+                                    <div class="sms-name-line"></div> ${smsData.name}
+                                </div>
+                                <div class="sms-bubble-box">${smsData.msg1}</div>
+                                <div class="sms-time-tag">13:14</div>
+                            </div>
+                            <div class="widget-sms-row right">
+                                <div class="sms-time-tag">05:20</div>
+                                <div class="sms-bubble-box">${smsData.msg2}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    container.onclick = () => this.showSmsEditModal(smsData);
+                }
+            },
+
+
+            // 倒计时修改弹窗
+            showCountdownEditModal(currentData) {
+                UIManager.showModal({
+                    customClass: 'modal-default-style',
+                    title: "倒计时设置",
+                    body: `
+                        <div class="form-group">
+                            <label>事件名称</label>
+                            <input type="text" id="widget-count-title" value="${currentData.title}" maxlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label>目标日期</label>
+                            <input type="date" id="widget-count-date" value="${currentData.date}">
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const title = $('#widget-count-title').value.trim() || '纪念日';
+                            const date = $('#widget-count-date').value;
+                            if(!date) return UIManager.showToast("请选择日期");
+
+                            const settings = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
+                            if (!settings.desktopWidgetData) settings.desktopWidgetData = {};
+                            settings.desktopWidgetData.countdown = { title, date };
+                            
+                            await DBHelper.put('apiConfig', settings);
+                            await this.renderDesktopWidget();
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            },
+
+            // 短信组件修改弹窗
+            showSmsEditModal(currentData) {
+                UIManager.showModal({
+                    customClass: 'modal-default-style',
+                    title: "短信组件设置",
+                    body: `
+                        <div class="form-group">
+                            <label>配色方案</label>
+                            <div style="display:flex; gap:10px; justify-content:space-between;">
+                                <label style="font-size:0.8rem;"><input type="radio" name="sms-theme" value="bw" ${currentData.theme === 'bw'?'checked':''}> 黑x白</label>
+                                <label style="font-size:0.8rem;"><input type="radio" name="sms-theme" value="pink" ${currentData.theme === 'pink'?'checked':''}> 白x粉</label>
+                                <label style="font-size:0.8rem;"><input type="radio" name="sms-theme" value="blue" ${currentData.theme === 'blue'?'checked':''}> 浅蓝x白</label>
+                                <label style="font-size:0.8rem;"><input type="radio" name="sms-theme" value="green" ${currentData.theme === 'green'?'checked':''}> 白x绿</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>发送人名字</label>
+                            <input type="text" id="widget-sms-name" value="${currentData.name}" maxlength="10">
+                        </div>
+                        <div class="form-group">
+                            <label>左侧内容 (Msg 1)</label>
+                            <input type="text" id="widget-sms-msg1" value="${currentData.msg1}">
+                        </div>
+                        <div class="form-group">
+                            <label>右侧内容 (Msg 2)</label>
+                            <input type="text" id="widget-sms-msg2" value="${currentData.msg2}">
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const theme = $('input[name="sms-theme"]:checked').value;
+                            const name = $('#widget-sms-name').value.trim();
+                            const msg1 = $('#widget-sms-msg1').value.trim();
+                            const msg2 = $('#widget-sms-msg2').value.trim();
+
+                            const settings = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
+                            if (!settings.desktopWidgetData) settings.desktopWidgetData = {};
+                            settings.desktopWidgetData.sms = { theme, name, msg1, msg2 };
+                            
+                            await DBHelper.put('apiConfig', settings);
+                            await this.renderDesktopWidget();
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
             },
 
             async saveDesktopWallpaper(src) {
@@ -26310,10 +26746,6 @@ async showGiftDetailsModal(messageId) {
                 const musicBtn = $('#open-music-btn');
                 const forumBtn = $('#open-forum-btn');
                 const homeBar = $('#home-bar');
-                const widget = $('#desktop-widget');
-                const widgetInput = $('#widget-upload');
-                const widgetImg = $('#widget-img');
-                const widgetPlaceholder = widget.querySelector('.widget-placeholder');
                 
                 // Dock栏按钮
                 const smsBtn = $('#dock-sms-btn');
@@ -26329,7 +26761,7 @@ async showGiftDetailsModal(messageId) {
                     void appContainer.offsetWidth; 
                     appContainer.classList.add('app-active');
                     // 确保进入33Chat是显示消息页
-                    if (appState.currentPage === 'os-settings') {
+                    if (appState.currentPage === 'os-settings' || appState.currentPage === 'desktop-settings') {
                         UIManager.navigateTo('messages');
                     }
                 });
@@ -26348,15 +26780,9 @@ async showGiftDetailsModal(messageId) {
                     UIManager.navigateTo('os-settings');
                 });
 
-                // 2. 占位 App 点击 (全部改为浮窗 Toast)
-                musicBtn.addEventListener('click', () => {
-                    UIManager.showToast("音乐功能开发中...");
-                });
-                
-                forumBtn.addEventListener('click', () => {
-                    UIManager.showToast("论坛功能开发中...");
-                });
-
+                // 2. 占位 App 点击
+                musicBtn.addEventListener('click', () => UIManager.showToast("音乐功能开发中..."));
+                forumBtn.addEventListener('click', () => UIManager.showToast("论坛功能开发中..."));
                 if (smsBtn) smsBtn.addEventListener('click', () => UIManager.showToast("短信功能开发中..."));
                 if (unknownBtn1) unknownBtn1.addEventListener('click', () => UIManager.showToast("未知应用 A 开发中..."));
                 if (unknownBtn2) unknownBtn2.addEventListener('click', () => UIManager.showToast("未知应用 B 开发中..."));
@@ -26372,35 +26798,10 @@ async showGiftDetailsModal(messageId) {
                     desktop.classList.add('active');
                 });
 
-                // 4. 小组件上传图片
-                // 读取本地存储的图片
-                const savedWidgetImg = localStorage.getItem('ios_widget_img');
-                if (savedWidgetImg) {
-                    widgetImg.src = savedWidgetImg;
-                    widgetImg.style.display = 'block';
-                    widgetPlaceholder.style.display = 'none';
-                }
-
-                widget.addEventListener('click', () => {
-                    widgetInput.click();
-                });
-
-                widgetInput.addEventListener('change', async (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        try {
-                            // 使用已有的压缩工具
-                            const base64 = await Utils.compressImage(file, 800, 800, 0.8);
-                            widgetImg.src = base64;
-                            widgetImg.style.display = 'block';
-                            widgetPlaceholder.style.display = 'none';
-                            localStorage.setItem('ios_widget_img', base64);
-                            UIManager.showToast("小组件图片已更新");
-                        } catch (err) {
-                            UIManager.showToast("图片处理失败");
-                        }
-                    }
-                });
+                // 4. 初始化小组件渲染 (通过 EventManager)
+                // 这里的逻辑已经移入 EventManager.renderDesktopWidget
+                // 只需要在 initApp 末尾调用一次即可。
+                // 注意：旧的 widgetInput 监听器已经在 renderDesktopWidget 的 'photo' 逻辑中重新绑定了
             }
 
             try {
@@ -26636,6 +27037,8 @@ async showGiftDetailsModal(messageId) {
                 await EventManager.applyPageStyleSettings();
                 await EventManager.applyChatInterfaceStyleSettings();
                 await EventManager.applyDesktopSettings();
+                // 渲染桌面小组件
+                await EventManager.renderDesktopWidget();
                 
                 await EventManager.initEmojiPanel(); 
                 await UIManager.navigateTo('messages');
