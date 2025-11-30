@@ -28527,39 +28527,71 @@ async showGiftDetailsModal(messageId) {
             }
         }
         
-        // --- 新增：解决移动端键盘遮挡输入框问题 ---
+        // --- 新增：解决移动端键盘遮挡输入框问题 (修复版) ---
         if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
+            const handleViewportResize = () => {
                 const appContainer = document.getElementById('app-container');
                 const chatArea = document.getElementById('chat-area');
+                const layoutViewport = document.getElementById('main-content'); // 获取主内容区
                 
-                // 当键盘弹出时，将容器高度设置为实际可视高度
-                appContainer.style.height = window.visualViewport.height + 'px';
+                // 当前可视高度
+                const currentHeight = window.visualViewport.height;
+                // 屏幕总高度（用于判断键盘是否收起）
+                const screenHeight = window.innerHeight;
                 
-                // 如果在聊天页面，键盘弹出时自动滚动到底部
-                if (appState.currentPage === 'chat') {
-                    // 延时一点点确保布局调整完毕
-                    setTimeout(() => {
-                        chatArea.scrollTop = chatArea.scrollHeight;
-                        // 确保输入框在视图内
-                        const input = document.getElementById('message-input');
-                        if (document.activeElement === input) {
-                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                    }, 100);
+                // 如果可视高度接近屏幕高度，说明键盘收起了
+                const isKeyboardHidden = currentHeight >= screenHeight - 100; // 留100px容错
+
+                if (isKeyboardHidden) {
+                    // 键盘收起状态：强制重置高度为100%，并修复页面滚动
+                    appContainer.style.height = '100%';
+                    window.scrollTo(0, 0); // 关键：修复顶部标题栏消失的问题
+                } else {
+                    // 键盘弹出状态：设置高度为可视区域高度
+                    appContainer.style.height = currentHeight + 'px';
+                    
+                    // 如果在聊天页面，自动滚动到底部
+                    if (appState.currentPage === 'chat' && chatArea) {
+                        setTimeout(() => {
+                            chatArea.scrollTop = chatArea.scrollHeight;
+                            const input = document.getElementById('message-input');
+                            if (document.activeElement === input) {
+                                input.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                            }
+                        }, 100);
+                    }
                 }
-            });
+            };
+
+            window.visualViewport.addEventListener('resize', handleViewportResize);
+            window.visualViewport.addEventListener('scroll', handleViewportResize); // 有些浏览器需要监听scroll
         }
         
-        // 额外的输入框聚焦监听，确保万无一失
+        // 额外的输入框聚焦/失焦监听，修复键盘收起后的布局错位
         const msgInput = document.getElementById('message-input');
         if (msgInput) {
+            // 聚焦时
             msgInput.addEventListener('focus', () => {
                 setTimeout(() => {
                     const chatArea = document.getElementById('chat-area');
-                    chatArea.scrollTop = chatArea.scrollHeight;
-                    msgInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 300); // 留出键盘弹出的动画时间
+                    if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+                    // 稍微延时以等待键盘完全弹出
+                    setTimeout(() => {
+                        msgInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                    }, 300);
+                }, 100);
+            });
+
+            // 失焦时 (即点击空白处键盘收起)
+            msgInput.addEventListener('blur', () => {
+                // 强制页面滚回顶部，修复顶部状态栏消失的问题
+                window.scrollTo(0, 0);
+                
+                // 强制重置容器高度，修复底部留白
+                const appContainer = document.getElementById('app-container');
+                if (appContainer) {
+                    appContainer.style.height = '100%';
+                }
             });
         }
         // --- 新增结束 ---
