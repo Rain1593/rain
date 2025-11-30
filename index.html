@@ -28527,73 +28527,64 @@ async showGiftDetailsModal(messageId) {
             }
         }
         
-        // --- 新增：解决移动端键盘遮挡输入框问题 (修复版) ---
+        
+        // --- PWA/移动端键盘适配核心逻辑 (最终修正版) ---
+        // 核心思路：PWA模式下，禁止浏览器自动推移页面(导致顶部空白)，而是手动改变容器高度来适应键盘
         if (window.visualViewport) {
-            const handleViewportResize = () => {
-                const appContainer = document.getElementById('app-container');
-                const chatArea = document.getElementById('chat-area');
-                const layoutViewport = document.getElementById('main-content'); // 获取主内容区
+            const appContainer = document.getElementById('app-container');
+            const chatArea = document.getElementById('chat-area');
+            
+            const handleResize = () => {
+                // 1. 核心修复：强制将页面滚动位置重置为0
+                // 这能解决“顶部多了空白”的问题，防止整个页面被键盘顶上去
+                window.scrollTo(0, 0);
                 
-                // 当前可视高度
-                const currentHeight = window.visualViewport.height;
-                // 屏幕总高度（用于判断键盘是否收起）
-                const screenHeight = window.innerHeight;
+                // 2. 将容器高度设置为实际的“可视高度”
+                // 容器变矮了，Flex布局会自动把底部的输入框顶上来，贴着键盘上沿，解决“看不见输入栏”
+                appContainer.style.height = window.visualViewport.height + 'px';
                 
-                // 如果可视高度接近屏幕高度，说明键盘收起了
-                const isKeyboardHidden = currentHeight >= screenHeight - 100; // 留100px容错
-
-                if (isKeyboardHidden) {
-                    // 键盘收起状态：强制重置高度为100%，并修复页面滚动
-                    appContainer.style.height = '100%';
-                    window.scrollTo(0, 0); // 关键：修复顶部标题栏消失的问题
-                } else {
-                    // 键盘弹出状态：设置高度为可视区域高度
-                    appContainer.style.height = currentHeight + 'px';
-                    
-                    // 如果在聊天页面，自动滚动到底部
-                    if (appState.currentPage === 'chat' && chatArea) {
-                        setTimeout(() => {
-                            chatArea.scrollTop = chatArea.scrollHeight;
-                            const input = document.getElementById('message-input');
-                            if (document.activeElement === input) {
-                                input.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                            }
-                        }, 100);
-                    }
+                // 3. 如果在聊天页面，调整消息列表滚动到底部，确保看到最新消息
+                if (appState.currentPage === 'chat' && chatArea) {
+                    setTimeout(() => {
+                        chatArea.scrollTop = chatArea.scrollHeight;
+                    }, 50);
                 }
             };
 
-            window.visualViewport.addEventListener('resize', handleViewportResize);
-            window.visualViewport.addEventListener('scroll', handleViewportResize); // 有些浏览器需要监听scroll
-        }
-        
-        // 额外的输入框聚焦/失焦监听，修复键盘收起后的布局错位
-        const msgInput = document.getElementById('message-input');
-        if (msgInput) {
-            // 聚焦时
-            msgInput.addEventListener('focus', () => {
-                setTimeout(() => {
-                    const chatArea = document.getElementById('chat-area');
-                    if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
-                    // 稍微延时以等待键盘完全弹出
-                    setTimeout(() => {
-                        msgInput.scrollIntoView({ behavior: 'smooth', block: 'end' });
-                    }, 300);
-                }, 100);
-            });
-
-            // 失焦时 (即点击空白处键盘收起)
-            msgInput.addEventListener('blur', () => {
-                // 强制页面滚回顶部，修复顶部状态栏消失的问题
-                window.scrollTo(0, 0);
-                
-                // 强制重置容器高度，修复底部留白
-                const appContainer = document.getElementById('app-container');
-                if (appContainer) {
-                    appContainer.style.height = '100%';
+            // 监听可视区域变化（键盘弹出/收起时触发）
+            window.visualViewport.addEventListener('resize', handleResize);
+            
+            // 防抖动：某些情况下滚动也会触发视图变化，强制锁死位置
+            window.visualViewport.addEventListener('scroll', () => {
+                if (appState.currentPage === 'chat') {
+                    window.scrollTo(0, 0);
                 }
             });
         }
+
+        // 输入框监听辅助
+        const msgInput = document.getElementById('message-input');
+        if (msgInput) {
+            msgInput.addEventListener('blur', () => {
+                // 键盘收起失去焦点时
+                // 1. 再次强制复位滚动
+                window.scrollTo(0, 0);
+                // 2. 延时恢复容器高度占满屏幕，解决底部留白
+                setTimeout(() => {
+                    const appContainer = document.getElementById('app-container');
+                    if (appContainer) appContainer.style.height = '100%';
+                }, 100);
+            });
+            
+            // 聚焦时，不要自己滚，完全交给上面的 visualViewport resize 事件处理
+            // 这里只做一个双重保险，防止个别机型没触发 resize
+            msgInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                }, 300);
+            });
+        }
+        
         // --- 新增结束 ---
 
         document.addEventListener('DOMContentLoaded', initApp);
