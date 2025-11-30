@@ -2,7 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <!-- 修改 viewport，增加 interactive-widget=resizes-content 属性，这是解决键盘遮挡的核心 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <title>33phone</title>
     <!-- PWA 配置开始 -->
     <link rel="manifest" href="manifest.json">
@@ -366,11 +367,17 @@
         }
 
         html, body {
+            /* 修改：使用 svh 和 dvh 来适配移动端动态视口，height: 100% 在PWA中容易出问题 */
             height: 100%;
-            overflow: hidden;
+            height: 100dvh; /* 动态视口高度，关键 */
+            width: 100%;
+            overflow: hidden; /* 防止整体滚动 */
             font-family: var(--font-main);
             color: var(--text-color-dark);
-            font-size: var(--global-font-size); /* 应用全局字体变量 */
+            font-size: var(--global-font-size);
+            position: fixed; /* 锁定body防止回弹 */
+            top: 0;
+            left: 0;
         }
 
     body {
@@ -16616,6 +16623,38 @@ async showGroupMentionPopup(chatId) {
                     }
                 });
 
+                // --- 新增：修复iOS PWA模式下键盘遮挡输入框的问题 ---
+                const fixKeyboardOverlay = () => {
+                    // 1. 监听输入框聚焦事件
+                    messageInput.addEventListener('focus', () => {
+                        // 延时等待键盘完全弹出
+                        setTimeout(() => {
+                            // 强制滚动到可视区域底部
+                            messageInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // 兼容性补丁：强制重绘一下高度，触发 interactive-widget 生效
+                            document.body.style.height = window.innerHeight + 'px';
+                        }, 300);
+                    });
+
+                    // 2. 监听视口变化（针对现代浏览器）
+                    if (window.visualViewport) {
+                        window.visualViewport.addEventListener('resize', () => {
+                            // 如果高度变小了（说明键盘弹出了）
+                            if (window.visualViewport.height < window.innerHeight) {
+                                // 再次强制滚动
+                                if (document.activeElement === messageInput) {
+                                    setTimeout(() => {
+                                        messageInput.scrollIntoView({ behavior: 'auto', block: 'center' });
+                                    }, 100);
+                                }
+                            }
+                            // 恢复body高度
+                            document.body.style.height = window.visualViewport.height + 'px';
+                        });
+                    }
+                };
+                fixKeyboardOverlay();
+                // --- 新增结束 ---
                 
                 appContainer.addEventListener('click', (e) => this.handleClickEffect(e));
                 modalOverlay.addEventListener('click', (e) => {
