@@ -28561,29 +28561,6 @@ async showGiftDetailsModal(messageId) {
                 }
             });
         }
-
-        // 输入框监听辅助
-        const msgInput = document.getElementById('message-input');
-        if (msgInput) {
-            msgInput.addEventListener('blur', () => {
-                // 键盘收起失去焦点时
-                // 1. 再次强制复位滚动
-                window.scrollTo(0, 0);
-                // 2. 延时恢复容器高度占满屏幕，解决底部留白
-                setTimeout(() => {
-                    const appContainer = document.getElementById('app-container');
-                    if (appContainer) appContainer.style.height = '100%';
-                }, 100);
-            });
-            
-            // 聚焦时，不要自己滚，完全交给上面的 visualViewport resize 事件处理
-            // 这里只做一个双重保险，防止个别机型没触发 resize
-            msgInput.addEventListener('focus', () => {
-                setTimeout(() => {
-                    window.scrollTo(0, 0);
-                }, 300);
-            });
-        }
         
         // --- 新增结束 ---
 
