@@ -48,6 +48,7 @@
         @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
         /* --- 1. 全局与主题 --- */
         :root {
+            --global-font-size: 16px; /* 新增：系统基准字体大小 */
             --theme-color-1: #F4E8DD; /* 奶油杏 */
             --theme-color-2: #EDD4D8; /* 柔粉 */
             --theme-color-3: #CCD4CC; /* 灰绿 */
@@ -290,6 +291,12 @@
         #home-bar:hover {
             opacity: 0.8;
         }
+
+        /* 音乐页面下 Home Bar 变白 */
+        #app-container.on-music-page #home-bar {
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
         
         /* App 打开时的动画 */
         @keyframes appOpen {
@@ -359,6 +366,7 @@
             overflow: hidden;
             font-family: var(--font-main);
             color: var(--text-color-dark);
+            font-size: var(--global-font-size); /* 应用全局字体变量 */
         }
 
     body {
@@ -754,11 +762,11 @@
         .setting-item {
             display: flex;
             align-items: center;
-            padding: 18px 15px;
-            background-color: rgba(255, 255, 255, 0.65); /* 修改：增加透明度 */
-            backdrop-filter: blur(5px); /* 新增：增加毛玻璃模糊效果 */
-            -webkit-backdrop-filter: blur(10px); /* 新增：兼容 Safari */
-            margin: 0 10px 12px;
+            padding: 14px 15px; /* 修改：减小高度 (原18px) */
+            background-color: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(10px);
+            margin: 0 10px 8px; /* 修改：减小间距 (原12px) */
             border-radius: 12px;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
@@ -819,8 +827,8 @@
         }
         /* --- 聊天背景容器 --- */
         #app-container {
-            background-size: contain;
-            background-position: center;
+            background-size: cover; /* 修改：由 contain 改为 cover，确保铺满屏幕 */
+            background-position: center center;
             background-repeat: no-repeat;
             background-attachment: fixed; /* 关键：使背景固定不滚动 */
         }
@@ -3184,7 +3192,7 @@
             margin: 0 10px 1px; /* 紧凑列表 */
             border-radius: 0;
             padding: 18px 15px;
-            background: var(--text-color-white);
+            background: rgba(255, 255, 255, 0.55); /* 修改：降低发现页面选项背景不透明度 */
         }
         #page-discover .setting-item:first-child {
             border-top-left-radius: 12px;
@@ -4905,9 +4913,13 @@
         }
 
         /* --- 聊天设置页面美化 --- */
+        #page-chat-settings {
+            background-color: #fff !important; /* 固定白色背景 */
+            background-image: none !important; /* 移除背景图 */
+        }
         #page-chat-settings .settings-list {
             padding: 10px;
-            background-color: var(--bg-main);
+            background-color: transparent; /* 列表背景透明，透出页面的白色 */
         }
         #page-chat-settings .setting-item {
             display: flex;
@@ -5648,9 +5660,9 @@
         .cal-day.today { background-color: #ff3b30; color: white; font-weight: bold; }
         
         /* 倒计时 */
-        .count-days { font-size: 2.2rem; font-weight: bold; line-height: 1; color: #333; }
-        .count-label { font-size: 0.7rem; color: #8e8e93; margin-top: 5px; text-align: center;}
-        .count-target { font-size: 0.8rem; color: #ff3b30; margin-bottom: 2px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+        .count-days { font-size: 2.6rem; font-weight: bold; line-height: 1.1; color: #333; margin: 2px 0; }
+        .count-label { font-size: 0.85rem; color: #8e8e93; font-weight: 500; }
+        .count-target { font-size: 1.1rem; color: #ff3b30; margin-bottom: 5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
         /* 4. 短信风组件 */
         .widget-sms-container {
@@ -5721,61 +5733,445 @@
 
         .sms-theme-green .left .sms-bubble-box { background: white; color: black; }
         .sms-theme-green .right .sms-bubble-box { background: #C8E6C9; color: #2E7D32; } /* 浅绿 */
+
+
+        /* --- 音乐APP样式 --- */
+        #page-music {
+            background-color: #222; /* 深色背景基调 */
+            color: white;
+            /* display: flex; 删除此行，交给 .page.active 控制显示，否则会和聊天并排 */
+            flex-direction: column;
+        }
+        
+        #music-sub-view-container {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .music-view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            overflow: hidden; /* 关键：禁止整个页面滚动，改为内部区域滚动 */
+            background: linear-gradient(to bottom, #2c3e50, #000000);
+        }
+        .music-view.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        /* 音乐底部导航 */
+        #music-bottom-nav {
+            height: 60px;
+            background: rgba(30, 30, 30, 0.9);
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .music-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #888;
+            font-size: 0.7rem;
+            cursor: pointer;
+            width: 60px;
+        }
+        .music-nav-item.active {
+            color: #d43c33; /* 网易云红 */
+        }
+        .music-nav-item i {
+            font-size: 1.4rem;
+            margin-bottom: 3px;
+        }
+
+/* --- 1. 播放界面 (Player) --- */
+        .music-player-header {
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            z-index: 20;
+            flex-shrink: 0; /* 关键：防止头部被压缩 */
+            background: transparent; /* 保持背景透明 */
+        }
+        .music-player-back {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .disc-area {
+            width: 100%;
+            height: 320px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            margin-top: 40px; /* 新增：让唱片位置往下一点 */
+        }
+        /* 唱臂 */
+        .disc-needle {
+            position: absolute;
+            top: -10px; /* 微调顶部位置 */
+            left: 50%;
+            width: 102px; /* 稍微加大一点 */
+            height: 160px;
+            /* 修改：请将下面的链接替换为你GitHub img分支的卡针图片链接，例如 https://raw.githubusercontent.com/你的用户名/仓库名/img/needle.png */
+            background-image: url('https://raw.githubusercontent.com/rain1593/rain/img/singing_arm.png'); 
+            background-size: contain;
+            background-repeat: no-repeat;
+            z-index: 10;
+            transform-origin: 15px 15px;
+            transform: rotate(-55deg);
+            transition: transform 0.5s;
+            pointer-events: none;
+            margin-left: 10px; /* 微调水平位置 */
+        }
+        .disc-needle.playing {
+            transform: rotate(-28deg);
+        }
+        
+        .disc-container {
+            width: 260px;
+            height: 260px;
+            /* 修改：请将下面的链接替换为你GitHub img分支的黑胶底盘图片链接 */
+            background: url('https://raw.githubusercontent.com/rain1593/rain/img/record.png');
+            background-size: cover;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: rotate 20s linear infinite;
+            animation-play-state: paused;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            border: 5px solid rgba(255,255,255,0.05); /* 增加一点质感 */
+        }
+        .disc-container.playing {
+            animation-play-state: running;
+        }
+        .disc-cover {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 歌词区域 (点击唱片切换) */
+        .lyrics-area {
+            display: none;
+            flex-grow: 1;
+            width: 100%;
+            height: 100%; /* 关键：占满中间区域 */
+            overflow-y: auto; /* 关键：开启内部滚动 */
+            text-align: center;
+            padding: 20px 0; /* 调整内边距 */
+            /* 蒙版渐变，实现上下虚化 */
+            mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+        .lyrics-area::-webkit-scrollbar { 
+            display: none; 
+        }
+        .lyrics-area.active { display: block; }
+        .lyrics-line {
+            color: rgba(255,255,255,0.4); /* 未激活歌词更暗淡 */
+            margin: 20px 0; /* 增加行间距 */
+            font-size: 1rem;
+            transition: all 0.3s;
+            min-height: 1.2em; /* 防止空行高度塌陷 */
+        }
+        .lyrics-line.active {
+            color: white;
+            font-size: 1.2rem; /* 激活歌词更大 */
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255,255,255,0.6);
+            transform: scale(1.05);
+        }
+
+        .player-info {
+            padding: 0 20px;
+            margin-bottom: 10px;
+        }
+        .song-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .song-artist { font-size: 0.9rem; color: #aaa; }
+
+        .player-controls {
+            padding: 10px 20px 30px;
+            flex-shrink: 0; /* 关键：防止底部被内容挤压 */
+            position: relative;
+            z-index: 20;
+        }
+        
+        /* 新增：中间区域容器样式，确保布局正确 */
+        #music-center-area {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden; /* 限制内部溢出 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .progress-container {
+            display: flex;
+            align-items: center;
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+        .progress-bar-bg {
+            flex-grow: 1;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            margin: 0 10px;
+            position: relative;
+            cursor: pointer;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            width: 0%;
+            position: relative;
+        }
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            right: -6px;
+            top: -4px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .control-buttons {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        .btn-play-pause {
+            font-size: 3.5rem;
+        }
+        .btn-mode { font-size: 1.2rem; color: #aaa; }
+        .btn-list { font-size: 1.2rem; color: #aaa; }
+
+        /* --- 2. 我的音乐 (Library) --- */
+        .library-header {
+            padding: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .playlist-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+        }
+        .playlist-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .playlist-cover {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            background: #333;
+        }
+        .playlist-name {
+            padding: 8px 10px 0;
+            font-size: 0.95rem;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .playlist-count {
+            padding: 0 10px;
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+        .add-playlist-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(255,255,255,0.2);
+            aspect-ratio: 1; /* 保持方形 */
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        /* 歌单详情列表 (嵌入在 My Music 视图中覆盖显示) */
+        #playlist-detail-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #1a1a1a;
+            z-index: 50;
+            display: none;
+            flex-direction: column;
+        }
+        #playlist-detail-overlay.active { display: flex; animation: slideInRight 0.3s; }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        
+        .playlist-detail-header {
+            height: 200px;
+            background: linear-gradient(to bottom, #444, #1a1a1a);
+            padding: 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+            position: relative;
+        }
+        .pd-back-btn { position: absolute; top: 15px; left: 15px; font-size: 1.2rem; cursor: pointer; }
+        .pd-cover { width: 120px; height: 120px; border-radius: 10px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .pd-info h2 { font-size: 1.2rem; margin-bottom: 5px; }
+        .pd-info p { font-size: 0.8rem; color: #ccc; }
+        
+        .song-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+        .song-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+        }
+        .song-item:hover { background: rgba(255,255,255,0.05); }
+        .song-index { color: #888; font-size: 0.9rem; width: 30px; text-align: center; }
+        .song-info { flex-grow: 1; overflow: hidden; }
+        .song-name-row { font-size: 1rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .song-artist-row { font-size: 0.75rem; color: #888; margin-top: 3px; }
+        .song-actions { color: #888; padding: 0 10px; }
+
+        /* 播放列表半弹窗 */
+        .queue-sheet {
+            max-height: 60vh;
+            background: #222;
+            color: white;
+        }
+        .queue-item { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
+        .queue-item.active { color: #d43c33; }
+        .queue-item .del-btn { color: #666; }
+
+
+        /* --- 音乐播放列表弹窗 (磨砂卡片风) --- */
+        .music-playlist-popup {
+            position: absolute;
+            bottom: 80px; /* 在底部导航栏上方 */
+            right: 15px;
+            width: 300px;
+            max-height: 400px;
+            background: rgba(255, 255, 255, 0.85); /* 亮白色底，轻微透明 */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); /* 深色阴影 */
+            display: none;
+            flex-direction: column;
+            z-index: 150; /* 确保层级高于其他元素 */
+            overflow: hidden;
+            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: #333; /* 字体深色 */
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .music-playlist-header {
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .music-playlist-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 5px 0;
+        }
+        .music-playlist-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .music-playlist-body::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 2px;
+        }
+        .music-queue-item {
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .music-queue-item:hover {
+            background-color: rgba(0,0,0,0.03);
+        }
+        .music-queue-item.active {
+            color: #d43c33; /* 网易云红 */
+        }
+        .music-queue-item.active .queue-song-name {
+            font-weight: bold;
+        }
+        .queue-song-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .queue-song-name {
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .queue-song-artist {
+            font-size: 0.75rem;
+            color: #888;
+            margin-top: 2px;
+        }
+        /* 当深色模式时，弹窗字体的适配 (此处保持亮色卡片设计，不随背景变黑，模拟App内的独立UI) */
+
 </style>
 <style id="exclusive-bubble-style"></style>
-<script>
-// 智能禁用右键菜单，保留输入框功能
-document.addEventListener('contextmenu', function(e) {
-    // 获取被长按或右键点击的元素的标签名
-    const targetTagName = e.target.tagName.toUpperCase();
 
-    // 如果是输入框(INPUT)、文本域(TEXTAREA)或下拉选择框(SELECT)，则不禁用
-    if (targetTagName === 'INPUT' || targetTagName === 'TEXTAREA' || targetTagName === 'SELECT') {
-        return; // 允许默认的上下文菜单出现
-    }
-
-    // 对于其他所有元素，禁用右键菜单
-    e.preventDefault();
-});
-
-    // 禁用特定的开发者工具快捷键
-    document.addEventListener('keydown', function(e) {
-        // F12
-        if (e.keyCode === 123) {
-            e.preventDefault();
-        }
-        // Ctrl+Shift+I
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 73) {
-            e.preventDefault();
-        }
-        // Ctrl+Shift+J
-        if (e.ctrlKey && e.shiftKey && e.keyCode === 74) {
-            e.preventDefault();
-        }
-        // Ctrl+U
-        if (e.ctrlKey && e.keyCode === 85) {
-            e.preventDefault();
-        }
-    });
-
-    // 通过debugger语句检测开发者工具
-    (function() {
-        function checkDevTools() {
-            const startTime = new Date();
-            debugger;
-            const endTime = new Date();
-            
-            // 如果执行时间差很长，说明在debugger处暂停了
-            if (endTime - startTime > 100) {
-                // 替换页面内容，阻止查看
-                document.body.innerHTML = '<div style="position:fixed;top:0;left:0;width:100%;height:100%;background:white;display:flex;justify-content:center;align-items:center;font-size:24px;color:black;z-index:999999;">请关闭开发者工具后刷新页面。</div>';
-            }
-        }
-
-        // 定期执行检测
-        setInterval(checkDevTools, 1000);
-    })();
-</script>
 </head>
 <body>
     <!-- 开屏动画 -->
@@ -6285,6 +6681,121 @@ document.addEventListener('contextmenu', function(e) {
                     </div>
                 </div> <!-- 新增的包裹层闭合标签 -->
             </div>
+
+            <!-- 音乐 App 页面 -->
+            <div id="page-music" class="page">
+                <div id="music-sub-view-container">
+                    <!-- 1. 播放界面 -->
+                    <div id="music-view-player" class="music-view active">
+                        <div class="music-player-header">
+                            <i class="fas fa-chevron-down music-player-back" id="music-hide-player-btn" title="返回"></i>
+                            <div class="song-title" id="player-song-title">无音乐播放</div>
+                            <div class="song-artist" id="player-song-artist">--</div>
+                        </div>
+                        
+                        <!-- 唱片与歌词区域 (点击切换) -->
+                        <div id="music-center-area">
+                            <div class="disc-area" id="disc-area">
+                                <div class="disc-needle" id="disc-needle"></div>
+                                <div class="disc-container" id="disc-container">
+                                    <img src="https://s2.loli.net/2024/03/29/7g1Z9K5X3Y8Q5Jq.png" class="disc-cover" id="disc-cover">
+                                </div>
+                            </div>
+                            <div class="lyrics-area" id="lyrics-area">
+                                <div style="margin-top: 50%; color: #aaa;">暂无歌词 / 点击显示唱片</div>
+                            </div>
+                        </div>
+
+                        <div class="player-controls">
+                            <div class="progress-container">
+                                <span id="player-curr-time">00:00</span>
+                                <div class="progress-bar-bg" id="music-progress-bar">
+                                    <div class="progress-bar-fill" id="music-progress-fill"></div>
+                                </div>
+                                <span id="player-total-time">00:00</span>
+                            </div>
+                            <div class="control-buttons">
+                                <button class="control-btn btn-mode" id="music-mode-btn"><i class="fas fa-random"></i></button>
+                                <button class="control-btn" id="music-prev-btn"><i class="fas fa-step-backward"></i></button>
+                                <button class="control-btn btn-play-pause" id="music-play-btn"><i class="fas fa-play-circle"></i></button>
+                                <button class="control-btn" id="music-next-btn"><i class="fas fa-step-forward"></i></button>
+                                <button class="control-btn btn-list" id="music-list-btn"><i class="fas fa-list"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- 新增：右下角播放列表弹窗 -->
+                        <div id="music-playlist-popup" class="music-playlist-popup">
+                            <div class="music-playlist-header">
+                                <span>播放列表</span>
+                                <i class="fas fa-trash-alt" id="music-clear-playlist-btn" style="cursor: pointer; font-size: 0.9rem; color: #666;"></i>
+                            </div>
+                            <div class="music-playlist-body" id="music-playlist-body">
+                                <!-- JS 生成列表项 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 我的音乐 (歌单) -->
+                    <div id="music-view-library" class="music-view">
+                        <div class="library-header">
+                            <span>我的音乐</span>
+                            <i class="fas fa-plus" id="add-playlist-btn" style="font-size: 1.2rem; cursor: pointer;"></i>
+                        </div>
+                        <div class="playlist-grid" id="playlist-grid">
+                            <!-- JS 生成 -->
+                        </div>
+                        
+                        <!-- 歌单详情覆盖层 -->
+                        <div id="playlist-detail-overlay">
+                            <div class="playlist-detail-header">
+                                <i class="fas fa-arrow-left pd-back-btn" id="pd-back-btn"></i>
+                                <img src="" id="pd-cover" class="pd-cover">
+                                <div class="pd-info">
+                                    <h2 id="pd-name">歌单名</h2>
+                                    <p id="pd-count">0 首歌曲</p>
+                                    <button class="modal-btn btn-primary" id="pd-add-song-btn" style="margin-top: 10px; padding: 5px 15px; font-size: 0.8rem;">+ 添加歌曲</button>
+                                </div>
+                            </div>
+                            <div class="song-list" id="pd-song-list">
+                                <!-- JS 生成歌曲列表 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 设置 (简单占位) -->
+                    <div id="music-view-settings" class="music-view">
+                        <div class="library-header">设置</div>
+                        <div class="settings-list" style="padding: 20px;">
+                            <div class="setting-item">
+                                <span>音频可视化 (Beta)</span>
+                                <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                            </div>
+                            <p style="color: #666; font-size: 0.8rem; text-align: center; margin-top: 20px;">Music v1.0.0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <nav id="music-bottom-nav">
+                    <div class="music-nav-item active" data-view="player">
+                        <i class="fas fa-compact-disc"></i>
+                        <span>播放</span>
+                    </div>
+                    <div class="music-nav-item" data-view="library">
+                        <i class="fas fa-music"></i>
+                        <span>我的</span>
+                    </div>
+                    <div class="music-nav-item" data-view="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>设置</span>
+                    </div>
+                </nav>
+            </div>
+            <!-- 隐藏的文件输入 -->
+            <input type="file" id="music-file-input" accept="audio/*" style="display: none;" multiple>
+            <input type="file" id="music-lrc-input" accept=".lrc,.txt" style="display: none;">
+            <input type="file" id="playlist-cover-input" accept="image/*" style="display: none;">
+
+
             <!-- 教程页面 (新) -->
             <div id="page-tutorial" class="page">
                 <div class="page-header">
@@ -6559,6 +7070,8 @@ document.addEventListener('contextmenu', function(e) {
         <div id="home-bar" title="点击返回桌面"></div>
     </div>
 
+    <!-- 独立的全局音频元素，确保切换App不中断 -->
+    <audio id="global-audio-player" style="display: none;"></audio>
 
     <!-- 模态框 -->
     <input type="file" id="import-data-input" accept=".json" style="display: none;">
@@ -6636,6 +7149,7 @@ document.addEventListener('contextmenu', function(e) {
             'video-call-log-detail': $('#page-video-call-log-detail'),
             favorites: $('#page-favorites'),
             'favorite-detail': $('#page-favorite-detail'),
+            'music': $('#page-music'),
         };
 
         
@@ -6745,8 +7259,8 @@ document.addEventListener('contextmenu', function(e) {
             db: null,
 
             async init() {
-                
-                this.DB_VERSION = 24;
+                // 升级版本号以触发更新
+                this.DB_VERSION = 25; 
 
                 return new Promise((resolve, reject) => {
                     if (this.db) {
@@ -6770,10 +7284,9 @@ document.addEventListener('contextmenu', function(e) {
                         const db = event.target.result;
                         const transaction = event.target.transaction;
                         
+                        // --- 保持原有升级逻辑 ---
                         if (event.oldVersion < 15) {
-                            if (!db.objectStoreNames.contains('profile')) {
-                                db.createObjectStore('profile', { keyPath: 'id' });
-                            }
+                            if (!db.objectStoreNames.contains('profile')) db.createObjectStore('profile', { keyPath: 'id' });
                             if (!db.objectStoreNames.contains('contacts')) {
                                 const store = db.createObjectStore('contacts', { keyPath: 'id' });
                                 store.createIndex('name', 'name', { unique: true });
@@ -6783,12 +7296,8 @@ document.addEventListener('contextmenu', function(e) {
                                  const store = db.createObjectStore('groups', { keyPath: 'id' });
                                  store.createIndex('createdAt', 'createdAt', { unique: false });
                             }
-                            if (!db.objectStoreNames.contains('chats')) {
-                                db.createObjectStore('chats', { keyPath: 'chatId' });
-                            }
-                            if (!db.objectStoreNames.contains('apiConfig')) {
-                                db.createObjectStore('apiConfig', { keyPath: 'id' });
-                            }
+                            if (!db.objectStoreNames.contains('chats')) db.createObjectStore('chats', { keyPath: 'chatId' });
+                            if (!db.objectStoreNames.contains('apiConfig')) db.createObjectStore('apiConfig', { keyPath: 'id' });
                             if (!db.objectStoreNames.contains('openingScenes')) {
                                 const store = db.createObjectStore('openingScenes', { keyPath: 'id' });
                                 store.createIndex('groupId', 'groupId', { unique: false });
@@ -6817,7 +7326,6 @@ document.addEventListener('contextmenu', function(e) {
                                 store.createIndex('name', 'name', { unique: true });
                                 store.createIndex('createdAt', 'createdAt', { unique: false });
                             }
-
                             if (db.objectStoreNames.contains('contacts') && !transaction.objectStore('contacts').indexNames.contains('folderId')) {
                                 transaction.objectStore('contacts').createIndex('folderId', 'folderId', { unique: false });
                             }
@@ -6825,160 +7333,57 @@ document.addEventListener('contextmenu', function(e) {
                                 transaction.objectStore('openingScenes').createIndex('contactId', 'contactId', { unique: false });
                             }
                             
-                            
-                            console.log("开始进行版本15的数据迁移：创建 chatMetadata...");
                             const chatMetadataStore = db.createObjectStore('chatMetadata', { keyPath: 'chatId' });
                             chatMetadataStore.createIndex('lastMessageTimestamp', 'lastMessageTimestamp', { unique: false });
-                            
                             chatMetadataStore.createIndex('isPinned', 'isPinned', { unique: false });
-
-                            const chatsStore = transaction.objectStore('chats');
-                            chatsStore.openCursor().onsuccess = (e) => {
-                                const cursor = e.target.result;
-                                if (cursor) {
-                                    const chat = cursor.value;
-                                    if (chat.history && chat.history.length > 0) {
-                                        const displayableHistory = chat.history.filter(m => !['inner_voice', 'essay'].includes(m.segmentType));
-                                        if (displayableHistory.length > 0) {
-                                            const lastMessage = displayableHistory[displayableHistory.length - 1];
-                                            const unreadCount = chat.history.filter(m => m.isUnread).length;
-
-                                            const metadata = {
-                                                chatId: chat.chatId,
-                                                lastMessage: lastMessage,
-                                                unreadCount: unreadCount,
-                                                lastMessageTimestamp: lastMessage.timestamp
-                                            };
-                                            transaction.objectStore('chatMetadata').put(metadata);
-                                        }
-                                    }
-                                    cursor.continue();
-                                } else {
-                                    console.log("chatMetadata 迁移完成。");
-                                }
-                            };
                         }
                         
-                        
                         if (event.oldVersion < 16) {
-                            console.log("数据库升级至版本 16：创建 messages 表...");
-
                             const messagesStore = db.createObjectStore('messages', { keyPath: 'messageId' });
                             messagesStore.createIndex('by_chat_and_time', ['chatId', 'timestamp'], { unique: false });
                             messagesStore.createIndex('by_chat_and_sender', ['chatId', 'senderId'], { unique: false });
-
-                            
-                            if (db.objectStoreNames.contains('chats')) {
-                                const chatsStore = transaction.objectStore('chats');
-                                chatsStore.openCursor().onsuccess = (e) => {
-                                    const cursor = e.target.result;
-                                    if (cursor) {
-                                        const chat = cursor.value;
-                                        if (chat.history && chat.history.length > 0) {
-                                            
-                                            
-                                            let timestampOffset = 0; 
-                                            for (const message of chat.history) {
-                                                
-                                                message.chatId = chat.chatId;
-
-                                                
-                                                
-                                                message.timestamp = message.timestamp + (timestampOffset++);
-
-                                                
-                                                transaction.objectStore('messages').put(message);
-                                            }
-                                            
-                                        }
-                                        cursor.continue();
-                                    } else {
-                                        console.log("聊天记录迁移到 messages 表完成。");
-                                    }
-                                };
-                            }
                         }
 
-                        
-                        if (event.oldVersion < 17) {
-                            console.log("数据库升级至版本 17：创建 giftApiConfig 表...");
-                            if (!db.objectStoreNames.contains('giftApiConfig')) {
-                                db.createObjectStore('giftApiConfig', { keyPath: 'id' });
-                            }
+                        if (event.oldVersion < 17 && !db.objectStoreNames.contains('giftApiConfig')) {
+                            db.createObjectStore('giftApiConfig', { keyPath: 'id' });
                         }
 
-                        
-                        if (event.oldVersion < 20) {
-                            console.log("数据库升级至版本 20：为 chatMetadata 添加 lastRawAiResponse...");
-                            
-                            
+                        if (event.oldVersion < 21 && !db.objectStoreNames.contains('videoCallLogs')) {
+                            const store = db.createObjectStore('videoCallLogs', { keyPath: 'id' });
+                            store.createIndex('by_contact', 'contactId', { unique: false });
+                            store.createIndex('by_time', 'startTime', { unique: false });
                         }
                         
-                        if (event.oldVersion < 21) {
-                            console.log("数据库升级至版本 21: 创建 videoCallLogs 表...");
-                            if (!db.objectStoreNames.contains('videoCallLogs')) {
-                                const store = db.createObjectStore('videoCallLogs', { keyPath: 'id' });
-                                store.createIndex('by_contact', 'contactId', { unique: false });
-                                store.createIndex('by_time', 'startTime', { unique: false });
-                            }
-                        }
-                        
-                        
-                        if (event.oldVersion < 22) {
-                            console.log("数据库升级至版本 22: 创建 globalPrompts 表...");
-                            if (!db.objectStoreNames.contains('globalPrompts')) {
-                                const store = db.createObjectStore('globalPrompts', { keyPath: 'id' });
-                                store.createIndex('by_order', 'order', { unique: false });
-                            }
+                        if (event.oldVersion < 22 && !db.objectStoreNames.contains('globalPrompts')) {
+                            const store = db.createObjectStore('globalPrompts', { keyPath: 'id' });
+                            store.createIndex('by_order', 'order', { unique: false });
                         }
                         
                         if (event.oldVersion < 23) {
-                            console.log("数据库升级至版本 23: 为提示词和文件夹添加排序功能...");
-                            
                             const promptStore = transaction.objectStore('prompts');
-                            if (!promptStore.indexNames.contains('by_order')) {
-                                promptStore.createIndex('by_order', 'order', { unique: false });
-                            }
-                            
+                            if (!promptStore.indexNames.contains('by_order')) promptStore.createIndex('by_order', 'order', { unique: false });
                             const folderStore = transaction.objectStore('promptFolders');
-                            if (!folderStore.indexNames.contains('by_order')) {
-                                folderStore.createIndex('by_order', 'order', { unique: false });
-                            }
-
-                            // 为现有数据添加初始排序
-                            folderStore.getAll().onsuccess = e => {
-                                const folders = e.target.result.sort((a, b) => a.createdAt - b.createdAt);
-                                folders.forEach((folder, index) => {
-                                    folder.order = index;
-                                    folderStore.put(folder);
-                                });
-                            };
-
-                            promptStore.getAll().onsuccess = e => {
-                                const allPrompts = e.target.result;
-                                const promptsByFolder = allPrompts.reduce((acc, p) => {
-                                    if (!acc[p.folderId]) acc[p.folderId] = [];
-                                    acc[p.folderId].push(p);
-                                    return acc;
-                                }, {});
-
-                                for (const folderId in promptsByFolder) {
-                                    const prompts = promptsByFolder[folderId].sort((a, b) => a.createdAt - b.createdAt);
-                                    prompts.forEach((prompt, index) => {
-                                        prompt.order = index;
-                                        promptStore.put(prompt);
-                                    });
-                                }
-                            };
+                            if (!folderStore.indexNames.contains('by_order')) folderStore.createIndex('by_order', 'order', { unique: false });
                         }
                         
-                        if (event.oldVersion < 24) {
-                            console.log("数据库升级至版本 24: 创建 favorites 表...");
-                            if (!db.objectStoreNames.contains('favorites')) {
-                                const store = db.createObjectStore('favorites', { keyPath: 'id' });
-                                store.createIndex('by_timestamp', 'timestamp', { unique: false });
+                        if (event.oldVersion < 24 && !db.objectStoreNames.contains('favorites')) {
+                            const store = db.createObjectStore('favorites', { keyPath: 'id' });
+                            store.createIndex('by_timestamp', 'timestamp', { unique: false });
+                        }
+
+                        // --- 新增：音乐App相关表 ---
+                        if (event.oldVersion < 25) {
+                            console.log("数据库升级至版本 25: 创建 musicPlaylists 和 musicSongs 表...");
+                            if (!db.objectStoreNames.contains('musicPlaylists')) {
+                                const plStore = db.createObjectStore('musicPlaylists', { keyPath: 'id' });
+                                plStore.createIndex('createdAt', 'createdAt', { unique: false });
+                            }
+                            if (!db.objectStoreNames.contains('musicSongs')) {
+                                const songStore = db.createObjectStore('musicSongs', { keyPath: 'id' });
+                                songStore.createIndex('playlistId', 'playlistId', { unique: false });
                             }
                         }
+
                         console.log("数据库升级完成");
                     };
                 });
@@ -7334,10 +7739,21 @@ document.addEventListener('contextmenu', function(e) {
             }
             
             // 修改：将设置相关的子页面加入列表，进入这些页面时隐藏底部导航栏
-            if (['chat', 'prompts', 'moments', 'tutorial', 'pomodoro', 'gifts', 'forwarded-history', 'video-call', 'video-call-history', 'video-call-log-detail', 'chat-settings', 'api-settings', 'theme-settings', 'bubble-settings', 'os-settings', 'desktop-settings'].includes(pageId)) {
+            if (['chat', 'prompts', 'moments', 'tutorial', 'pomodoro', 'gifts', 'forwarded-history', 'video-call', 'video-call-history', 'video-call-log-detail', 'chat-settings', 'api-settings', 'theme-settings', 'bubble-settings', 'os-settings', 'desktop-settings', 'music'].includes(pageId)) {
                 bottomNav.style.display = 'none';
             } else {
                 bottomNav.style.display = 'flex';
+            }
+
+            // 音乐页面特殊处理：Home Bar 变色及状态清理
+            if (pageId === 'music') {
+                appContainer.classList.add('on-music-page');
+                // 强制退出聊天多选模式，防止状态残留导致显示多选操作栏
+                if (appState.selectionMode && appState.selectionMode.active) {
+                    this.toggleSelectionMode();
+                }
+            } else {
+                appContainer.classList.remove('on-music-page');
             }
 
             EventManager.updateFloatingBallVisibility();
@@ -14359,6 +14775,617 @@ ${globalPromptsSection}
             },
         };
 
+        const MusicManager = {
+            audio: $('#global-audio-player'),
+            isPlaying: false,
+            currentPlaylist: [],
+            currentIndex: -1,
+            playlists: [],
+            currentViewPlaylistId: null,
+            mode: 'sequence',
+            lrcLines: [],
+            currentObjectUrl: null,
+            // 纯灰色图片 Base64
+            defaultCover: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 
+            
+            async init() {
+                this.bindEvents();
+                await this.loadPlaylists();
+                
+                // 关键修改：如果当前正在播放，不要重置状态，只更新UI
+                const isActuallyPlaying = !this.audio.paused;
+                
+                if (!isActuallyPlaying) {
+                    const savedState = JSON.parse(localStorage.getItem('musicState') || '{}');
+                    if (savedState.playlistId && savedState.songIndex !== undefined) {
+                        const songs = await DBHelper.getAll('musicSongs');
+                        this.currentPlaylist = songs.filter(s => s.playlistId === savedState.playlistId);
+                        if (this.currentPlaylist[savedState.songIndex]) {
+                            this.currentIndex = savedState.songIndex;
+                            // 传入 false 表示不自动播放，只加载信息
+                            this.loadSong(this.currentPlaylist[this.currentIndex], false);
+                        }
+                    }
+                } else {
+                    // 如果正在播放，同步UI状态
+                    this.setPlayState(true);
+                    // 重新解析当前歌曲的歌词以确保显示
+                    const currentSongName = $('#player-song-title').textContent;
+                    if(currentSongName && this.currentPlaylist[this.currentIndex]) {
+                         // 简单同步一下
+                    }
+                }
+            },
+
+            bindEvents() {
+                $('#music-bottom-nav').addEventListener('click', (e) => {
+                    const item = e.target.closest('.music-nav-item');
+                    if (!item) return;
+                    
+                    $$('.music-nav-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    $$('.music-view').forEach(v => v.classList.remove('active'));
+                    $(`#music-view-${item.dataset.view}`).classList.add('active');
+                });
+
+                $('#music-play-btn').onclick = () => this.togglePlay();
+                $('#music-prev-btn').onclick = () => this.playPrev();
+                $('#music-next-btn').onclick = () => this.playNext();
+                $('#music-mode-btn').onclick = () => this.toggleMode();
+                
+                // 列表按钮点击事件
+                $('#music-list-btn').onclick = (e) => {
+                    e.stopPropagation(); // 防止冒泡
+                    const popup = $('#music-playlist-popup');
+                    if (popup.style.display === 'flex') {
+                        popup.style.display = 'none';
+                    } else {
+                        this.renderPlaylistQueue();
+                        popup.style.display = 'flex';
+                    }
+                };
+                
+                // 点击其他地方关闭列表弹窗
+                document.addEventListener('click', (e) => {
+                    const popup = $('#music-playlist-popup');
+                    const btn = $('#music-list-btn');
+                    if (popup.style.display === 'flex' && !popup.contains(e.target) && !btn.contains(e.target)) {
+                        popup.style.display = 'none';
+                    }
+                });
+
+                // 播放列表内点击切歌
+                const playlistBody = $('#music-playlist-body');
+                // 先移除可能存在的旧监听器，防止重复
+                playlistBody.onclick = null;
+                
+                // 使用 addEventListener 并强制阻断一切冒泡
+                playlistBody.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation(); // [修复] 彻底阻止事件传播给同一元素上的其他监听器
+                    
+                    const item = e.target.closest('.music-queue-item');
+                    if (!item) return;
+                    const index = parseInt(item.dataset.index);
+                    this.currentIndex = index;
+                    this.loadSong(this.currentPlaylist[index], true);
+                    this.renderPlaylistQueue(); // 刷新高亮
+                });
+
+                // 清空播放列表 (仅UI逻辑，简单实现为停止播放)
+                $('#music-clear-playlist-btn').onclick = () => {
+                    this.audio.pause();
+                    this.currentPlaylist = [];
+                    this.currentIndex = -1;
+                    $('#player-song-title').textContent = "无音乐播放";
+                    $('#player-song-artist').textContent = "--";
+                    $('#disc-cover').src = this.defaultCover;
+                    this.renderPlaylistQueue();
+                    $('#music-playlist-popup').style.display = 'none';
+                };
+                
+                $('#music-progress-bar').onclick = (e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const percent = (e.clientX - rect.left) / rect.width;
+                    if (this.audio.duration) {
+                        this.audio.currentTime = this.audio.duration * percent;
+                    }
+                };
+
+                this.audio.ontimeupdate = () => this.updateProgress();
+                this.audio.onended = () => this.playNext(true);
+                this.audio.onplay = () => this.setPlayState(true);
+                this.audio.onpause = () => this.setPlayState(false);
+
+                $('#music-center-area').onclick = () => {
+                    $('#disc-area').style.display = $('#disc-area').style.display === 'none' ? 'flex' : 'none';
+                    $('#lyrics-area').classList.toggle('active');
+                };
+
+                // --- 修改：左上角按钮返回桌面 ---
+                $('#music-hide-player-btn').onclick = () => {
+                    const appContainer = $('#app-container');
+                    const desktop = $('#ios-desktop');
+                    
+                    // 隐藏 App 容器
+                    appContainer.classList.remove('app-active');
+                    appContainer.classList.remove('on-music-page'); // 恢复 Home Bar 颜色
+                    setTimeout(() => { appContainer.style.display = 'none'; }, 300);
+                    
+                    // 显示桌面
+                    desktop.style.display = 'flex';
+                    void desktop.offsetWidth; 
+                    desktop.classList.add('active');
+                };
+
+                $('#add-playlist-btn').onclick = () => this.createPlaylist();
+                $('#playlist-grid').addEventListener('click', (e) => this.handlePlaylistClick(e));
+                $('#pd-back-btn').onclick = () => $('#playlist-detail-overlay').classList.remove('active');
+                $('#pd-add-song-btn').onclick = () => this.showAddSongModal();
+                
+                $('#pd-song-list').onclick = (e) => {
+                    const item = e.target.closest('.song-item');
+                    if (!item) return;
+                    if (e.target.closest('.fa-trash')) {
+                        e.stopPropagation();
+                        UIManager.showModal({
+                            title: '确认删除',
+                            body: '<p>确定要从歌单中删除这首歌曲吗？</p>',
+                            actions: [
+                                { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                                { text: '删除', class: 'btn-danger', handler: () => {
+                                    this.deleteSong(item.dataset.id);
+                                    UIManager.hideModal();
+                                    UIManager.showToast('歌曲已删除');
+                                }}
+                            ]
+                        });
+                        return;
+                    }
+                    if (e.target.closest('.fa-file-alt')) {
+                        e.stopPropagation();
+                        this.uploadLyrics(item.dataset.id);
+                        return;
+                    }
+                    this.playSongInList(item.dataset.id);
+                };
+
+                $('#music-file-input').onchange = (e) => this.handleSongUpload(e);
+                $('#playlist-cover-input').onchange = (e) => this.handleCoverUpload(e);
+                $('#music-lrc-input').onchange = (e) => this.handleLrcUpload(e);
+            },
+
+            renderPlaylistQueue() {
+                const listBody = $('#music-playlist-body');
+                if (this.currentPlaylist.length === 0) {
+                    listBody.innerHTML = '<div style="padding:20px; text-align:center; color:#888; font-size:0.9rem;">播放列表为空</div>';
+                    return;
+                }
+                
+                listBody.innerHTML = this.currentPlaylist.map((song, index) => {
+                    const isActive = index === this.currentIndex;
+                    return `
+                        <div class="music-queue-item ${isActive ? 'active' : ''}" data-index="${index}">
+                            <div class="queue-song-info">
+                                <div class="queue-song-name">${song.name}</div>
+                                <div class="queue-song-artist">${song.artist}</div>
+                            </div>
+                            ${isActive ? '<i class="fas fa-volume-up"></i>' : ''}
+                        </div>
+                    `;
+                }).join('');
+                
+                // 自动滚动到当前播放歌曲
+                const activeItem = listBody.querySelector('.music-queue-item.active');
+                if (activeItem) {
+                    activeItem.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }
+            },
+
+            async loadSong(song, autoPlay = true) {
+                if (!song) return;
+                
+                $('#player-song-title').textContent = song.name;
+                $('#player-song-artist').textContent = song.artist;
+                
+                const playlist = this.playlists.find(p => p.id === song.playlistId);
+                // 修改：使用默认纯灰色封面
+                const cover = playlist && playlist.cover ? playlist.cover : this.defaultCover;
+                $('#disc-cover').src = cover;
+
+                if (song.sourceType === 'local') {
+                    if (this.currentObjectUrl) URL.revokeObjectURL(this.currentObjectUrl);
+                    this.currentObjectUrl = URL.createObjectURL(song.blob);
+                    this.audio.src = this.currentObjectUrl;
+                } else {
+                    this.audio.src = song.url;
+                }
+
+                this.parseLyrics(song.lrc || '');
+
+                if (autoPlay) {
+                    try {
+                        await this.audio.play();
+                    } catch (e) { console.error("播放失败", e); }
+                }
+                
+                localStorage.setItem('musicState', JSON.stringify({ playlistId: song.playlistId, songIndex: this.currentIndex }));
+            },
+
+            togglePlay() {
+                if (this.audio.paused) this.audio.play();
+                else this.audio.pause();
+            },
+
+            setPlayState(isPlaying) {
+                this.isPlaying = isPlaying;
+                const btnIcon = $('#music-play-btn i');
+                const discContainer = $('#disc-container');
+                const needle = $('#disc-needle');
+
+                if (isPlaying) {
+                    btnIcon.className = 'fas fa-pause-circle';
+                    discContainer.classList.add('playing');
+                    needle.classList.add('playing');
+                } else {
+                    btnIcon.className = 'fas fa-play-circle';
+                    discContainer.classList.remove('playing');
+                    needle.classList.remove('playing');
+                }
+            },
+
+            playNext(auto = false) {
+                if (this.currentPlaylist.length === 0) return;
+                
+                if (this.mode === 'random') {
+                    let nextIndex = Math.floor(Math.random() * this.currentPlaylist.length);
+                    if (this.currentPlaylist.length > 1 && nextIndex === this.currentIndex) {
+                        nextIndex = (nextIndex + 1) % this.currentPlaylist.length;
+                    }
+                    this.currentIndex = nextIndex;
+                } else if (this.mode === 'loop' && auto) {
+                    this.audio.currentTime = 0;
+                    this.audio.play();
+                    return; 
+                } else {
+                    this.currentIndex = (this.currentIndex + 1) % this.currentPlaylist.length;
+                }
+                this.loadSong(this.currentPlaylist[this.currentIndex]);
+            },
+
+            playPrev() {
+                if (this.currentPlaylist.length === 0) return;
+                this.currentIndex = (this.currentIndex - 1 + this.currentPlaylist.length) % this.currentPlaylist.length;
+                this.loadSong(this.currentPlaylist[this.currentIndex]);
+            },
+
+            toggleMode() {
+                if (this.mode === 'sequence') { this.mode = 'random'; $('#music-mode-btn i').className = 'fas fa-random'; UIManager.showToast('随机播放'); }
+                else if (this.mode === 'random') { this.mode = 'loop'; $('#music-mode-btn i').className = 'fas fa-redo'; UIManager.showToast('单曲循环'); }
+                else { this.mode = 'sequence'; $('#music-mode-btn i').className = 'fas fa-list-ol'; UIManager.showToast('顺序播放'); }
+            },
+
+            updateProgress() {
+                const { currentTime, duration } = this.audio;
+                if (isNaN(duration)) return;
+                
+                const percent = (currentTime / duration) * 100;
+                $('#music-progress-fill').style.width = `${percent}%`;
+                
+                const format = (t) => {
+                    const m = Math.floor(t / 60).toString().padStart(2, '0');
+                    const s = Math.floor(t % 60).toString().padStart(2, '0');
+                    return `${m}:${s}`;
+                };
+                $('#player-curr-time').textContent = format(currentTime);
+                $('#player-total-time').textContent = format(duration);
+
+                this.syncLyrics(currentTime);
+            },
+
+            parseLyrics(lrcText) {
+                this.lrcLines = [];
+                const lines = lrcText.split('\n');
+                const regex = /\[(\d{2}):(\d{2})\.(\d{2,3})\](.*)/;
+                
+                for (const line of lines) {
+                    const match = line.match(regex);
+                    if (match) {
+                        const min = parseInt(match[1]);
+                        const sec = parseInt(match[2]);
+                        const ms = parseInt(match[3]);
+                        const time = min * 60 + sec + ms / 1000;
+                        const text = match[4].trim();
+                        // 即使是空行也保留，用于占位
+                        this.lrcLines.push({ time, text });
+                    }
+                }
+                
+                const lrcContainer = $('#lyrics-area');
+                // 添加前后padding让第一句和最后一句能滚到中间
+                const paddingDiv = '<div style="height: 50%;"></div>';
+                lrcContainer.innerHTML = this.lrcLines.length ? 
+                    paddingDiv + this.lrcLines.map((l, i) => `<p class="lyrics-line" data-index="${i}">${l.text}</p>`).join('') + paddingDiv: 
+                    '<div style="margin-top: 50%; color: #aaa;">暂无歌词</div>';
+            },
+
+            syncLyrics(time) {
+                if (!this.lrcLines.length) return;
+                
+                let activeIndex = -1;
+                for (let i = 0; i < this.lrcLines.length; i++) {
+                    if (time >= this.lrcLines[i].time) {
+                        activeIndex = i;
+                    } else {
+                        break;
+                    }
+                }
+
+                if (activeIndex !== -1) {
+                    const lines = $$('.lyrics-line');
+                    const activeLine = lines[activeIndex];
+                    
+                    // 只有当行发生变化时才滚动，避免频繁操作DOM
+                    if (activeLine && !activeLine.classList.contains('active')) {
+                        lines.forEach(l => l.classList.remove('active'));
+                        activeLine.classList.add('active');
+                        activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+            },
+
+            async loadPlaylists() {
+                this.playlists = await DBHelper.getAll('musicPlaylists');
+                const grid = $('#playlist-grid');
+                grid.innerHTML = '';
+                
+                this.playlists.forEach(p => {
+                    const div = document.createElement('div');
+                    div.className = 'playlist-card';
+                    div.dataset.id = p.id;
+                    // 修改：使用默认纯灰色封面
+                    div.innerHTML = `
+                        <img src="${p.cover || this.defaultCover}" class="playlist-cover">
+                        <div class="playlist-name">${p.name}</div>
+                        <div class="playlist-count">${p.songCount || 0}首</div>
+                    `;
+                    let timer;
+                    div.addEventListener('mousedown', () => timer = setTimeout(() => this.showPlaylistOptions(p), 800));
+                    div.addEventListener('mouseup', () => clearTimeout(timer));
+                    div.addEventListener('touchstart', () => timer = setTimeout(() => this.showPlaylistOptions(p), 800));
+                    div.addEventListener('touchend', () => clearTimeout(timer));
+                    
+                    grid.appendChild(div);
+                });
+
+                const addBtn = document.createElement('div');
+                addBtn.className = 'add-playlist-card';
+                addBtn.innerHTML = '<i class="fas fa-plus" style="font-size:2rem; color:#aaa;"></i>';
+                addBtn.onclick = () => this.createPlaylist();
+                grid.appendChild(addBtn);
+            },
+
+            createPlaylist() {
+                UIManager.showModal({
+                    title: '新建歌单',
+                    body: `<input type="text" id="new-playlist-name" class="form-group" style="width:100%; padding:10px;" placeholder="歌单名称">`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '创建', class: 'btn-primary', handler: async () => {
+                            const name = $('#new-playlist-name').value.trim();
+                            if (!name) return;
+                            const newPl = {
+                                id: Utils.generateId('pl'),
+                                name: name,
+                                cover: '', // 默认空，加载时会显示灰色
+                                songCount: 0,
+                                createdAt: Date.now()
+                            };
+                            await DBHelper.put('musicPlaylists', newPl);
+                            this.loadPlaylists();
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            },
+
+            async showPlaylistOptions(playlist) {
+                UIManager.showModal({
+                    title: `管理歌单: ${playlist.name}`,
+                    body: `<p>请选择操作</p>`,
+                    actions: [
+                        { text: '重命名', class: 'btn-secondary', handler: () => {
+                            UIManager.hideModal();
+                            const newName = prompt("输入新名称", playlist.name);
+                            if (newName) {
+                                playlist.name = newName;
+                                DBHelper.put('musicPlaylists', playlist).then(() => this.loadPlaylists());
+                            }
+                        }},
+                        { text: '更换封面', class: 'btn-secondary', handler: () => {
+                            this.tempPlaylistIdForCover = playlist.id;
+                            $('#playlist-cover-input').click();
+                            UIManager.hideModal();
+                        }},
+                        { text: '删除', class: 'btn-danger', handler: async () => {
+                            await DBHelper.delete('musicPlaylists', playlist.id);
+                            const allSongs = await DBHelper.getAll('musicSongs');
+                            const songsToDelete = allSongs.filter(s => s.playlistId === playlist.id);
+                            for (const s of songsToDelete) await DBHelper.delete('musicSongs', s.id);
+                            this.loadPlaylists();
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            },
+
+            async handleCoverUpload(e) {
+                const file = e.target.files[0];
+                if (!file || !this.tempPlaylistIdForCover) return;
+                const base64 = await Utils.compressImage(file, 300, 300, 0.7);
+                const playlist = await DBHelper.get('musicPlaylists', this.tempPlaylistIdForCover);
+                if (playlist) {
+                    playlist.cover = base64;
+                    await DBHelper.put('musicPlaylists', playlist);
+                    this.loadPlaylists();
+                    if (this.currentViewPlaylistId === playlist.id) {
+                        $('#pd-cover').src = base64;
+                    }
+                }
+            },
+
+            async handlePlaylistClick(e) {
+                const card = e.target.closest('.playlist-card');
+                if (!card) return;
+                const id = card.dataset.id;
+                this.openPlaylistDetail(id);
+            },
+
+            async openPlaylistDetail(id) {
+                this.currentViewPlaylistId = id;
+                const playlist = this.playlists.find(p => p.id === id);
+                if (!playlist) return;
+
+                $('#pd-name').textContent = playlist.name;
+                // 修改：使用默认纯灰色封面
+                $('#pd-cover').src = playlist.cover || this.defaultCover;
+                
+                const songs = await DBHelper.getAll('musicSongs');
+                const playlistSongs = songs.filter(s => s.playlistId === id);
+                $('#pd-count').textContent = `${playlistSongs.length} 首歌曲`;
+
+                const listEl = $('#pd-song-list');
+                listEl.innerHTML = playlistSongs.map((s, index) => `
+                    <div class="song-item" data-id="${s.id}">
+                        <div class="song-index">${index + 1}</div>
+                        <div class="song-info">
+                            <div class="song-name-row">${s.name}</div>
+                            <div class="song-artist-row">${s.artist}</div>
+                        </div>
+                        <div class="song-actions">
+                            <i class="fas fa-file-alt" title="上传歌词" style="margin-right:10px;"></i>
+                            <i class="fas fa-trash"></i>
+                        </div>
+                    </div>
+                `).join('');
+
+                $('#playlist-detail-overlay').classList.add('active');
+            },
+
+            showAddSongModal() {
+                UIManager.showModal({
+                    title: '添加歌曲',
+                    body: `
+                        <div style="display:flex; flex-direction:column; gap:10px;">
+                            <button class="modal-btn btn-primary" onclick="document.getElementById('music-file-input').click()">上传本地音频</button>
+                            <button class="modal-btn btn-secondary" id="add-url-song-btn">添加网络链接</button>
+                        </div>
+                    `,
+                    actions: [{ text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() }]
+                });
+                
+                $('#add-url-song-btn').onclick = () => {
+                    UIManager.hideModal();
+                    const url = prompt("请输入音频 URL (.mp3/.m4a):");
+                    if (url) {
+                        const name = prompt("歌曲名称:", "未命名歌曲");
+                        const artist = prompt("歌手:", "未知歌手");
+                        this.addSongToDB({ sourceType: 'url', url: url, name: name, artist: artist });
+                    }
+                };
+            },
+
+            async handleSongUpload(e) {
+                const files = Array.from(e.target.files);
+                if (!files.length) return;
+                
+                UIManager.showToast(`正在导入 ${files.length} 首歌曲...`);
+                UIManager.hideModal();
+
+                for (const file of files) {
+                    let name = file.name.replace(/\.[^/.]+$/, "");
+                    let artist = "未知歌手";
+                    
+                    if (name.includes('-')) {
+                        const parts = name.split('-');
+                        artist = parts[0].trim();
+                        name = parts[1].trim();
+                    }
+
+                    await this.addSongToDB({
+                        sourceType: 'local',
+                        blob: file,
+                        name: name,
+                        artist: artist
+                    });
+                }
+                UIManager.showToast("导入完成");
+            },
+
+            async addSongToDB(songData) {
+                if (!this.currentViewPlaylistId) return;
+                
+                const newSong = {
+                    id: Utils.generateId('song'),
+                    playlistId: this.currentViewPlaylistId,
+                    createdAt: Date.now(),
+                    ...songData
+                };
+                
+                await DBHelper.put('musicSongs', newSong);
+                const playlist = await DBHelper.get('musicPlaylists', this.currentViewPlaylistId);
+                playlist.songCount = (playlist.songCount || 0) + 1;
+                await DBHelper.put('musicPlaylists', playlist);
+                
+                this.loadPlaylists();
+                this.openPlaylistDetail(this.currentViewPlaylistId);
+            },
+
+            async deleteSong(songId) {
+                await DBHelper.delete('musicSongs', songId);
+                const playlist = await DBHelper.get('musicPlaylists', this.currentViewPlaylistId);
+                playlist.songCount = Math.max(0, playlist.songCount - 1);
+                await DBHelper.put('musicPlaylists', playlist);
+                this.openPlaylistDetail(this.currentViewPlaylistId);
+            },
+
+            async playSongInList(songId) {
+                const songs = await DBHelper.getAll('musicSongs');
+                this.currentPlaylist = songs.filter(s => s.playlistId === this.currentViewPlaylistId);
+                this.currentIndex = this.currentPlaylist.findIndex(s => s.id === songId);
+                this.loadSong(this.currentPlaylist[this.currentIndex], true);
+                
+                $('#playlist-detail-overlay').classList.remove('active');
+                $('[data-view="player"]').click();
+            },
+
+            uploadLyrics(songId) {
+                this.tempSongIdForLrc = songId;
+                $('#music-lrc-input').click();
+            },
+
+            async handleLrcUpload(e) {
+                const file = e.target.files[0];
+                if (!file || !this.tempSongIdForLrc) return;
+                
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    const text = ev.target.result;
+                    const song = await DBHelper.get('musicSongs', this.tempSongIdForLrc);
+                    if (song) {
+                        song.lrc = text;
+                        await DBHelper.put('musicSongs', song);
+                        UIManager.showToast("歌词上传成功");
+                        if ($('#player-song-title').textContent === song.name) {
+                            this.parseLyrics(text);
+                        }
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
         
         const EventManager = {
 
@@ -18757,6 +19784,9 @@ async showMomentsSettingsModal() {
                 const appContainer = $('#app-container');
                 if (settings.appBackground) {
                     appContainer.style.backgroundImage = `url(${settings.appBackground})`;
+                    appContainer.style.backgroundSize = 'cover'; // 强制设置为铺满
+                    appContainer.style.backgroundPosition = 'center center';
+                    appContainer.style.backgroundRepeat = 'no-repeat';
                 } else {
                     appContainer.style.backgroundImage = '';
                 }
@@ -19095,10 +20125,25 @@ async showMomentsSettingsModal() {
                     targetDate.setHours(0,0,0,0);
                     today.setHours(0,0,0,0);
                     const diffTime = targetDate - today;
-                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    let dayLabel = "天";
-                    if (diffDays < 0) { diffDays = Math.abs(diffDays); dayLabel = "天已过"; }
-                    if (diffDays === 0) { diffDays = "今天"; dayLabel = ""; }
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    // 构建显示的 HTML
+                    let countDisplayHtml = '';
+                    if (diffDays > 0) {
+                        countDisplayHtml = `
+                            <div class="count-label">还剩</div>
+                            <div class="count-days">${diffDays}<span style="font-size: 1rem; font-weight: normal; margin-left: 2px;">天</span></div>
+                        `;
+                    } else if (diffDays < 0) {
+                        countDisplayHtml = `
+                            <div class="count-label">已过去</div>
+                            <div class="count-days">${Math.abs(diffDays)}<span style="font-size: 1rem; font-weight: normal; margin-left: 2px;">天</span></div>
+                        `;
+                    } else {
+                        countDisplayHtml = `
+                            <div class="count-days" style="color: var(--accent-color);">今天</div>
+                        `;
+                    }
 
                     // 生成日历HTML
                     const now = new Date();
@@ -19125,8 +20170,7 @@ async showMomentsSettingsModal() {
                             </div>
                             <div class="widget-count-part" id="widget-count-click">
                                 <div class="count-target">${countData.title}</div>
-                                <div class="count-days">${diffDays}</div>
-                                <div class="count-label">${dayLabel}</div>
+                                ${countDisplayHtml}
                             </div>
                         </div>
                     `;
@@ -19383,6 +20427,8 @@ async showMomentsSettingsModal() {
                 };
             },
 
+
+
             async applyDesktopSettings() {
                 const settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
                 const desktop = $('#ios-desktop');
@@ -19394,6 +20440,10 @@ async showMomentsSettingsModal() {
                     // 默认壁纸
                     desktop.style.backgroundImage = `url('https://w.wallhaven.cc/full/wq/wallhaven-wqery6.jpg')`;
                 }
+                // 确保桌面壁纸也是铺满的
+                desktop.style.backgroundSize = 'cover';
+                desktop.style.backgroundPosition = 'center center';
+                desktop.style.backgroundRepeat = 'no-repeat';
 
                 // 应用图标
                 const customIcons = settings.desktopIcons || {};
@@ -25827,6 +26877,9 @@ async showGiftDetailsModal(messageId) {
                 }
             },
             toggleSelectionMode() {
+                // [修复] 如果当前是音乐页面，强制禁止触发聊天多选模式
+                if (appState.currentPage === 'music') return;
+
                 const pageChat = $('#page-chat');
                 const selectionBar = $('#chat-selection-bar');
                 const selectionInfo = $('#selection-info');
@@ -26746,62 +27799,60 @@ async showGiftDetailsModal(messageId) {
                 const musicBtn = $('#open-music-btn');
                 const forumBtn = $('#open-forum-btn');
                 const homeBar = $('#home-bar');
-                
-                // Dock栏按钮
                 const smsBtn = $('#dock-sms-btn');
-                const unknownBtn1 = $('#dock-unknown-1');
-                const unknownBtn2 = $('#dock-unknown-2');
+                const settingsBtn = $('#open-settings-btn');
+
+                // 通用打开APP函数
+                const openApp = (pageId) => {
+                    desktop.classList.remove('active');
+                    setTimeout(() => { desktop.style.display = 'none'; }, 200);
+                    appContainer.style.display = 'flex';
+                    void appContainer.offsetWidth;
+                    appContainer.classList.add('app-active');
+                    
+                    if (pageId === 'music') {
+                        appContainer.classList.add('on-music-page'); // 音乐模式：Home Bar 变白
+                        // 音乐APP特殊处理：显示音乐页，隐藏主导航
+                        Object.values(pages).forEach(p => p.classList.remove('active'));
+                        $('#page-music').classList.add('active');
+                        $('#bottom-nav').style.display = 'none';
+                        // 初始化音乐
+                        MusicManager.init();
+                        // 默认进播放页
+                        $('[data-view="player"]').click();
+                    } else {
+                        appContainer.classList.remove('on-music-page'); // 退出音乐模式
+                        if (pageId === 'settings') {
+                            UIManager.navigateTo('os-settings');
+                        } else {
+                            // 默认进聊天列表
+                            UIManager.navigateTo('messages');
+                        }
+                    }
+                };
 
                 // 1. 打开 33Chat
-                chatBtn.addEventListener('click', () => {
-                    desktop.classList.remove('active');
-                    setTimeout(() => { desktop.style.display = 'none'; }, 200);
-                    
-                    appContainer.style.display = 'flex';
-                    void appContainer.offsetWidth; 
-                    appContainer.classList.add('app-active');
-                    // 确保进入33Chat是显示消息页
-                    if (appState.currentPage === 'os-settings' || appState.currentPage === 'desktop-settings') {
-                        UIManager.navigateTo('messages');
-                    }
-                });
+                chatBtn.addEventListener('click', () => openApp('chat'));
 
-                // 新增：打开设置 App
-                const settingsBtn = $('#open-settings-btn');
-                settingsBtn.addEventListener('click', () => {
-                    desktop.classList.remove('active');
-                    setTimeout(() => { desktop.style.display = 'none'; }, 200);
-                    
-                    appContainer.style.display = 'flex';
-                    void appContainer.offsetWidth; 
-                    appContainer.classList.add('app-active');
-                    
-                    // 导航到系统设置页
-                    UIManager.navigateTo('os-settings');
-                });
+                // 2. 打开 音乐
+                musicBtn.addEventListener('click', () => openApp('music'));
 
-                // 2. 占位 App 点击
-                musicBtn.addEventListener('click', () => UIManager.showToast("音乐功能开发中..."));
+                // 3. 打开 设置
+                settingsBtn.addEventListener('click', () => openApp('settings'));
+
+                // 其他占位
                 forumBtn.addEventListener('click', () => UIManager.showToast("论坛功能开发中..."));
                 if (smsBtn) smsBtn.addEventListener('click', () => UIManager.showToast("短信功能开发中..."));
-                if (unknownBtn1) unknownBtn1.addEventListener('click', () => UIManager.showToast("未知应用 A 开发中..."));
-                if (unknownBtn2) unknownBtn2.addEventListener('click', () => UIManager.showToast("未知应用 B 开发中..."));
 
-                // 3. 返回桌面 (Home Bar)
+                // 返回桌面
                 homeBar.addEventListener('click', () => {
                     appContainer.classList.remove('app-active');
+                    appContainer.classList.remove('on-music-page'); // 确保恢复 Home Bar 颜色
                     setTimeout(() => { appContainer.style.display = 'none'; }, 300);
-                    
                     desktop.style.display = 'flex';
-                    // 强制重绘
                     void desktop.offsetWidth;
                     desktop.classList.add('active');
                 });
-
-                // 4. 初始化小组件渲染 (通过 EventManager)
-                // 这里的逻辑已经移入 EventManager.renderDesktopWidget
-                // 只需要在 initApp 末尾调用一次即可。
-                // 注意：旧的 widgetInput 监听器已经在 renderDesktopWidget 的 'photo' 逻辑中重新绑定了
             }
 
             try {
