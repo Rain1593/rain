@@ -28536,14 +28536,26 @@ async showGiftDetailsModal(messageId) {
             
             const handleResize = () => {
                 // 1. 核心修复：强制将页面滚动位置重置为0
-                // 这能解决“顶部多了空白”的问题，防止整个页面被键盘顶上去
                 window.scrollTo(0, 0);
                 
-                // 2. 将容器高度设置为实际的“可视高度”
-                // 容器变矮了，Flex布局会自动把底部的输入框顶上来，贴着键盘上沿，解决“看不见输入栏”
-                appContainer.style.height = window.visualViewport.height + 'px';
+                // 2. 检测键盘是否弹出
+                // 如果可视高度明显小于屏幕高度（例如小于80%），通常意味着键盘弹出了
+                const isKeyboardOpen = window.visualViewport.height < window.innerHeight * 0.85;
                 
-                // 3. 如果在聊天页面，调整消息列表滚动到底部，确保看到最新消息
+                // 3. 计算容器高度
+                let finalHeight = window.visualViewport.height;
+                
+                // 如果键盘弹出且在聊天页面，额外减去60px的高度
+                // 这会强迫 flex 容器变短，从而把底部的输入栏往上顶，留出缓冲区域
+                // 60px 约为普通底部偏移量的2倍
+                if (isKeyboardOpen && appState.currentPage === 'chat') {
+                    finalHeight -= 60;
+                }
+
+                // 应用高度
+                appContainer.style.height = finalHeight + 'px';
+                
+                // 4. 如果在聊天页面，调整消息列表滚动到底部，确保看到最新消息
                 if (appState.currentPage === 'chat' && chatArea) {
                     setTimeout(() => {
                         chatArea.scrollTop = chatArea.scrollHeight;
