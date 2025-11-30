@@ -106,7 +106,7 @@
             height: 100%;
             /* 修改：拆分背景属性并增加底色，防止图片加载失败时透视 */
             background-color: #f2f2f2; 
-            background-image: url('https://w.wallhaven.cc/full/wq/wallhaven-wqery6.jpg');
+            background-image: url('https://raw.githubusercontent.com/rain1593/rain/img/bizhi_1.jpg');
             background-repeat: no-repeat;
             background-position: center center;
             background-size: cover;
@@ -5738,6 +5738,129 @@
         .sms-theme-green .right .sms-bubble-box { background: #C8E6C9; color: #2E7D32; } /* 浅绿 */
 
 
+        /* 5. 复古唱片机小组件 */
+        .widget-music-box {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #2b2b2b, #1a1a1a);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            position: relative;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        /* 装饰性纹理 */
+        .widget-music-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px);
+            pointer-events: none;
+        }
+        
+        /* 唱片部分 */
+        .wm-disc-area {
+            width: 110px;
+            height: 110px;
+            flex-shrink: 0;
+            position: relative;
+            margin-right: 15px;
+        }
+        .wm-disc {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: url('https://raw.githubusercontent.com/rain1593/rain/img/record.png');
+            background-size: cover;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            animation: rotate 10s linear infinite;
+            animation-play-state: paused;
+        }
+        .wm-disc.playing {
+            animation-play-state: running;
+        }
+        .wm-cover {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        /* 唱臂 */
+        .wm-needle {
+            position: absolute;
+            top: -10px;
+            right: -10px; /* 相对唱片区域右上角 */
+            width: 40px;
+            height: 80px;
+            background-image: url('https://raw.githubusercontent.com/rain1593/rain/img/singing_arm.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            transform-origin: 25px 5px; /* 旋转支点 */
+            transform: rotate(-35deg);
+            transition: transform 0.5s;
+            z-index: 5;
+        }
+        .wm-needle.playing {
+            transform: rotate(0deg);
+        }
+
+        /* 信息部分 */
+        .wm-info {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            z-index: 2;
+        }
+        .wm-title {
+            color: #e0e0e0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 5px;
+            font-family: 'Times New Roman', serif; /* 复古字体感 */
+        }
+        .wm-artist {
+            color: #888;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 8px; /* 增加一点间距给歌词 */
+        }
+        /* 新增：小组件歌词样式 */
+        .wm-lyrics {
+            font-size: 0.85rem;
+            color: #d43c33; /* 网易云红 */
+            line-height: 1.3;
+            min-height: 2.6em; /* 预留两行高度 */
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* 限制显示2行 */
+            -webkit-box-orient: vertical;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            font-weight: 500; /* 稍微加粗一点点让红色更清晰 */
+        }t: vertical;
+            opacity: 0.9;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+        .wm-status-icon {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.1);
+        }
+
         /* --- 音乐APP样式 --- */
         #page-music {
             background-color: #222; /* 深色背景基调 */
@@ -6026,15 +6149,29 @@
             color: #aaa;
         }
         .add-playlist-card {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            position: relative; /* 为图标绝对定位提供基准 */
             background: rgba(255,255,255,0.05);
             border: 2px dashed rgba(255,255,255,0.2);
-            aspect-ratio: 1; /* 保持方形 */
+            /* 移除 aspect-ratio: 1，改为 padding hack，解决挤扁邻居的问题 */
             border-radius: 12px;
             cursor: pointer;
+            box-sizing: border-box;
+            /* 确保在网格中填满高度，跟随左侧卡片的高度 */
+            height: 100%; 
+            min-height: 100%;
+        }
+        /* 使用伪元素撑开高度，保证它自己至少是个正方形 */
+        .add-playlist-card::before {
+            content: "";
+            display: block;
+            padding-top: 100%; 
+        }
+        /* 图标绝对居中 */
+        .add-playlist-card i {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         /* 歌单详情列表 (嵌入在 My Music 视图中覆盖显示) */
@@ -15068,6 +15205,8 @@ ${globalPromptsSection}
                 }
                 
                 localStorage.setItem('musicState', JSON.stringify({ playlistId: song.playlistId, songIndex: this.currentIndex }));
+                // 同步更新桌面小组件信息
+                this.updateDesktopWidget();
             },
 
             togglePlay() {
@@ -15090,6 +15229,8 @@ ${globalPromptsSection}
                     discContainer.classList.remove('playing');
                     needle.classList.remove('playing');
                 }
+                // 同步更新桌面小组件
+                this.updateDesktopWidget();
             },
 
             playNext(auto = false) {
@@ -15128,17 +15269,25 @@ ${globalPromptsSection}
                 if (isNaN(duration)) return;
                 
                 const percent = (currentTime / duration) * 100;
-                $('#music-progress-fill').style.width = `${percent}%`;
+                const fill = $('#music-progress-fill');
+                if(fill) fill.style.width = `${percent}%`; // 增加判空，防止在桌面时报错
                 
                 const format = (t) => {
                     const m = Math.floor(t / 60).toString().padStart(2, '0');
                     const s = Math.floor(t % 60).toString().padStart(2, '0');
                     return `${m}:${s}`;
                 };
-                $('#player-curr-time').textContent = format(currentTime);
-                $('#player-total-time').textContent = format(duration);
+                
+                const currTimeEl = $('#player-curr-time');
+                if(currTimeEl) {
+                    currTimeEl.textContent = format(currentTime);
+                    $('#player-total-time').textContent = format(duration);
+                }
 
                 this.syncLyrics(currentTime);
+                
+                // 新增：同步更新桌面小组件歌词
+                this.updateWidgetLyrics();
             },
 
             parseLyrics(lrcText) {
@@ -15440,7 +15589,72 @@ ${globalPromptsSection}
                     }
                 };
                 reader.readAsText(file);
-            }
+            },
+
+            updateDesktopWidget() {
+                const titleEl = document.getElementById('wm-title');
+                const artistEl = document.getElementById('wm-artist');
+                const coverEl = document.getElementById('wm-cover');
+                const discEl = document.getElementById('wm-disc');
+                const needleEl = document.getElementById('wm-needle');
+
+                // 只有当桌面上存在这个组件时才更新
+                if (!titleEl) return;
+
+                const currentSong = this.currentPlaylist[this.currentIndex];
+                const isPlaying = !this.audio.paused;
+
+                if (currentSong) {
+                    titleEl.textContent = currentSong.name;
+                    artistEl.textContent = currentSong.artist;
+                    
+                    const playlist = this.playlists.find(p => p.id === currentSong.playlistId);
+                    const cover = playlist && playlist.cover ? playlist.cover : this.defaultCover;
+                    coverEl.src = cover;
+                } else {
+                    titleEl.textContent = '无音乐播放';
+                    artistEl.textContent = '---';
+                    coverEl.src = this.defaultCover;
+                }
+
+                if (isPlaying) {
+                    discEl.classList.add('playing');
+                    needleEl.classList.add('playing');
+                } else {
+                    discEl.classList.remove('playing');
+                    needleEl.classList.remove('playing');
+                }
+            },
+
+            updateWidgetLyrics() {
+                const lyricEl = document.getElementById('wm-lyrics');
+                // 如果桌面没有显示该组件，或者是本地音乐没歌词，就不处理
+                if (!lyricEl) return;
+
+                const time = this.audio.currentTime;
+                
+                // 如果没有歌词数据
+                if (!this.lrcLines || this.lrcLines.length === 0) {
+                    if (lyricEl.textContent !== '') lyricEl.textContent = '';
+                    return;
+                }
+
+                // 查找当前时间对应的歌词
+                let currentLineText = '';
+                // 简单的遍历查找
+                for (let i = 0; i < this.lrcLines.length; i++) {
+                    if (time >= this.lrcLines[i].time) {
+                        currentLineText = this.lrcLines[i].text;
+                    } else {
+                        break; 
+                    }
+                }
+
+                // 只有当歌词内容变化时才更新DOM，避免性能浪费
+                if (lyricEl.textContent !== currentLineText) {
+                    lyricEl.textContent = currentLineText;
+                }
+            },
         };
         
         const EventManager = {
@@ -20073,7 +20287,8 @@ async showMomentsSettingsModal() {
                         { value: 'photo', text: '相册' },
                         { value: 'time', text: '时钟' },
                         { value: 'calendar', text: '日历 + 倒计时' },
-                        { value: 'sms', text: '短信' }
+                        { value: 'sms', text: '短信' },
+                        { value: 'music', text: '复古黑胶播放器' }
                     ],
                     onSelect: async (value, text) => {
                         const settingsToSave = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
@@ -20265,6 +20480,48 @@ async showMomentsSettingsModal() {
                     `;
 
                     container.onclick = () => this.showSmsEditModal(smsData);
+                } else if (type === 'music') {
+                    // 5. 音乐播放器组件
+                    container.classList.add('transparent-bg'); // 清除默认背景
+                    
+                    // 获取当前音乐状态
+                    const currentSong = MusicManager.currentPlaylist[MusicManager.currentIndex];
+                    const isPlaying = !MusicManager.audio.paused;
+                    const title = currentSong ? currentSong.name : '无音乐播放';
+                    const artist = currentSong ? currentSong.artist : '---';
+                    const cover = (currentSong && currentSong.sourceType === 'local' && MusicManager.currentObjectUrl) 
+                        ? MusicManager.defaultCover // 本地音乐暂时无法在组件显示blob图片，使用默认
+                        : (currentSong && currentSong.cover ? currentSong.cover : MusicManager.defaultCover);
+                    
+                    // 为了能显示本地封面，尝试直接读取 MusicManager 的 cover
+                    // 如果是播放列表里的 cover 属性，应该可以直接用
+                    const displayCover = (currentSong && currentSong.playlistId) 
+                        ? (MusicManager.playlists.find(p=>p.id===currentSong.playlistId)?.cover || MusicManager.defaultCover) 
+                        : MusicManager.defaultCover;
+
+                    container.innerHTML = `
+                        <div class="widget-music-box">
+                            <div class="wm-disc-area">
+                                <div class="wm-disc ${isPlaying ? 'playing' : ''}" id="wm-disc">
+                                    <img src="${displayCover}" class="wm-cover" id="wm-cover">
+                                </div>
+                                <div class="wm-needle ${isPlaying ? 'playing' : ''}" id="wm-needle"></div>
+                            </div>
+                            <div class="wm-info">
+                                <div class="wm-title" id="wm-title">${title}</div>
+                                <div class="wm-artist" id="wm-artist">${artist}</div>
+                                <!-- 新增歌词容器 -->
+                                <div class="wm-lyrics" id="wm-lyrics"></div>
+                            </div>
+                            <div class="wm-status-icon"><i class="fas fa-music"></i></div>
+                        </div>
+                    `;
+                    
+                    // 点击跳转到音乐APP
+                    container.onclick = () => {
+                        const musicBtn = document.getElementById('open-music-btn');
+                        if(musicBtn) musicBtn.click();
+                    };
                 }
             },
 
@@ -20494,7 +20751,7 @@ async showMomentsSettingsModal() {
                     desktop.style.backgroundImage = `url(${settings.desktopWallpaper})`;
                 } else {
                     // 默认壁纸
-                    desktop.style.backgroundImage = `url('https://w.wallhaven.cc/full/wq/wallhaven-wqery6.jpg')`;
+                    desktop.style.backgroundImage = `url('https://raw.githubusercontent.com/rain1593/rain/img/bizhi_1.jpg')`;
                 }
                 // 确保桌面壁纸也是铺满的
                 desktop.style.backgroundSize = 'cover';
