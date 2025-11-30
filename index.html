@@ -42,6 +42,10 @@
     <!-- PWA 配置结束 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 新增：引入 ID3 标签解析库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Long+Cang&display=swap" rel="stylesheet">
     <style>
@@ -5944,7 +5948,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            overflow: hidden;
+            overflow: visible; /* 修改：允许溢出，防止唱臂顶部被裁切 */
             margin-top: 40px; /* 新增：让唱片位置往下一点 */
         }
         /* 唱臂 */
@@ -5982,7 +5986,7 @@
             animation: rotate 20s linear infinite;
             animation-play-state: paused;
             box-shadow: 0 0 15px rgba(0,0,0,0.5);
-            border: 5px solid rgba(255,255,255,0.05); /* 增加一点质感 */
+            /* 已移除 border 属性，消除白色边框和旋转时的锯齿凹陷 */
         }
         .disc-container.playing {
             animation-play-state: running;
@@ -6217,7 +6221,18 @@
         .song-info { flex-grow: 1; overflow: hidden; }
         .song-name-row { font-size: 1rem; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .song-artist-row { font-size: 0.75rem; color: #888; margin-top: 3px; }
-        .song-actions { color: #888; padding: 0 10px; }
+        
+        /* 修改：增大操作按钮区域 */
+        .song-actions { display: flex; align-items: center; }
+        .song-actions i { 
+            color: #888; 
+            font-size: 1.4rem; /* 增大图标 */
+            padding: 10px 15px; /* 大幅增加点击范围 */
+            cursor: pointer; 
+            margin-left: 5px; /* 图标之间留点空隙 */
+            transition: color 0.2s;
+        }
+        .song-actions i:hover { color: var(--accent-color); }
 
         /* 播放列表半弹窗 */
         .queue-sheet {
@@ -15184,9 +15199,37 @@ ${globalPromptsSection}
                 $('#player-song-artist').textContent = song.artist;
                 
                 const playlist = this.playlists.find(p => p.id === song.playlistId);
-                // 修改：使用默认纯灰色封面
-                const cover = playlist && playlist.cover ? playlist.cover : this.defaultCover;
-                $('#disc-cover').src = cover;
+                
+                // 1. 清理上一首歌的封面 URL (防止内存泄漏)
+                if (this.currentCoverUrl && this.currentCoverUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(this.currentCoverUrl);
+                }
+
+                // 2. 决定封面来源
+                let coverSrc = this.defaultCover;
+                
+                if (song.cover) {
+                    if (song.cover instanceof Blob) {
+                        // 如果是新导入的 Blob 对象，生成临时 URL
+                        this.currentCoverUrl = URL.createObjectURL(song.cover);
+                        coverSrc = this.currentCoverUrl;
+                    } else {
+                        // 兼容旧的 Base64 字符串
+                        coverSrc = song.cover;
+                    }
+                } else if (playlist && playlist.cover) {
+                    coverSrc = playlist.cover;
+                }
+                
+                // 3. 应用到主播放器
+                $('#disc-cover').src = coverSrc;
+
+                // 4. 同步应用到桌面小组件 (优先显示歌曲封面)
+                const widgetCover = document.getElementById('wm-cover');
+                if (widgetCover) widgetCover.src = coverSrc;
+
+                // 5. 存储当前使用的封面链接供 updateDesktopWidget 使用
+                this.currentDisplayCover = coverSrc; 
 
                 if (song.sourceType === 'local') {
                     if (this.currentObjectUrl) URL.revokeObjectURL(this.currentObjectUrl);
@@ -15470,8 +15513,8 @@ ${globalPromptsSection}
                             <div class="song-artist-row">${s.artist}</div>
                         </div>
                         <div class="song-actions">
-                            <i class="fas fa-file-alt" title="上传歌词" style="margin-right:10px;"></i>
-                            <i class="fas fa-trash"></i>
+                            <i class="fas fa-file-alt" title="上传歌词"></i>
+                            <i class="fas fa-trash" title="删除"></i>
                         </div>
                     </div>
                 `).join('');
@@ -15502,28 +15545,94 @@ ${globalPromptsSection}
                 };
             },
 
+            // 新增：解析 MP3 ID3 标签的辅助函数
+            parseID3Tags(file) {
+                return new Promise((resolve) => {
+                    if (!window.jsmediatags) {
+                        console.warn("jsmediatags library not loaded");
+                        resolve(null);
+                        return;
+                    }
+
+                    window.jsmediatags.read(file, {
+                        onSuccess: (tag) => {
+                            const tags = tag.tags;
+                            let cover = null;
+                            let lyrics = "";
+
+                            // 1. 解析图片 (封面) - 存为 Blob，性能更好
+                            if (tags.picture) {
+                                const { data, format } = tags.picture;
+                                const byteArray = new Uint8Array(data);
+                                cover = new Blob([byteArray], { type: format });
+                            }
+
+                            // 2. 解析歌词 (USLT 帧)
+                            if (tags.lyrics) {
+                                lyrics = tags.lyrics.lyrics;
+                            } else if (tags.USLT) {
+                                // 部分标签库可能直接暴露 USLT
+                                lyrics = tags.USLT.data;
+                            }
+
+                            resolve({
+                                title: tags.title,
+                                artist: tags.artist,
+                                album: tags.album,
+                                cover: cover,
+                                lyrics: lyrics
+                            });
+                        },
+                        onError: (error) => {
+                            console.log("ID3 read error:", error);
+                            resolve(null);
+                        }
+                    });
+                });
+            },
+
             async handleSongUpload(e) {
                 const files = Array.from(e.target.files);
                 if (!files.length) return;
                 
-                UIManager.showToast(`正在导入 ${files.length} 首歌曲...`);
+                UIManager.showToast(`正在解析并导入 ${files.length} 首歌曲...`);
                 UIManager.hideModal();
 
                 for (const file of files) {
+                    // 1. 默认使用文件名作为备选
                     let name = file.name.replace(/\.[^/.]+$/, "");
                     let artist = "未知歌手";
-                    
+                    let cover = null;
+                    let lrc = "";
+
+                    // 尝试从文件名解析 歌手-歌名
                     if (name.includes('-')) {
                         const parts = name.split('-');
                         artist = parts[0].trim();
                         name = parts[1].trim();
                     }
 
+                    // 2. 尝试读取 ID3 标签 (内嵌封面和歌词)
+                    try {
+                        const tags = await this.parseID3Tags(file);
+                        if (tags) {
+                            if (tags.title) name = tags.title.trim();
+                            if (tags.artist) artist = tags.artist.trim();
+                            if (tags.cover) cover = tags.cover;
+                            if (tags.lyrics) lrc = tags.lyrics;
+                        }
+                    } catch (err) {
+                        console.error("Tags parsing failed for", file.name, err);
+                    }
+
+                    // 3. 存入数据库
                     await this.addSongToDB({
                         sourceType: 'local',
                         blob: file,
                         name: name,
-                        artist: artist
+                        artist: artist,
+                        cover: cover, // 存入封面数据
+                        lrc: lrc      // 存入内嵌歌词
                     });
                 }
                 UIManager.showToast("导入完成");
@@ -15608,9 +15717,15 @@ ${globalPromptsSection}
                     titleEl.textContent = currentSong.name;
                     artistEl.textContent = currentSong.artist;
                     
-                    const playlist = this.playlists.find(p => p.id === currentSong.playlistId);
-                    const cover = playlist && playlist.cover ? playlist.cover : this.defaultCover;
-                    coverEl.src = cover;
+                    // 优先使用 loadSong 中计算好的封面 (包含了 Blob URL 处理)
+                    // 如果没有，再回退到歌单封面
+                    if (this.currentDisplayCover) {
+                        coverEl.src = this.currentDisplayCover;
+                    } else {
+                        const playlist = this.playlists.find(p => p.id === currentSong.playlistId);
+                        const cover = playlist && playlist.cover ? playlist.cover : this.defaultCover;
+                        coverEl.src = cover;
+                    }
                 } else {
                     titleEl.textContent = '无音乐播放';
                     artistEl.textContent = '---';
