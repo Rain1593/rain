@@ -21,6 +21,7 @@
                     .catch(err => console.log('SW failed', err));
             });
         }
+        
     </script>
     <!-- PWA 配置结束 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -219,6 +220,11 @@
         .icon-chat {
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
             color: #5D534A;
+        }
+        /* 我的信息 图标 */
+        .icon-my-info {
+            background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);
+            color: white;
         }
         /* 音乐 图标 */
         .icon-music {
@@ -795,6 +801,7 @@
             color: var(--text-color-light);
             font-size: 1rem;
         }
+
 
         /* --- 7. 聊天页面 --- */
         #page-chat .page-header .header-title {
@@ -2642,6 +2649,113 @@
             padding: 10px 20px; /* Reduced vertical padding */
             font-size: 1rem; /* Slightly smaller font */
         }
+
+        /* --- 音乐App iOS 风格弹窗样式 --- */
+        .modal-content.ios-style {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 14px;
+            padding: 0;
+            width: 280px;
+            max-width: 85%;
+            border: none;
+            box-shadow: 0 0 0 1000px rgba(0,0,0,0.4);
+            color: #000;
+            animation: iosPopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes iosPopIn {
+            from { transform: scale(1.1); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-content.ios-style .modal-header {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 20px 15px 5px;
+            margin: 0;
+            text-align: center;
+            color: #000;
+            border: none;
+        }
+        .modal-content.ios-style .modal-body {
+            padding: 5px 15px 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #000;
+        }
+        .modal-content.ios-style input[type="text"],
+        .modal-content.ios-style input[type="number"] {
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px 8px;
+            font-size: 0.9rem;
+            width: 90%;
+            margin-top: 5px;
+        }
+        .modal-content.ios-style .modal-actions {
+            display: flex;
+            border-top: 1px solid rgba(60, 60, 67, 0.29); /* iOS separator color */
+            margin-top: 0;
+        }
+        .modal-content.ios-style .modal-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 12px 0;
+            font-size: 1.05rem;
+            color: #007AFF; /* iOS Blue */
+            font-weight: 400;
+            cursor: pointer;
+            margin: 0;
+        }
+        .modal-content.ios-style .modal-btn:active {
+            background-color: rgba(0,0,0,0.05);
+        }
+        .modal-content.ios-style .modal-btn:not(:last-child) {
+            border-right: 1px solid rgba(60, 60, 67, 0.29);
+        }
+        .modal-content.ios-style .modal-btn.btn-primary {
+            background: transparent;
+            color: #007AFF;
+            font-weight: 600; /* Bold for primary action */
+            box-shadow: none;
+        }
+        .modal-content.ios-style .modal-btn.btn-danger {
+            background: transparent;
+            color: #FF3B30; /* iOS Red */
+            font-weight: 600;
+        }
+        .modal-content.ios-style .modal-btn.btn-secondary {
+            background: transparent;
+            color: #007AFF;
+            box-shadow: none;
+        }
+
+        /* --- iOS 风格弹窗竖向排列扩展 --- */
+        .modal-content.ios-style.vertical-actions .modal-actions {
+            flex-direction: column;
+        }
+        .modal-content.ios-style.vertical-actions .modal-btn {
+            width: 100%;
+            border-right: none !important; /* 移除左右分割线 */
+            border-bottom: 0.5px solid rgba(60, 60, 67, 0.29); /* 稍微减细分割线，更精致 */
+            padding: 12px 0; /* 减小内边距，使选项更紧凑 */
+        }
+        /* 关键修复：倒数第二个按钮去掉底边框，防止与取消按钮的顶部分割叠加 */
+        .modal-content.ios-style.vertical-actions .modal-btn:nth-last-child(2) {
+            border-bottom: none;
+        }
+        /* 关键修复：取消按钮样式优化 */
+        .modal-content.ios-style.vertical-actions .modal-btn:last-child {
+            border-bottom: none;
+            font-weight: 400;
+            margin-top: 0; /* 移除间距，避免出现空白缝隙 */
+            border-top: 2.8px solid rgba(0,0,0,0.05); /* 加粗顶边框来模拟iOS的分隔条，视觉上只有一条宽线 */
+        }
+
 /* --- 9. 点击特效 --- */
 #click-effect-layer {
     position: absolute;
@@ -5856,9 +5970,6 @@
             opacity: 0.9;
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
             font-weight: 500; /* 稍微加粗一点点让红色更清晰 */
-        }t: vertical;
-            opacity: 0.9;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
         .wm-status-icon {
             position: absolute;
@@ -5868,6 +5979,7 @@
             color: rgba(255,255,255,0.1);
         }
 
+        
         /* --- 音乐APP样式 --- */
         #page-music {
             background-color: #222; /* 深色背景基调 */
@@ -6248,6 +6360,69 @@
         .queue-item .del-btn { color: #666; }
 
 
+        /* --- 通用磨砂玻璃弹窗样式 (仿音乐播放列表) --- */
+        .modal-content.glass-style {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #333;
+            width: 85%;
+            max-width: 320px;
+            padding: 0;
+            overflow: hidden;
+        }
+        .modal-content.glass-style .modal-header {
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            margin: 0;
+            text-align: center;
+            color: var(--text-color-dark);
+        }
+        .modal-content.glass-style .modal-body {
+            padding: 0; /* 列表式布局不需要padding */
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .glass-list-item {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 1rem;
+        }
+        .glass-list-item:active {
+            background-color: rgba(0,0,0,0.05);
+        }
+        .glass-list-item i {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+        .glass-list-item.new-item {
+            color: var(--accent-color);
+            font-weight: bold;
+            justify-content: center;
+        }
+        .modal-content.glass-style .modal-actions {
+            padding: 10px;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            justify-content: center;
+        }
+        .modal-content.glass-style .modal-btn {
+            background: transparent;
+            color: var(--text-color-medium);
+            box-shadow: none;
+            font-size: 0.9rem;
+        }
+
         /* --- 音乐播放列表弹窗 (磨砂卡片风) --- */
         .music-playlist-popup {
             position: absolute;
@@ -6326,6 +6501,561 @@
             margin-top: 2px;
         }
         /* 当深色模式时，弹窗字体的适配 (此处保持亮色卡片设计，不随背景变黑，模拟App内的独立UI) */
+
+/* --- 我的信息 App (复古报纸/票根风格) --- */
+        #page-my-info-app {
+            background-color: #f4e4bc; /* 复古纸张黄 */
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #2c2c2c;
+            font-family: "Courier New", Courier, monospace; /* 打字机字体 */
+            /* display: flex; 已删除，交给 .page.active 控制显示 */
+            flex-direction: column;
+        }
+        
+        .my-info-container {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            padding: 15px;
+        }
+
+        .my-info-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+            animation: fadeIn 0.3s;
+        }
+        .my-info-view.active { display: flex; }
+
+        /* 复古头部 */
+        .retro-header {
+            text-align: center;
+            border-bottom: 3px double #2c2c2c;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .retro-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .retro-subtitle, .retro-date {
+            font-size: 0.8rem;
+            font-weight: bold;
+            background: #2c2c2c;
+            color: #f4e4bc;
+            padding: 2px 6px;
+        }
+
+        /* --- 1. 人设库 (电影票风格) --- */
+        .ticket-stack-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding-bottom: 60px;
+        }
+        
+        .movie-ticket {
+            background: #fff;
+            position: relative;
+            height: 100px;
+            display: flex;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+            transition: transform 0.2s;
+            cursor: pointer;
+            margin-bottom: -40px; /* 堆叠效果 */
+            transition: margin 0.3s, transform 0.3s;
+        }
+        .movie-ticket:hover {
+            transform: translateY(-10px);
+            margin-bottom: 0;
+            z-index: 10;
+        }
+        .movie-ticket::before, .movie-ticket::after {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            background-color: #f4e4bc; /* 与背景同色实现镂空 */
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
+        .movie-ticket::before { left: -10px; }
+        .movie-ticket::after { right: -10px; }
+
+        .ticket-stub {
+            width: 80px;
+            border-right: 2px dashed #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #2c2c2c;
+            color: #f4e4bc;
+            padding: 5px;
+        }
+        .ticket-stub .stub-icon { font-size: 1.5rem; margin-bottom: 5px; }
+        .ticket-stub .stub-text { font-size: 0.6rem; writing-mode: vertical-rl; letter-spacing: 2px; }
+
+        .ticket-body {
+            flex-grow: 1;
+            padding: 10px 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background-image: radial-gradient(#e0e0e0 15%, transparent 16%);
+            background-size: 10px 10px;
+        }
+        .ticket-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .ticket-info { font-size: 0.8rem; color: #666; display: flex; gap: 10px; }
+        .ticket-actions {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .ticket-btn {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            border: 1px solid #2c2c2c;
+            display: flex; justify-content: center; align-items: center;
+            background: white;
+            transition: all 0.2s;
+        }
+        .ticket-btn:hover { background: #2c2c2c; color: white; }
+
+        .add-ticket-btn {
+            margin-top: 50px;
+            border: 2px dashed #2c2c2c;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .add-ticket-btn:hover { background: rgba(0,0,0,0.05); }
+
+        /* --- 2. 当前人设 (小组件风格) --- */
+        .persona-widget-card {
+            background: white;
+            border: 3px solid #2c2c2c;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            position: relative;
+            background-image: url("data:image/svg+xml,%3Csvg width='6' height='6' viewBox='0 0 6 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%232c2c2c' fill-opacity='0.05' fill-rule='evenodd'%3E%3Cpath d='M5 0h1L0 6V5zM6 5v1H5z'/%3E%3C/g%3E%3C/svg%3E");
+        }
+        .widget-decor-top {
+            text-align: center;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .widget-main-section {
+            position: relative;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .widget-avatar-wrapper {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #2c2c2c;
+            overflow: hidden;
+            position: relative;
+            background: #eee;
+            z-index: 2;
+        }
+        .widget-avatar-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-edit-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.5); color: white;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.2s; cursor: pointer;
+        }
+        .widget-avatar-wrapper:hover .avatar-edit-overlay { opacity: 1; }
+
+        /* 四角的小框 */
+        .corner-box {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border: 2px solid #2c2c2c;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            z-index: 1;
+            box-shadow: 2px 2px 0 #ccc;
+        }
+        .corner-box:active { transform: scale(0.95); }
+        .corner-box.top-left { top: 0; left: 10%; transform: rotate(-5deg); }
+        .corner-box.top-right { top: 0; right: 10%; transform: rotate(5deg); }
+        .corner-box.bottom-left { bottom: 0; left: 5%; transform: rotate(3deg); }
+        .corner-box.bottom-right { bottom: 0; right: 5%; transform: rotate(-3deg); }
+        
+        .corner-label { font-size: 0.5rem; font-weight: bold; margin-bottom: 2px; }
+        .corner-box i { font-size: 1.2rem; color: #2c2c2c; }
+
+        .widget-name-row {
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .edit-name-icon { font-size: 0.9rem; cursor: pointer; opacity: 0.5; }
+        .edit-name-icon:hover { opacity: 1; }
+
+        .widget-pat-section {
+            background: #2c2c2c;
+            color: #f4e4bc;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .retro-paper-section {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            min-height: 100px;
+        }
+        .paper-lines {
+            background-image: repeating-linear-gradient(#fff 0px, #fff 24px, #00bfff 25px);
+            line-height: 25px;
+            font-family: cursive;
+            color: #555;
+        }
+
+        .retro-btn {
+            background: #2c2c2c;
+            color: #f4e4bc;
+            border: none;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+        }
+        .retro-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
+
+        /* --- 3. 设置列表 --- */
+        .retro-list-menu { display: flex; flex-direction: column; gap: 15px; }
+        .retro-menu-item {
+            background: white;
+            border: 2px solid #2c2c2c;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .retro-menu-item:hover { background: #fffcf0; }
+        .menu-icon { font-size: 1.5rem; width: 40px; text-align: center; }
+        .menu-content { display: flex; flex-direction: column; }
+        .menu-title { font-weight: bold; font-size: 1.1rem; }
+        .menu-desc { font-size: 0.8rem; color: #666; }
+
+        /* --- 底部导航 --- */
+        #my-info-bottom-nav {
+            height: 60px;
+            background: #2c2c2c;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            color: #888;
+            flex-shrink: 0;
+        }
+        .mi-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            width: 60px;
+            transition: color 0.2s;
+        }
+        .mi-nav-item.active { color: #f4e4bc; transform: translateY(-3px); }
+        .mi-nav-item i { font-size: 1.4rem; margin-bottom: 3px; }
+
+        /* --- 新增：竖向票根页面样式 --- */
+        .ticket-creation-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .vertical-ticket-card {
+            width: 95%; /* 稍微增加宽度占比 */
+            max-width: 380px; /* 增大最大宽度，从320px -> 380px */
+            background: #fdfbf7;
+            border: 2px solid #2c2c2c;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2); /* 加深阴影增加立体感 */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: radial-gradient(#e0e0e0 15%, transparent 16%);
+            background-size: 8px 8px;
+        }
+
+        /* 顶部关闭按钮 */
+        .ticket-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px; /* 放在右上角，符合大部分操作习惯，左上角也可以 */
+            width: 30px;
+            height: 30px;
+            background: #2c2c2c;
+            color: #fdfbf7;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+        .ticket-close-btn:active { transform: scale(0.9); }
+
+        .vt-section { padding: 15px; }
+
+        /* 顶部品牌区 */
+        .vt-header {
+            background: #2c2c2c;
+            color: #fdfbf7;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            border-bottom: 2px dashed #fdfbf7;
+        }
+        .vt-brand {
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+        }
+        /* 装饰圆孔 */
+        .vt-header::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background-image: radial-gradient(circle, #fdfbf7 6px, transparent 7px);
+            background-size: 20px 20px;
+            background-position: center;
+        }
+
+        /* 头像区 */
+        .vt-section.avatar-section {
+            display: flex;
+            justify-content: center;
+            padding-top: 30px;
+        }
+        .vt-avatar-frame {
+            width: 100px;
+            height: 100px;
+            border: 3px solid #2c2c2c;
+            border-radius: 50%; /* 圆形头像，复古感 */
+            overflow: hidden;
+            position: relative;
+            background: #eee;
+            cursor: pointer;
+        }
+        .vt-avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
+        .vt-avatar-overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.3); color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.2s; font-size: 1.5rem;
+        }
+        .vt-avatar-frame:hover .vt-avatar-overlay { opacity: 1; }
+
+        /* 输入框样式 */
+        .vt-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        .vt-row label {
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.9rem;
+            width: 70px;
+        }
+        .vt-row input, .vt-row select {
+            flex-grow: 1;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 1rem;
+            color: #2c2c2c;
+            outline: none;
+        }
+
+        /* 详细区 */
+        .vt-field-group { margin-bottom: 15px; }
+        .vt-field-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            background: #2c2c2c;
+            color: #fdfbf7;
+            display: inline-block;
+            padding: 2px 5px;
+        }
+        .vt-field-group textarea {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #ccc;
+            padding: 5px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: none;
+            outline: none;
+        }
+        
+        .vt-dashed-line {
+            border-top: 2px dashed #ccc;
+            margin: 10px 0;
+            position: relative;
+        }
+        /* 票根两侧的缺口装饰 */
+        .vt-dashed-line::before, .vt-dashed-line::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            width: 20px;
+            height: 20px;
+            background: #f4e4bc; /* 与页面背景同色 */
+            border-radius: 50%;
+            border: 2px solid #2c2c2c; /* 模拟边框 */
+            box-sizing: border-box;
+        }
+        .vt-dashed-line::before { left: -27px; border-right-color: transparent; border-top-color: transparent; border-bottom-color: transparent; } /* 简化处理，直接用背景色覆盖 */
+        .vt-dashed-line::after { right: -27px; }
+        /* 修正缺口样式：直接用背景色圆遮挡边框 */
+        .vt-dashed-line::before, .vt-dashed-line::after {
+             background-color: #f4e4bc; /* 这里的颜色必须和 page-my-info-app 的背景色一致 */
+             border: none;
+        }
+
+        .vt-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .vt-meta-grid label { font-size: 0.7rem; font-weight: bold; display: block; opacity: 0.7; }
+        .vt-meta-grid input {
+            width: 100%;
+            border: none;
+            border-bottom: 1px dotted #2c2c2c;
+            background: transparent;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        /* 底部按钮区 */
+        .vt-footer {
+            padding: 15px;
+            text-align: center;
+            border-top: 2px solid #2c2c2c;
+            background: #fff;
+        }
+        .vt-save-btn {
+            background: #2c2c2c;
+            color: #fdfbf7;
+            border: none;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+        .vt-save-btn:active {
+            transform: scale(0.98);
+            background: #000;
+        }
+        .vt-barcode {
+            height: 40px; /* 固定高度 */
+            width: 90%;   /* 宽度 */
+            margin: 10px auto 0; /* 居中 */
+            /* 使用线性渐变绘制逼真的密集条形码 */
+            background-image: linear-gradient(90deg, 
+                #2c2c2c 0%, #2c2c2c 1%, transparent 1%, transparent 2%,
+                #2c2c2c 2%, #2c2c2c 4%, transparent 4%, transparent 5%,
+                #2c2c2c 5%, #2c2c2c 6%, transparent 6%, transparent 7%,
+                #2c2c2c 7%, #2c2c2c 10%, transparent 10%, transparent 11%,
+                #2c2c2c 11%, #2c2c2c 12%, transparent 12%, transparent 14%,
+                #2c2c2c 14%, #2c2c2c 16%, transparent 16%, transparent 17%,
+                #2c2c2c 17%, #2c2c2c 18%, transparent 18%, transparent 20%,
+                #2c2c2c 20%, #2c2c2c 23%, transparent 23%, transparent 24%,
+                #2c2c2c 24%, #2c2c2c 25%, transparent 25%, transparent 27%,
+                #2c2c2c 27%, #2c2c2c 30%, transparent 30%, transparent 32%,
+                #2c2c2c 32%, #2c2c2c 33%, transparent 33%, transparent 35%,
+                #2c2c2c 35%, #2c2c2c 38%, transparent 38%, transparent 39%,
+                #2c2c2c 39%, #2c2c2c 41%, transparent 41%, transparent 42%,
+                #2c2c2c 42%, #2c2c2c 45%, transparent 45%, transparent 46%,
+                #2c2c2c 46%, #2c2c2c 47%, transparent 47%, transparent 49%,
+                #2c2c2c 49%, #2c2c2c 52%, transparent 52%, transparent 54%,
+                #2c2c2c 54%, #2c2c2c 55%, transparent 55%, transparent 56%,
+                #2c2c2c 56%, #2c2c2c 59%, transparent 59%, transparent 60%,
+                #2c2c2c 60%, #2c2c2c 62%, transparent 62%, transparent 64%,
+                #2c2c2c 64%, #2c2c2c 65%, transparent 65%, transparent 67%,
+                #2c2c2c 67%, #2c2c2c 70%, transparent 70%, transparent 72%,
+                #2c2c2c 72%, #2c2c2c 73%, transparent 73%, transparent 75%,
+                #2c2c2c 75%, #2c2c2c 78%, transparent 78%, transparent 79%,
+                #2c2c2c 79%, #2c2c2c 81%, transparent 81%, transparent 83%,
+                #2c2c2c 83%, #2c2c2c 85%, transparent 85%, transparent 87%,
+                #2c2c2c 87%, #2c2c2c 89%, transparent 89%, transparent 91%,
+                #2c2c2c 91%, #2c2c2c 93%, transparent 93%, transparent 95%,
+                #2c2c2c 95%, #2c2c2c 98%, transparent 98%, transparent 100%
+            );
+            background-size: 100% 100%;
+            opacity: 0.8;
+        }
 
 </style>
 <style id="exclusive-bubble-style"></style>
@@ -6446,11 +7176,11 @@ document.addEventListener('contextmenu', function(e) {
                 </div>
                 <span class="app-name">未知</span>
             </div>
-            <div class="app-item" id="dock-unknown-2">
-                <div class="app-icon icon-unknown">
-                    <i class="fas fa-question"></i>
+            <div class="app-item" id="open-my-info-app-btn">
+                <div class="app-icon icon-my-info" style="background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);">
+                    <i class="fas fa-address-card"></i>
                 </div>
-                <span class="app-name">未知</span>
+                <span class="app-name">我的信息</span>
             </div>
         </div>
     </div>
@@ -6551,11 +7281,6 @@ document.addEventListener('contextmenu', function(e) {
                             <span>导入/导出全部数据</span>
                             <i class="fas fa-chevron-right"></i>
                         </div>
-                         <div class="setting-item" id="setting-reset">
-                            <i class="fas fa-trash-alt"></i>
-                            <span>重置应用</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -6587,6 +7312,11 @@ document.addEventListener('contextmenu', function(e) {
                         <div class="setting-item" id="os-setting-desktop">
                             <i class="fas fa-desktop" style="background: #32ADE6; color: white; padding: 5px; border-radius: 6px; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; margin-right: 15px;"></i>
                             <span>桌面设置</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="setting-item" id="setting-reset">
+                            <i class="fas fa-trash-alt" style="background: #FF3B30; color: white; padding: 5px; border-radius: 6px; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; margin-right: 15px;"></i>
+                            <span>重置应用</span>
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
@@ -7244,6 +7974,224 @@ document.addEventListener('contextmenu', function(e) {
                 </div>
             </div>
 
+
+            <!-- 我的信息 App 页面 (New) -->
+            <div id="page-my-info-app" class="page">
+                <div class="my-info-container">
+                    <!-- 1. 预设库 (电影票风格) -->
+                    <div id="view-persona-library" class="my-info-view">
+                        <div class="retro-header">
+                            <span class="retro-title">PERSONA ARCHIVE</span>
+                            <span class="retro-subtitle">No.001980</span>
+                        </div>
+                        <div class="ticket-stack-container" id="persona-ticket-list">
+                            <!-- JS生成电影票 -->
+                        </div>
+                        <div class="add-ticket-btn" id="add-new-persona-ticket">
+                            <i class="fas fa-plus"></i> NEW TICKET
+                        </div>
+                    </div>
+
+                    <!-- 2. 当前人设 (小组件风格) -->
+                    <div id="view-current-persona" class="my-info-view active">
+                        <div class="retro-header">
+                            <span class="retro-title">CURRENT IDENTITY</span>
+                            <span class="retro-date">TODAY</span>
+                        </div>
+                        
+                        <div class="persona-widget-card">
+                            <!-- 顶部装饰 -->
+                            <div class="widget-decor-top">
+                                <span>★ MEMORIES ★</span>
+                            </div>
+                            
+                            <!-- 头像与核心信息区 -->
+                            <div class="widget-main-section">
+                                <!-- 四个角的小框 (点击修改属性) -->
+                                <div class="corner-box top-left" data-field="likes" title="修改喜好">
+                                    <span class="corner-label">LIKES</span>
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <div class="corner-box top-right" data-field="dislikes" title="修改厌恶">
+                                    <span class="corner-label">HATE</span>
+                                    <i class="fas fa-thumbs-down"></i>
+                                </div>
+                                
+                                <div class="widget-avatar-wrapper">
+                                    <img id="current-persona-avatar" src="" alt="Avatar">
+                                    <div class="avatar-edit-overlay"><i class="fas fa-camera"></i></div>
+                                    <input type="file" id="current-persona-avatar-input" accept="image/*" style="display:none;">
+                                </div>
+
+                                <div class="corner-box bottom-left" data-field="habits" title="修改习惯">
+                                    <span class="corner-label">HABIT</span>
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="corner-box bottom-right" data-field="background" title="修改背景">
+                                    <span class="corner-label">INFO</span>
+                                    <i class="fas fa-info"></i>
+                                </div>
+                            </div>
+
+                            <!-- 名字与性别 -->
+                            <div class="widget-name-row">
+                                <span id="current-persona-name">Player Name</span>
+                                <i id="current-persona-gender-icon" class="fas fa-venus-mars"></i>
+                                <i class="fas fa-pen edit-name-icon" id="edit-current-name-btn"></i>
+                            </div>
+
+                            <!-- 拍一拍显示 -->
+                            <div class="widget-pat-section" id="edit-pat-info-btn">
+                                <div class="pat-preview-text">
+                                    <span style="opacity: 0.6;">你拍了拍 </span>
+                                    <span id="pat-preview-name">xxx</span>
+                                    <span id="pat-preview-action">，动作</span>
+                                    <span id="pat-preview-content">内容</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 底部额外信息展示 -->
+                        <div class="retro-paper-section">
+                            <div class="paper-lines">
+                                <p id="current-persona-desc">点击角落图标完善你的详细人设...</p>
+                            </div>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 15px;">
+                            <button class="retro-btn" id="save-current-as-preset-btn">保存为新票根</button>
+                        </div>
+                    </div>
+
+                    <!-- 3. 设置 (数据管理) -->
+                    <div id="view-my-info-settings" class="my-info-view">
+                        <div class="retro-header">
+                            <span class="retro-title">SETTINGS</span>
+                        </div>
+                        <div class="retro-list-menu">
+                            <!-- 新增：壁纸设置按钮 -->
+                            <div class="retro-menu-item" id="my-info-wallpaper">
+                                <span class="menu-icon"><i class="fas fa-image"></i></span>
+                                <div class="menu-content">
+                                    <span class="menu-title">WALLPAPER</span>
+                                    <span class="menu-desc">改变APP背景图</span>
+                                </div>
+                            </div>
+                            <div class="retro-menu-item" id="my-info-import">
+                                <span class="menu-icon"><i class="fas fa-file-import"></i></span>
+                                <div class="menu-content">
+                                    <span class="menu-title">IMPORT DATA</span>
+                                    <span class="menu-desc">读取外部档案数据</span>
+                                </div>
+                            </div>
+                            <div class="retro-menu-item" id="my-info-export">
+                                <span class="menu-icon"><i class="fas fa-file-export"></i></span>
+                                <div class="menu-content">
+                                    <span class="menu-title">EXPORT DATA</span>
+                                    <span class="menu-desc">打包当前所有人设</span>
+                                </div>
+                            </div>
+                            <div class="retro-menu-item" id="my-info-reset">
+                                <span class="menu-icon"><i class="fas fa-trash-alt"></i></span>
+                                <div class="menu-content">
+                                    <span class="menu-title">RESET</span>
+                                    <span class="menu-desc" style="color: #c0392b;">重置所有数据</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 4. 新增人设 (竖向票根视图) -->
+                    <div id="view-add-persona-ticket" class="my-info-view">
+                        <div class="ticket-creation-wrapper">
+                            <div class="vertical-ticket-card">
+                                <div class="ticket-close-btn" id="close-add-ticket-btn"><i class="fas fa-times"></i></div>
+                                
+                                <!-- 顶部装饰 -->
+                                <div class="vt-header">
+                                    <span class="vt-brand">NEW PERSONA</span>
+                                    <div class="vt-holes"></div>
+                                </div>
+
+                                <!-- 头像上传区 -->
+                                <div class="vt-section avatar-section">
+                                    <div class="vt-avatar-frame" id="new-ticket-avatar-trigger">
+                                        <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4=" id="new-ticket-avatar-preview">
+                                        <div class="vt-avatar-overlay"><i class="fas fa-camera"></i></div>
+                                    </div>
+                                    <input type="file" id="new-ticket-avatar-input" accept="image/*" style="display:none;">
+                                </div>
+
+                                <!-- 信息输入区 -->
+                                <div class="vt-section info-section">
+                                    <div class="vt-row">
+                                        <label>NAME:</label>
+                                        <input type="text" id="new-ticket-name" placeholder="Name..." maxlength="10">
+                                    </div>
+                                    <div class="vt-row">
+                                        <label>GENDER:</label>
+                                        <select id="new-ticket-gender">
+                                            <option value="男">MALE</option>
+                                            <option value="女">FEMALE</option>
+                                            <option value="其他">OTHER</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 详细设定区 -->
+                                <div class="vt-section detail-section">
+                                    <div class="vt-field-group">
+                                        <label>BACKGROUND / INFO</label>
+                                        <textarea id="new-ticket-background" rows="3" placeholder="Enter character details..."></textarea>
+                                    </div>
+
+                                     <!-- 新增：习惯填写 -->
+                                    <div class="vt-field-group">
+                                        <label>HABIT</label>
+                                        <input type="text" id="new-ticket-habits" style="width: 100%; border: none; border-bottom: 1px dotted #2c2c2c; background: transparent; font-family: inherit; font-size: 0.9rem; outline: none; padding: 5px 0;">
+                                    </div>
+
+                                    <div class="vt-dashed-line"></div>
+                                    <div class="vt-meta-grid">
+                                        <div>
+                                            <label>LIKES</label>
+                                            <input type="text" id="new-ticket-likes">
+                                        </div>
+                                        <div>
+                                            <label>HATE</label>
+                                            <input type="text" id="new-ticket-dislikes">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 底部确认 -->
+                                <div class="vt-footer">
+                                    <button id="save-new-ticket-btn" class="vt-save-btn">ADMIT ONE (SAVE)</button>
+                                    <!-- 内容清空，由CSS生成条形码图案 -->
+                                    <div class="vt-barcode"></div> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <nav id="my-info-bottom-nav">
+                    <div class="mi-nav-item" data-target="view-persona-library">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>人设库</span>
+                    </div>
+                    <div class="mi-nav-item active" data-target="view-current-persona">
+                        <i class="fas fa-user-circle"></i>
+                        <span>当前</span>
+                    </div>
+                    <div class="mi-nav-item" data-target="view-my-info-settings">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>设置</span>
+                    </div>
+                </nav>
+            </div>
+
         </main>
 
             <!-- 转发历史页面 (新) -->
@@ -7360,6 +8308,7 @@ document.addEventListener('contextmenu', function(e) {
             favorites: $('#page-favorites'),
             'favorite-detail': $('#page-favorite-detail'),
             'music': $('#page-music'),
+            'my-info': $('#page-my-info-app'), // 新增
         };
 
         
@@ -7461,6 +8410,9 @@ document.addEventListener('contextmenu', function(e) {
             favoritesSortOrder: 'desc', // 'desc' for newest first, 'asc' for oldest first
             isFavoritesLoading: false,
             allFavoritesLoaded: false,
+            myInfoState: {
+                currentView: 'view-current-persona'
+            },
         };
         
         const DBHelper = {
@@ -7949,7 +8901,7 @@ document.addEventListener('contextmenu', function(e) {
             }
             
             // 修改：将设置相关的子页面加入列表，进入这些页面时隐藏底部导航栏
-            if (['chat', 'prompts', 'moments', 'tutorial', 'pomodoro', 'gifts', 'forwarded-history', 'video-call', 'video-call-history', 'video-call-log-detail', 'chat-settings', 'api-settings', 'theme-settings', 'bubble-settings', 'os-settings', 'desktop-settings', 'music'].includes(pageId)) {
+            if (['chat', 'prompts', 'moments', 'tutorial', 'pomodoro', 'gifts', 'forwarded-history', 'video-call', 'video-call-history', 'video-call-log-detail', 'chat-settings', 'api-settings', 'theme-settings', 'bubble-settings', 'os-settings', 'desktop-settings', 'music', 'my-info'].includes(pageId)) {
                 bottomNav.style.display = 'none';
             } else {
                 bottomNav.style.display = 'flex';
@@ -9289,7 +10241,8 @@ document.addEventListener('contextmenu', function(e) {
                 if (appState.theme === 'neumorphic' && !config.customClass) {
                     modalContentWrapper.classList.add('modal-neumorphic');
                 } else if (config.customClass) {
-                    modalContentWrapper.classList.add(config.customClass);
+                    // 修复：使用 split 和展开运算符来支持添加多个类名（如 'ios-style vertical-actions'）
+                    modalContentWrapper.classList.add(...config.customClass.split(' '));
                 }
 
                 
@@ -15420,8 +16373,9 @@ ${globalPromptsSection}
 
             createPlaylist() {
                 UIManager.showModal({
+                    customClass: 'ios-style', // 使用 iOS 样式
                     title: '新建歌单',
-                    body: `<input type="text" id="new-playlist-name" class="form-group" style="width:100%; padding:10px;" placeholder="歌单名称">`,
+                    body: `<p style="margin-bottom:10px;">请输入歌单名称</p><input type="text" id="new-playlist-name" style="text-align:center;" placeholder="歌单名称">`,
                     actions: [
                         { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
                         { text: '创建', class: 'btn-primary', handler: async () => {
@@ -15430,7 +16384,7 @@ ${globalPromptsSection}
                             const newPl = {
                                 id: Utils.generateId('pl'),
                                 name: name,
-                                cover: '', // 默认空，加载时会显示灰色
+                                cover: '', 
                                 songCount: 0,
                                 createdAt: Date.now()
                             };
@@ -15444,18 +16398,17 @@ ${globalPromptsSection}
 
             async showPlaylistOptions(playlist) {
                 UIManager.showModal({
-                    title: `管理歌单: ${playlist.name}`,
-                    body: `<p>请选择操作</p>`,
+                    customClass: 'ios-style',
+                    title: `管理歌单`,
+                    body: `<p>${playlist.name}</p>`,
                     actions: [
-                        { text: '重命名', class: 'btn-secondary', handler: () => {
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '改名', class: 'btn-secondary', handler: () => {
                             UIManager.hideModal();
-                            const newName = prompt("输入新名称", playlist.name);
-                            if (newName) {
-                                playlist.name = newName;
-                                DBHelper.put('musicPlaylists', playlist).then(() => this.loadPlaylists());
-                            }
+                            // 简单的 prompt 也可以改为 iOS 风格模态框，这里为了简便暂且保留或升级
+                            this.showRenamePlaylistModal(playlist);
                         }},
-                        { text: '更换封面', class: 'btn-secondary', handler: () => {
+                        { text: '换封面', class: 'btn-secondary', handler: () => {
                             this.tempPlaylistIdForCover = playlist.id;
                             $('#playlist-cover-input').click();
                             UIManager.hideModal();
@@ -15472,6 +16425,26 @@ ${globalPromptsSection}
                 });
             },
 
+            // 新增：重命名歌单的 iOS 弹窗
+            showRenamePlaylistModal(playlist) {
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: '重命名歌单',
+                    body: `<input type="text" id="rename-playlist-input" value="${playlist.name}" style="text-align:center;">`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const newName = $('#rename-playlist-input').value.trim();
+                            if (newName) {
+                                playlist.name = newName;
+                                await DBHelper.put('musicPlaylists', playlist);
+                                this.loadPlaylists();
+                            }
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            },
             async handleCoverUpload(e) {
                 const file = e.target.files[0];
                 if (!file || !this.tempPlaylistIdForCover) return;
@@ -15500,7 +16473,6 @@ ${globalPromptsSection}
                 if (!playlist) return;
 
                 $('#pd-name').textContent = playlist.name;
-                // 修改：使用默认纯灰色封面
                 $('#pd-cover').src = playlist.cover || this.defaultCover;
                 
                 const songs = await DBHelper.getAll('musicSongs');
@@ -15508,6 +16480,8 @@ ${globalPromptsSection}
                 $('#pd-count').textContent = `${playlistSongs.length} 首歌曲`;
 
                 const listEl = $('#pd-song-list');
+                
+                // 修改：移除旧的按钮，换成 font-awesome 的小尺寸 3点按钮
                 listEl.innerHTML = playlistSongs.map((s, index) => `
                     <div class="song-item" data-id="${s.id}">
                         <div class="song-index">${index + 1}</div>
@@ -15516,36 +16490,162 @@ ${globalPromptsSection}
                             <div class="song-artist-row">${s.artist}</div>
                         </div>
                         <div class="song-actions">
-                            <i class="fas fa-file-alt" title="上传歌词"></i>
-                            <i class="fas fa-trash" title="删除"></i>
+                            <i class="fas fa-ellipsis-v song-menu-btn" style="font-size: 0.9rem; color: #888; padding: 10px;" data-id="${s.id}"></i>
                         </div>
                     </div>
                 `).join('');
 
+                // 绑定点击播放
+                $$('#pd-song-list .song-item').forEach(item => {
+                    // 单击播放
+                    item.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('song-menu-btn')) return; // 忽略菜单按钮点击
+                        this.playSongInList(item.dataset.id);
+                    });
+
+                    // 长按事件
+                    let longPressTimer;
+                    const startLongPress = () => {
+                        longPressTimer = setTimeout(() => {
+                            this.showSongOptions(item.dataset.id);
+                        }, 600); // 600ms 长按
+                    };
+                    const cancelLongPress = () => clearTimeout(longPressTimer);
+
+                    item.addEventListener('touchstart', startLongPress, {passive: true});
+                    item.addEventListener('touchend', cancelLongPress);
+                    item.addEventListener('touchmove', cancelLongPress);
+                    item.addEventListener('mousedown', startLongPress);
+                    item.addEventListener('mouseup', cancelLongPress);
+                    item.addEventListener('mouseleave', cancelLongPress);
+                });
+
+                // 绑定菜单按钮点击
+                $$('.song-menu-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.showSongOptions(btn.dataset.id);
+                    });
+                });
+
                 $('#playlist-detail-overlay').classList.add('active');
             },
 
+            async showSongOptions(songId) {
+                const song = await DBHelper.get('musicSongs', songId);
+                if (!song) return;
+
+                UIManager.showModal({
+                    // 修改：添加 vertical-actions 类以启用竖向排列样式
+                    customClass: 'ios-style vertical-actions',
+                    title: song.name,
+                    body: `<p style="color:#888; font-size:0.8rem;">${song.artist}</p>`,
+                    actions: [
+                        { text: '上传歌词', class: 'btn-secondary', handler: () => {
+                            UIManager.hideModal();
+                            this.uploadLyrics(songId);
+                        }},
+                        { text: '重命名', class: 'btn-secondary', handler: () => {
+                            UIManager.hideModal();
+                            this.showRenameSongModal(song);
+                        }},
+                        { text: '删除', class: 'btn-danger', handler: () => {
+                            UIManager.hideModal();
+                            this.showDeleteSongConfirm(songId);
+                        }},
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() }
+                    ]
+                });
+            },
+
+            showRenameSongModal(song) {
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: '编辑歌曲信息',
+                    body: `
+                        <input type="text" id="rename-song-name" value="${song.name}" placeholder="歌曲名称" style="text-align:center; margin-bottom:8px;">
+                        <input type="text" id="rename-song-artist" value="${song.artist}" placeholder="歌手" style="text-align:center;">
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            song.name = $('#rename-song-name').value.trim() || song.name;
+                            song.artist = $('#rename-song-artist').value.trim() || song.artist;
+                            await DBHelper.put('musicSongs', song);
+                            this.openPlaylistDetail(this.currentViewPlaylistId); // 刷新列表
+                            // 如果正在播放这首歌，更新播放器显示
+                            if ($('#player-song-title').textContent === song.name || 
+                                (MusicManager.currentPlaylist[MusicManager.currentIndex] && MusicManager.currentPlaylist[MusicManager.currentIndex].id === song.id)) {
+                                $('#player-song-title').textContent = song.name;
+                                $('#player-song-artist').textContent = song.artist;
+                            }
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            },
+
+            showDeleteSongConfirm(songId) {
+                 UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: '删除歌曲',
+                    body: '<p>确定要将这首歌移出歌单吗？</p>',
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '删除', class: 'btn-danger', handler: () => {
+                            this.deleteSong(songId);
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            },
+
+
             showAddSongModal() {
                 UIManager.showModal({
+                    customClass: 'ios-style',
                     title: '添加歌曲',
                     body: `
-                        <div style="display:flex; flex-direction:column; gap:10px;">
-                            <button class="modal-btn btn-primary" onclick="document.getElementById('music-file-input').click()">上传本地音频</button>
-                            <button class="modal-btn btn-secondary" id="add-url-song-btn">添加网络链接</button>
-                        </div>
+                        <p>请选择添加方式</p>
                     `,
-                    actions: [{ text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() }]
+                    actions: [
+                        { text: '本地音频', class: 'btn-secondary', handler: () => {
+                            document.getElementById('music-file-input').click();
+                            UIManager.hideModal();
+                        }},
+                        { text: '网络链接', class: 'btn-secondary', handler: () => {
+                            UIManager.hideModal();
+                            this.showUrlSongInputModal();
+                        }},
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() }
+                    ]
                 });
-                
-                $('#add-url-song-btn').onclick = () => {
-                    UIManager.hideModal();
-                    const url = prompt("请输入音频 URL (.mp3/.m4a):");
-                    if (url) {
-                        const name = prompt("歌曲名称:", "未命名歌曲");
-                        const artist = prompt("歌手:", "未知歌手");
-                        this.addSongToDB({ sourceType: 'url', url: url, name: name, artist: artist });
-                    }
-                };
+            },
+
+            // 辅助函数：网络链接输入框也改为 iOS 风格
+            showUrlSongInputModal() {
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: '添加网络歌曲',
+                    body: `
+                        <input type="text" id="add-url-input" placeholder="音频 URL (.mp3/.m4a)" style="margin-bottom:5px;">
+                        <input type="text" id="add-url-name" placeholder="歌曲名称" style="margin-bottom:5px;">
+                        <input type="text" id="add-url-artist" placeholder="歌手">
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '添加', class: 'btn-primary', handler: () => {
+                            const url = $('#add-url-input').value.trim();
+                            const name = $('#add-url-name').value.trim() || "未命名歌曲";
+                            const artist = $('#add-url-artist').value.trim() || "未知歌手";
+                            
+                            if (url) {
+                                this.addSongToDB({ sourceType: 'url', url: url, name: name, artist: artist });
+                            }
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
             },
 
             // 新增：解析 MP3 ID3 标签的辅助函数
@@ -15775,6 +16875,388 @@ ${globalPromptsSection}
             },
         };
         
+        const MyInfoManager = {
+            init() {
+                this.bindEvents();
+                this.initAddTicketView();
+                this.applySavedWallpaper(); // 初始化时应用壁纸
+            },
+
+            bindEvents() {
+                // 底部导航切换
+                $('#my-info-bottom-nav').addEventListener('click', (e) => {
+                    const item = e.target.closest('.mi-nav-item');
+                    if (!item) return;
+                    
+                    $$('.mi-nav-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    $$('.my-info-view').forEach(v => v.classList.remove('active'));
+                    $(`#${item.dataset.target}`).classList.add('active');
+                    
+                    if (item.dataset.target === 'view-persona-library') {
+                        this.renderLibrary();
+                    } else if (item.dataset.target === 'view-current-persona') {
+                        this.renderCurrentPersona();
+                    }
+                });
+
+                // 上传头像
+                $('#current-persona-avatar-input').onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const base64 = await Utils.fileToBase64(file);
+                        this.updateCurrentProfile({ avatar: base64 });
+                    }
+                };
+                $('.avatar-edit-overlay').onclick = () => $('#current-persona-avatar-input').click();
+
+                // 修改名字、性别、拍一拍、角落信息
+                $('#edit-current-name-btn').onclick = () => this.editName();
+                $('#current-persona-gender-icon').onclick = () => this.toggleGender();
+                $('#edit-pat-info-btn').onclick = () => this.editPatInfo();
+                $$('.corner-box').forEach(box => {
+                    box.onclick = () => this.editCornerInfo(box.dataset.field);
+                });
+
+                // 保存/新增预设按钮
+                $('#save-current-as-preset-btn').onclick = () => EventManager.handleSaveProfilePreset();
+                
+                // 跳转到新增票根页面
+                $('#add-new-persona-ticket').onclick = () => {
+                    $('#my-info-bottom-nav').style.display = 'none';
+                    $$('.my-info-view').forEach(v => v.classList.remove('active'));
+                    $('#view-add-persona-ticket').classList.add('active');
+                    this.resetAddTicketForm();
+                };
+
+                // 预设库点击事件
+                $('#persona-ticket-list').onclick = (e) => {
+                    const ticket = e.target.closest('.movie-ticket');
+                    if (!ticket) return;
+                    if (e.target.closest('.ticket-btn-delete')) {
+                        e.stopPropagation();
+                        this.deletePreset(ticket.dataset.id);
+                        return;
+                    }
+                    if (e.target.closest('.ticket-btn-apply') || !e.target.closest('.ticket-btn')) {
+                        this.applyPreset(ticket.dataset.id);
+                    }
+                };
+
+                // 设置菜单按钮
+                $('#my-info-wallpaper').onclick = () => this.showWallpaperModal(); // 新增：壁纸设置
+                $('#my-info-import').onclick = () => EventManager.handleImportProfilePresets();
+                $('#my-info-export').onclick = () => EventManager.handleExportProfilePresets();
+                $('#my-info-reset').onclick = () => EventManager.handleDeleteProfilePreset();
+            },
+
+            // --- 新增票根页面逻辑 ---
+            initAddTicketView() {
+                $('#close-add-ticket-btn').onclick = () => this.closeAddTicketView();
+
+                $('#new-ticket-avatar-trigger').onclick = () => $('#new-ticket-avatar-input').click();
+                $('#new-ticket-avatar-input').onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const base64 = await Utils.fileToBase64(file);
+                        $('#new-ticket-avatar-preview').src = base64;
+                    }
+                };
+
+                $('#save-new-ticket-btn').onclick = async () => {
+                    const name = $('#new-ticket-name').value.trim();
+                    if (!name) return UIManager.showToast("Please enter a name.");
+
+                    const avatar = $('#new-ticket-avatar-preview').src;
+                    const gender = $('#new-ticket-gender').value;
+                    const background = $('#new-ticket-background').value.trim();
+                    const habits = $('#new-ticket-habits').value.trim(); // 获取习惯
+                    const likes = $('#new-ticket-likes').value.trim();
+                    const dislikes = $('#new-ticket-dislikes').value.trim();
+                    
+                    const newPreset = {
+                        presetId: Utils.generateId('persona'),
+                        presetName: name,
+                        name: name,
+                        avatar: avatar,
+                        gender: gender,
+                        background: background,
+                        habits: habits,
+                        likes: likes,
+                        dislikes: dislikes,
+                        patAction: '',
+                        patContent: ''
+                    };
+
+                    const profile = await DBHelper.get('profile', 'myProfile');
+                    if (!profile.presets) profile.presets = [];
+                    profile.presets.push(newPreset);
+                    await DBHelper.put('profile', profile);
+
+                    UIManager.showToast("Ticket Created!");
+                    this.closeAddTicketView();
+                    this.renderLibrary();
+                };
+            },
+
+            resetAddTicketForm() {
+                $('#new-ticket-avatar-preview').src = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIj48cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IiNlZWVlZWUiLz48L3N2Zz4=";
+                $('#new-ticket-name').value = '';
+                $('#new-ticket-gender').value = '男';
+                $('#new-ticket-background').value = '';
+                $('#new-ticket-habits').value = ''; // 清空习惯
+                $('#new-ticket-likes').value = '';
+                $('#new-ticket-dislikes').value = '';
+                $('#new-ticket-avatar-input').value = '';
+            },
+
+            closeAddTicketView() {
+                $('#view-add-persona-ticket').classList.remove('active');
+                $('#view-persona-library').classList.add('active');
+                $('#my-info-bottom-nav').style.display = 'flex';
+            },
+
+            // --- 壁纸设置相关逻辑 ---
+            async applySavedWallpaper() {
+                const profile = await DBHelper.get('profile', 'myProfile');
+                const appEl = $('#page-my-info-app');
+                if (profile && profile.myInfoWallpaper) {
+                    appEl.style.backgroundImage = `url(${profile.myInfoWallpaper})`;
+                    appEl.style.backgroundSize = 'cover';
+                    appEl.style.backgroundPosition = 'center center';
+                } else {
+                    // 恢复默认复古背景
+                    appEl.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px)`;
+                    appEl.style.backgroundSize = '20px 20px';
+                }
+            },
+
+            showWallpaperModal() {
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "设置 App 壁纸",
+                    body: `
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <button class="modal-btn btn-primary" id="mi-wp-local">上传本地图片</button>
+                            <button class="modal-btn btn-secondary" id="mi-wp-url">使用图片链接</button>
+                            <button class="modal-btn btn-danger" id="mi-wp-reset">恢复默认</button>
+                        </div>
+                        <input type="file" id="mi-wp-input" accept="image/*" style="display:none;">
+                    `,
+                    actions: [{ text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() }]
+                });
+
+                $('#mi-wp-local').onclick = () => $('#mi-wp-input').click();
+                
+                $('#mi-wp-input').onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        try {
+                            const base64 = await Utils.fileToBase64(file);
+                            this.saveWallpaper(base64);
+                        } catch (err) { UIManager.showToast("读取失败"); }
+                    }
+                };
+
+                $('#mi-wp-url').onclick = () => {
+                    const url = prompt("请输入图片链接 (URL):");
+                    if (url) this.saveWallpaper(url);
+                };
+
+                $('#mi-wp-reset').onclick = async () => {
+                    const profile = await DBHelper.get('profile', 'myProfile');
+                    delete profile.myInfoWallpaper;
+                    await DBHelper.put('profile', profile);
+                    this.applySavedWallpaper();
+                    UIManager.hideModal();
+                    UIManager.showToast("壁纸已重置");
+                };
+            },
+
+            async saveWallpaper(src) {
+                const profile = await DBHelper.get('profile', 'myProfile');
+                profile.myInfoWallpaper = src;
+                await DBHelper.put('profile', profile);
+                this.applySavedWallpaper();
+                UIManager.hideModal();
+                UIManager.showToast("壁纸设置成功");
+            },
+
+            // --- 原有其他逻辑保持不变 ---
+            async renderCurrentPersona() {
+                const profile = await DBHelper.get('profile', 'myProfile');
+                if (!profile) return;
+
+                $('#current-persona-avatar').src = profile.avatar;
+                $('#current-persona-name').textContent = profile.name;
+                
+                const genderIcon = $('#current-persona-gender-icon');
+                genderIcon.className = profile.gender === '男' ? 'fas fa-mars' : (profile.gender === '女' ? 'fas fa-venus' : 'fas fa-genderless');
+                
+                $('#pat-preview-name').textContent = profile.name;
+                $('#pat-preview-action').textContent = profile.patAction || '';
+                $('#pat-preview-content').textContent = profile.patContent || '';
+
+                const desc = [];
+                if (profile.likes) desc.push(`[LIKES]: ${profile.likes}`);
+                if (profile.dislikes) desc.push(`[HATE]: ${profile.dislikes}`);
+                if (profile.habits) desc.push(`[HABIT]: ${profile.habits}`);
+                if (profile.background) desc.push(`[INFO]: ${profile.background}`);
+                
+                $('#current-persona-desc').innerHTML = desc.length > 0 ? desc.join('<br><br>') : "点击角落图标完善你的详细人设...";
+            },
+
+            async renderLibrary() {
+                const profile = await DBHelper.get('profile', 'myProfile');
+                const presets = (profile.presets || []).filter(p => p);
+                const container = $('#persona-ticket-list');
+                
+                if (presets.length === 0) {
+                    container.innerHTML = `<div style="text-align:center; padding:30px; color:#888;">暂无保存的人设票根</div>`;
+                    return;
+                }
+
+                container.innerHTML = presets.map((p, index) => `
+                    <div class="movie-ticket" data-id="${p.presetId}" style="z-index: ${index};">
+                        <div class="ticket-stub">
+                            <i class="fas fa-film stub-icon"></i>
+                            <span class="stub-text">NO.00${index + 1}</span>
+                        </div>
+                        <div class="ticket-body">
+                            <div class="ticket-name">${p.presetName || p.name}</div>
+                            <div class="ticket-info">
+                                <span>${p.gender}</span> | <span>${(p.background || '').substring(0, 10)}...</span>
+                            </div>
+                            <div class="ticket-actions">
+                                <div class="ticket-btn ticket-btn-apply" title="读取"><i class="fas fa-check"></i></div>
+                                <div class="ticket-btn ticket-btn-delete" title="销毁"><i class="fas fa-trash"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            },
+
+            async updateCurrentProfile(updates) {
+                const profile = await DBHelper.get('profile', 'myProfile');
+                const updatedProfile = { ...profile, ...updates };
+                await DBHelper.put('profile', updatedProfile);
+                this.renderCurrentPersona();
+                if($('#my-avatar')) $('#my-avatar').src = updatedProfile.avatar;
+            },
+
+            editName() {
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: '修改姓名',
+                    body: `<input type="text" id="edit-persona-name-input" placeholder="输入新名字" style="text-align:center;">`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: () => {
+                            const name = $('#edit-persona-name-input').value.trim();
+                            if(name) this.updateCurrentProfile({ name });
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            },
+
+            async toggleGender() {
+                const profile = await DBHelper.get('profile', 'myProfile');
+                const genders = ['男', '女', '其他'];
+                const currentIndex = genders.indexOf(profile.gender);
+                const nextGender = genders[(currentIndex + 1) % 3];
+                this.updateCurrentProfile({ gender: nextGender });
+            },
+
+            editPatInfo() {
+                UIManager.showModal({
+                    customClass: 'ios-style vertical-actions',
+                    title: '设置拍一拍',
+                    body: `
+                        <input type="text" id="edit-pat-action" placeholder="动作 (留空则无动作)" maxlength="5" style="text-align:center; margin-bottom:5px;">
+                        <input type="text" id="edit-pat-content" placeholder="后缀 (如:的头)" maxlength="20" style="text-align:center;">
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: () => {
+                            this.updateCurrentProfile({
+                                patAction: $('#edit-pat-action').value.trim(),
+                                patContent: $('#edit-pat-content').value.trim()
+                            });
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+                
+                (async () => {
+                    const profile = await DBHelper.get('profile', 'myProfile');
+                    if(profile) {
+                        $('#edit-pat-action').value = profile.patAction || '';
+                        $('#edit-pat-content').value = profile.patContent || '';
+                    }
+                })();
+            },
+
+            async editCornerInfo(field) {
+                const labels = { likes: '喜好', dislikes: '厌恶', habits: '习惯', background: '背景' };
+                const profile = await DBHelper.get('profile', 'myProfile');
+                const currentValue = profile[field] || '';
+
+                UIManager.showModal({
+                    customClass: 'modal-default-style',
+                    title: `修改${labels[field]}`,
+                    body: `<textarea id="edit-corner-input" rows="5" style="width:100%; border:1px solid #ccc; border-radius:8px; padding:10px;">${currentValue}</textarea>`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: () => {
+                            const val = $('#edit-corner-input').value.trim();
+                            this.updateCurrentProfile({ [field]: val });
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            },
+
+            async applyPreset(presetId) {
+                const profile = await DBHelper.get('profile', 'myProfile');
+                const preset = profile.presets.find(p => p.presetId === presetId);
+                if (preset) {
+                    await this.updateCurrentProfile({
+                        name: preset.name,
+                        avatar: preset.avatar,
+                        gender: preset.gender,
+                        background: preset.background,
+                        patAction: preset.patAction,
+                        patContent: preset.patContent,
+                        likes: preset.likes,
+                        dislikes: preset.dislikes,
+                        habits: preset.habits
+                    });
+                    
+                    $('[data-target="view-current-persona"]').click();
+                    UIManager.showToast(`已切换至 "${preset.presetName || preset.name}"`);
+                }
+            },
+
+            async deletePreset(presetId) {
+                UIManager.showModal({
+                    title: '撕毁票根',
+                    body: '<p>确定要删除这张人设票根吗？</p>',
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '删除', class: 'btn-danger', handler: async () => {
+                            const profile = await DBHelper.get('profile', 'myProfile');
+                            profile.presets = profile.presets.filter(p => p.presetId !== presetId);
+                            await DBHelper.put('profile', profile);
+                            this.renderLibrary();
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+            }
+        };
+
         const EventManager = {
 
             async showAnnouncementModal(isFromTutorial = false) {
@@ -16219,7 +17701,11 @@ async showGroupMentionPopup(chatId) {
                 });
                 $('#gift-bind-prompt-btn').addEventListener('click', () => this.handleGiftPromptBinding());
                 $('#gift-help-btn').addEventListener('click', () => this.showGiftHelpModal());
-                $('#my-avatar').addEventListener('click', () => this.handleEditProfile());
+                $('#my-avatar').addEventListener('click', () => {
+    // 直接跳转到我的信息 App
+    UIManager.navigateTo('my-info', 'messages');
+    MyInfoManager.renderCurrentPersona();
+});
                 $('#batch-delete-btn').addEventListener('click', () => this.handleBatchDelete());
                 $('#select-all-btn').addEventListener('click', () => this.handleSelectAll());
                 $('#cancel-selection-btn').addEventListener('click', () => this.handleBatchDelete());
@@ -16919,7 +18405,7 @@ chatArea.addEventListener('contextmenu', (e) => {
             },
 
             async handlePatRequest(patteeId) {
-                if (appState.selectionMode.active) return; //
+                if (appState.selectionMode.active) return;
                 const chatId = appState.currentChatId;
                 if (!chatId) return;
 
@@ -16928,10 +18414,18 @@ chatArea.addEventListener('contextmenu', (e) => {
                 
                 if (!patter || !pattee) return;
 
-                const patAction = pattee.patAction || '拍了拍';
+                // 修改：移除 || '拍了拍' 的默认值
+                const patAction = pattee.patAction || '';
                 const patContent = pattee.patContent || '';
 
-                const displayText = `${patter.name} ${patAction} ${pattee.name}${patContent ? ` ${patContent}` : ''}`;
+                // 构建显示文本，注意空格的处理
+                // 格式：A [action] B [content]
+                // 如果 action 为空，显示为：A B [content] (例如: 你 江然 被揍了)
+                // 或者更自然的: 你 戳了戳 江然
+                let displayText = `${patter.name}`;
+                if (patAction) displayText += ` ${patAction}`;
+                displayText += ` ${pattee.name}`;
+                if (patContent) displayText += ` ${patContent}`;
 
                 const message = {
                     messageId: Utils.generateId('msg'),
@@ -18076,41 +19570,57 @@ async handlePlayerSendMessage(prebuiltMessage = null) {
                 const profile = await DBHelper.get('profile', 'myProfile');
                 const presets = (profile.presets || []).filter(p => p);
 
-                const items = [{
-                    value: 'new',
-                    text: `保存为新预设 (${presets.length}/20)`
-                }];
+                // 构建列表HTML
+                let listHtml = `
+                    <div class="glass-list-item new-item" data-action="new">
+                        <i class="fas fa-plus-circle"></i> 保存为新票根
+                    </div>
+                `;
 
                 presets.forEach((preset) => {
-                    items.push({
-                        value: preset.presetId, 
-                        text: `覆盖预设: ${preset.presetName || preset.name}` // 优先使用显示名
-                    });
+                    listHtml += `
+                        <div class="glass-list-item" data-action="overwrite" data-id="${preset.presetId}">
+                            <span>覆盖: ${preset.presetName || preset.name}</span>
+                            <i class="fas fa-save" style="color: #ccc; font-size: 0.8rem;"></i>
+                        </div>
+                    `;
                 });
 
-                UIManager.showBottomSheet({
-                    title: '保存预设',
-                    items: items,
-                    onSelect: (value) => { 
-                        const currentData = {
-                            name: $('#profile-name-input').value.trim(),
-                            avatar: $('#profile-avatar-preview').src,
-                            gender: $('#profile-gender-select').value,
-                            background: $('#profile-background-input').value.trim()
-                        };
+                UIManager.showModal({
+                    customClass: 'glass-style',
+                    title: '保存人设票根',
+                    body: listHtml,
+                    actions: [{ text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() }]
+                });
 
-                        if (!currentData.name) {
-                            UIManager.showToast("保存失败，姓名不能为空");
-                            return;
-                        }
+                // 绑定列表点击事件
+                const modalBody = modalContentWrapper.querySelector('.modal-body');
+                modalBody.onclick = (e) => {
+                    const item = e.target.closest('.glass-list-item');
+                    if (!item) return;
 
-                        if (value === 'new') {
-                            this.confirmAndSavePreset(null, currentData); 
-                        } else {
-                            this.confirmAndSavePreset(value, currentData); 
-                        }
+                    const action = item.dataset.action;
+                    const currentData = {
+                        name: $('#current-persona-name').textContent, // 从界面获取当前显示的最新名字
+                        avatar: $('#current-persona-avatar').src,
+                        gender: $('#current-persona-gender-icon').classList.contains('fa-mars') ? '男' : ($('#current-persona-gender-icon').classList.contains('fa-venus') ? '女' : '其他'),
+                        background: (profile.background || ''), // 背景等详细信息还是从DB取比较准
+                        likes: profile.likes,
+                        dislikes: profile.dislikes,
+                        habits: profile.habits
+                    };
+
+                    if (!currentData.name) {
+                        UIManager.showToast("保存失败，姓名不能为空");
+                        return;
                     }
-                });
+
+                    if (action === 'new') {
+                        this.confirmAndSavePreset(null, currentData);
+                    } else if (action === 'overwrite') {
+                        this.confirmAndSavePreset(item.dataset.id, currentData);
+                    }
+                };
             },
             
             async confirmAndSavePreset(presetIdToOverwrite, currentData) {
@@ -18120,29 +19630,24 @@ async handlePlayerSendMessage(prebuiltMessage = null) {
 
                 const doSave = async (presetName) => {
                         const newPreset = {
-                            ...currentData, // currentData中包含了正确的玩家姓名 name
+                            ...currentData,
                             presetId: isNew ? Utils.generateId('persona') : presetIdToOverwrite,
                             presetName: presetName, // 这是预设的显示名称
-                            patAction: $('#profile-pat-action-input').value.trim(),
-                            patContent: $('#profile-pat-content-input').value.trim()
+                            patAction: $('#pat-preview-action').textContent === '拍了拍' && !profile.patAction ? '' : ($('#pat-preview-action').textContent),
+                            patContent: $('#pat-preview-content').textContent
                         };
-                        delete newPreset.playerName; // 清理可能存在的旧字段
+                        delete newPreset.playerName; 
 
-                    
                     profile.presets = (profile.presets || []).filter(p => p);
 
                     if (isNew) {
-                        if (profile.presets.length >= 20) {
-                            UIManager.showToast("预设已达到20个上限");
-                            return;
-                        }
+                        // 移除了数量限制检查
                         profile.presets.push(newPreset);
                     } else {
                         const indexToUpdate = profile.presets.findIndex(p => p.presetId === presetIdToOverwrite);
                         if (indexToUpdate !== -1) {
                             profile.presets[indexToUpdate] = newPreset;
                         } else {
-                            
                             profile.presets.push(newPreset);
                         }
                     }
@@ -18150,23 +19655,22 @@ async handlePlayerSendMessage(prebuiltMessage = null) {
                     await DBHelper.put('profile', profile); 
                     UIManager.hideModal();
                     UIManager.showToast(`预设 "${presetName}" 已保存`);
+                    this.renderLibrary(); // 刷新库视图
                 };
 
                 UIManager.showModal({
-                    title: isNew ? '保存为新预设' : '覆盖预设',
+                    customClass: 'ios-style', // 保持输入框的一致性
+                    title: isNew ? '为新票根命名' : '确认覆盖',
                     body: `
-                        <p>${existingPreset ? `这将覆盖预设 "${existingPreset.name}"。` : '为这个新预设起个名字吧。'}</p>
-                        <div class="form-group">
-                            <label for="preset-name-input">预设名称</label>
-                            <input type="text" id="preset-name-input" value="${existingPreset ? (existingPreset.presetName || existingPreset.name) : currentData.name}">
-                        </div>
+                        ${existingPreset ? `<p style="font-size:0.8rem; color:#888; margin-bottom:10px;">将覆盖 "${existingPreset.presetName || existingPreset.name}"</p>` : ''}
+                        <input type="text" id="preset-name-input" value="${existingPreset ? (existingPreset.presetName || existingPreset.name) : currentData.name}" style="text-align:center;">
                     `,
                     actions: [
                         { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
-                        { text: '确认保存', class: 'btn-primary', handler: () => {
+                        { text: '保存', class: 'btn-primary', handler: () => {
                             const presetName = $('#preset-name-input').value.trim();
                             if (!presetName) {
-                                UIManager.showToast("预设名称不能为空");
+                                UIManager.showToast("名称不能为空");
                                 return;
                             }
                             doSave(presetName);
@@ -19793,6 +21297,8 @@ async handlePlayerSendMessage(prebuiltMessage = null) {
 
                     const appendDataPart = (key, data) => {
                         if (exportState.isCancelled) throw new Error("Export cancelled by user.");
+                        if (data === undefined) return; // 关键修复：如果是 undefined 则跳过，防止生成非法 JSON
+                        
                         if (!isFirstDataPart) {
                             jsonParts.push(',');
                         }
@@ -19859,7 +21365,8 @@ async handlePlayerSendMessage(prebuiltMessage = null) {
                         await new Promise(resolve => setTimeout(resolve, 50));
                     }
 
-                    await processSimplePart('themeSettings', 30, 40, "主题设置", () => DBHelper.get('apiConfig', 'themeSettings'));
+                    // 修复：确保 themeSettings 即使为空也返回对象，或者依靠 appendDataPart 的 undefined 检查
+                    await processSimplePart('themeSettings', 30, 40, "主题设置", async () => (await DBHelper.get('apiConfig', 'themeSettings')) || {});
                     
                     if (partsToExport.includes('others')) {
                         updateProgress("正在读取其他配置...", 40);
@@ -28250,10 +29757,14 @@ async showGiftDetailsModal(messageId) {
                         $('[data-view="player"]').click();
                     } else {
                         appContainer.classList.remove('on-music-page'); // 退出音乐模式
+                        
                         if (pageId === 'settings') {
                             UIManager.navigateTo('os-settings');
+                        } else if (pageId === 'my-info') {
+                            // 修复：明确跳转到我的信息页面
+                            UIManager.navigateTo('my-info', 'messages'); 
                         } else {
-                            // 默认进聊天列表
+                            // 默认进聊天列表 (33Chat)
                             UIManager.navigateTo('messages');
                         }
                     }
@@ -28268,6 +29779,15 @@ async showGiftDetailsModal(messageId) {
                 // 3. 打开 设置
                 settingsBtn.addEventListener('click', () => openApp('settings'));
 
+                const myInfoBtn = $('#open-my-info-app-btn');
+                if (myInfoBtn) {
+                    myInfoBtn.addEventListener('click', () => {
+                        openApp('my-info');
+                        // 每次打开都重新渲染当前人设
+                        MyInfoManager.renderCurrentPersona();
+                    });
+                }
+                
                 // 其他占位
                 forumBtn.addEventListener('click', () => UIManager.showToast("论坛功能开发中..."));
                 if (smsBtn) smsBtn.addEventListener('click', () => UIManager.showToast("短信功能开发中..."));
@@ -28520,8 +30040,9 @@ async showGiftDetailsModal(messageId) {
                 await EventManager.renderDesktopWidget();
                 
                 await EventManager.initEmojiPanel(); 
+                MyInfoManager.init(); // 新增初始化
                 await UIManager.navigateTo('messages');
-
+                
             } catch (error) {
                 console.error("应用开场白吗初始化失败:", error);
                 document.body.innerHTML = `<div style="text-align:center; padding: 50px; color: red;">应用初始化失败，请检查浏览器是否支持IndexedDB或清除网站数据后重试。错误: ${error}</div>`;
