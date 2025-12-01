@@ -52,6 +52,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Long+Cang&display=swap" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
+        /* --- 引入京华老宋体 --- */
+        @font-face {
+            font-family: 'KingHwa Old Song';
+            src: url('https://s3plus.meituan.net/opapisdk/op_ticket_885190757_1753200929400_qdqqd_qgszdl.woff') format('woff');
+            font-display: swap;
+        }
+
         /* --- 1. 全局与主题 --- */
         :root {
             --global-font-size: 16px; /* 新增：系统基准字体大小 */
@@ -7057,6 +7064,31 @@
             opacity: 0.8;
         }
 
+
+        /* 1. 我的信息App - 底部导航栏使用全局设置的系统字体 */
+        #my-info-bottom-nav {
+            font-family: var(--font-main) !important;
+        }
+        #my-info-bottom-nav .mi-nav-item span {
+            font-weight: bold; /* 保持加粗 */
+        }
+
+        /* 2. 当前人设页面 - Info便签栏字体 */
+        #current-persona-desc,
+        .paper-lines {
+            font-family: 'KingHwa Old Song', serif !important;
+            font-size: 1.1rem !important; /* 稍微加大一点老宋体以保证可读性 */
+        }
+
+        /* 3. 票根里的玩家名字 (人设库列表) */
+        .ticket-name {
+            font-family: 'KingHwa Old Song', serif !important;
+        }
+
+        /* 4. 当前人设页面 - 玩家名字 */
+        #current-persona-name {
+            font-family: 'KingHwa Old Song', serif !important;
+        }
 </style>
 <style id="exclusive-bubble-style"></style>
 <script>
@@ -8133,9 +8165,9 @@ document.addEventListener('contextmenu', function(e) {
                                     <div class="vt-row">
                                         <label>GENDER:</label>
                                         <select id="new-ticket-gender">
-                                            <option value="男">MALE</option>
-                                            <option value="女">FEMALE</option>
-                                            <option value="其他">OTHER</option>
+                                            <option value="男">男</option>
+                                            <option value="女">女</option>
+                                            <option value="其他">其他</option>
                                         </select>
                                     </div>
                                 </div>
@@ -22261,7 +22293,7 @@ async showMomentsSettingsModal() {
                     { id: 'open-settings-btn', name: '设置', defaultClass: 'icon-settings', defaultIcon: '<i class="fas fa-cog"></i>' },
                     { id: 'dock-sms-btn', name: '短信', defaultClass: 'icon-sms', defaultIcon: '<i class="fas fa-comment-alt"></i>' },
                     { id: 'dock-unknown-1', name: '未知应用 A', defaultClass: 'icon-unknown', defaultIcon: '<i class="fas fa-question"></i>' },
-                    { id: 'dock-unknown-2', name: '未知应用 B', defaultClass: 'icon-unknown', defaultIcon: '<i class="fas fa-question"></i>' }
+                    { id: 'open-my-info-app-btn', name: '我的信息', defaultClass: 'icon-my-info', defaultIcon: '<i class="fas fa-address-card"></i>' }
                 ];
 
                 const createRow = (app) => {
@@ -22393,7 +22425,7 @@ async showMomentsSettingsModal() {
                     'open-settings-btn': { icon: '<i class="fas fa-cog"></i>', bgClass: 'icon-settings' },
                     'dock-sms-btn': { icon: '<i class="fas fa-comment-alt"></i>', bgClass: 'icon-sms' },
                     'dock-unknown-1': { icon: '<i class="fas fa-question"></i>', bgClass: 'icon-unknown' },
-                    'dock-unknown-2': { icon: '<i class="fas fa-question"></i>', bgClass: 'icon-unknown' }
+                    'open-my-info-app-btn': { icon: '<i class="fas fa-address-card"></i>', bgClass: 'icon-my-info' }
                 };
 
                 for (const [appId, defaults] of Object.entries(appDefaults)) {
