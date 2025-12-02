@@ -8091,7 +8091,7 @@ document.addEventListener('contextmenu', function(e) {
                         </div>
                         
                         <div style="text-align: center; margin-top: 15px;">
-                            <button class="retro-btn" id="save-current-as-preset-btn">保存为新票根</button>
+                            <button class="retro-btn" id="save-current-as-preset-btn">另存为新票根</button>
                         </div>
                     </div>
 
@@ -8127,7 +8127,7 @@ document.addEventListener('contextmenu', function(e) {
                                 <span class="menu-icon"><i class="fas fa-trash-alt"></i></span>
                                 <div class="menu-content">
                                     <span class="menu-title">RESET</span>
-                                    <span class="menu-desc" style="color: #c0392b;">重置所有数据</span>
+                                    <span class="menu-desc" style="color: #c0392b;">批量删除人设</span>
                                 </div>
                             </div>
                         </div>
@@ -13169,6 +13169,43 @@ ${promptLines.join('\n\n')}
             },
 
             async parseAndDisplayMixedAIResponse(text, chatId) {
+                // --- 兼容性修复开始：提取JSONL格式内容 ---
+                // 如果AI回复了 {"role":"ai", ...} 这种格式，尝试提取其中的 content 字段
+                if (text && (text.trim().startsWith('{"role":') || text.includes('{"role":"ai"'))) {
+                    try {
+                        const lines = text.split('\n');
+                        let extractedContent = '';
+                        let hasJson = false;
+                        
+                        for (const line of lines) {
+                            const trimmedLine = line.trim();
+                            if (trimmedLine.startsWith('{') && trimmedLine.includes('"content"')) {
+                                try {
+                                    // 尝试作为JSON解析
+                                    const obj = JSON.parse(trimmedLine);
+                                    if (obj.content) {
+                                        extractedContent += obj.content + '\n';
+                                        hasJson = true;
+                                    }
+                                } catch (e) {
+                                    // 如果不是标准JSON，保留原行（或者可以在这里尝试正则提取）
+                                    extractedContent += line + '\n';
+                                }
+                            } else {
+                                extractedContent += line + '\n';
+                            }
+                        }
+                        
+                        if (hasJson) {
+                            console.log("检测到JSON格式回复，已提取内容进行解析");
+                            text = extractedContent;
+                        }
+                    } catch (e) {
+                        console.error("JSON格式兼容解析失败，将按原样处理", e);
+                    }
+                }
+                // --- 兼容性修复结束 ---
+
                 const contacts = await DBHelper.getAll('contacts');
                 const baseTimestamp = Date.now();
                 let timestampOffset = 0;
@@ -29176,10 +29213,15 @@ async showGiftDetailsModal(messageId) {
                             }
 
                             
+                            // 修改：如果没有找到可删除的消息（可能是因为上次解析完全失败，导致没存入消息），
+                            // 只要有 metadata.lastRawAiResponse，依然允许用户进行编辑修正。
                             if (messagesToDelete.length === 0) {
-                                UIManager.hideModal();
-                                UIManager.showToast("没有可编辑的AI回复。");
-                                return;
+                                if (!metadata || !metadata.lastRawAiResponse) {
+                                    UIManager.hideModal();
+                                    UIManager.showToast("没有可编辑的AI回复。");
+                                    return;
+                                }
+                                // 如果有原始回复但没有解析出的消息，则直接跳过删除步骤，继续执行下面的编辑保存逻辑
                             }
 
                             for (const msg of messagesToDelete) {
