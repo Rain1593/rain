@@ -183,100 +183,7 @@
             pointer-events: none;
         }
 
-        /* 中号组件样式 (2x2) - 透明背景，尺寸调整 */
-        .ios-widget-medium {
-            grid-column: 1 / 3; /* 占据左侧两列 */
-            grid-row: 4 / 6;    /* 占据第4、5行 */
-            min-height: 160px;  /* 强制高度与大组件一致(160px) */
-            background: transparent; /* 背景透明 */
-            backdrop-filter: none;   /* 移除模糊 */
-            box-shadow: none;        /* 移除阴影 */
-            border: none;            /* 移除边框 */
-            
-            position: relative;
-            overflow: visible; /* 允许内容（如阴影）溢出 */
-            cursor: pointer;
-            transition: transform 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-        .ios-widget-medium:active { transform: scale(0.98); }
-
-        /* 强制定位 App 图标位置 */
-        /* 第3行 */
-        #open-33chat-btn { grid-area: 3 / 1 / 4 / 2; }
-        #open-music-btn { grid-area: 3 / 2 / 4 / 3; }
-        #open-forum-btn { grid-area: 3 / 3 / 4 / 4; }
-        #open-settings-btn { grid-area: 3 / 4 / 4 / 5; }
         
-        /* 第4行右侧 (提示词) */
-        #open-prompts-app-btn { grid-area: 4 / 3 / 5 / 4; }
-        /* 第4行最右 (相册) */
-        #open-photos-btn { grid-area: 4 / 4 / 5 / 5; }
-
-        /* Widget B - 样式1: 单头像 (透明背景版) */
-        .wb-style-single {
-            width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            background: transparent; 
-            color: #333;
-        }
-        .wb-single-avatar {
-            width: 85px; height: 85px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            border: 3px solid white; /* 增加白边增强立体感 */
-        }
-        .wb-single-text1 { font-size: 1.1rem; font-weight: bold; color: #333; text-shadow: 0 1px 2px rgba(255,255,255,0.5); }
-        .wb-single-text2 { font-size: 0.85rem; color: #666; margin-top: 2px; font-weight: 500; background: rgba(255,255,255,0.6); padding: 2px 8px; border-radius: 10px; }
-
-        /* Widget B - 样式2: 双头像对话 (头像在气泡内版) */
-        .wb-style-double {
-            width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            justify-content: center;
-            padding: 0 15px; /* 容器左右留白 */
-            gap: 15px; /* 上下两个气泡的间距 */
-            background: transparent;
-        }
-        
-        /* 胶囊气泡容器 (包含头像和文字) */
-        .wb-double-pill {
-            display: flex;
-            align-items: center;
-            border-radius: 50px; /* 完整的胶囊圆角 */
-            padding: 6px; /* 胶囊内边距，头像周围留白 */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            width: fit-content; /* 宽度自适应内容 */
-            max-width: 100%; /* 防止溢出 */
-            transition: transform 0.2s;
-        }
-        .wb-double-pill:active { transform: scale(0.98); }
-
-        /* 对齐方式 */
-        .wb-double-pill.left { align-self: flex-start; flex-direction: row; }
-        .wb-double-pill.right { align-self: flex-end; flex-direction: row; } /* 右侧也是左图右文结构，或者右图左文，由HTML顺序决定 */
-
-        .wb-double-avatar {
-            width: 46px; height: 46px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
-        }
-
-        .wb-double-text {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: #333;
-            margin: 0 14px; /* 文字左右边距 */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 130px; /* 限制文字最大宽度 */
-        }
 
         /* APP 图标样式 */
         .app-item {
@@ -6136,6 +6043,65 @@
             color: rgba(255,255,255,0.1);
         }
 
+        /* 6. 个人主页小组件 (Profile Widget) - 修复版 */
+        .widget-profile-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* 核心修复：使用 !important 覆盖全局的大组件图片样式，防止头像被拉伸 */
+        .ios-widget-large .widget-profile-container .widget-profile-avatar {
+            position: relative !important;
+            width: 90px !important;  /* 控制头像大小 */
+            height: 90px !important;
+            object-fit: cover !important;
+            border-radius: 50% !important; /* 强制圆形 */
+            top: auto !important;
+            left: auto !important;
+            margin: 0 !important;
+            margin-bottom: 10px !important; /* 头像与文字的间距 */
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            border: 4px solid rgba(255, 255, 255, 0.9); /* 加粗白边，更像iOS组件 */
+        }
+
+        .widget-profile-text-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transform: translateY(5px); /* 整体文字下移一点 */
+        }
+
+        .widget-profile-text-1 {
+            font-size: 1.1rem;
+            font-weight: 800; /* 加粗 */
+            color: #333;
+            text-shadow: 0 2px 5px rgba(255,255,255,0.9); /* 增加描边防止背景干扰 */
+            letter-spacing: 0.5px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .widget-profile-text-2 {
+            font-size: 0.8rem;
+            color: #555;
+            background: rgba(255, 255, 255, 0.6); /* 半透明胶囊底 */
+            padding: 4px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(4px);
+            max-width: 220px; /* 限制宽度，防止太长 */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        
         /* --- 相册 App 样式 (iOS风格) --- */
         #page-photos {
             background-color: var(--text-color-white);
@@ -7981,18 +7947,12 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
     </div>
     <!-- iOS 桌面 -->
     <div id="ios-desktop">
-<!-- 4x6 网格布局 -->
         <div class="ios-grid">
-            <!-- 顶部大组件 (占位 1,2 行) -->
+            <!-- 小组件 (占位 1,2 行) -->
             <div class="ios-widget-large" id="desktop-widget">
                 <span class="widget-placeholder"><i class="fas fa-plus"></i> 点击上传图片</span>
                 <input type="file" id="widget-upload" accept="image/*" style="display: none;">
                 <img id="widget-img" src="" style="display: none;">
-            </div>
-
-            <!-- 中部小组件 B (占位 4,5 行 左侧) -->
-            <div class="ios-widget-medium" id="desktop-widget-b">
-                <!-- 内容由 JS 渲染 -->
             </div>
 
             <!-- 第3行 App -->
@@ -25006,97 +24966,24 @@ async showMomentsSettingsModal() {
                 };
             },
 
-            // --- 桌面小组件设置子页面 (新版：支持组件A和组件B切换) ---
+            // --- 桌面小组件设置子页面 ---
             async renderDesktopWidgetSettingsSubPage() {
                 const contentArea = $('#desktop-settings-content');
                 $('#desktop-settings-title').textContent = "小组件设置";
                 
+                // 核心修复：设置返回按钮
                 $('#desktop-settings-back-btn').onclick = () => this.renderDesktopSettingsPage();
 
                 const settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
-                // 默认选中顶部组件A
-                let activeTab = 'widget-a'; 
-
-                const renderContent = () => {
-                    contentArea.innerHTML = `
-                        <style>
-                            .widget-tabs {
-                                display: flex; justify-content: center; gap: 20px; padding: 15px 0; border-bottom: 1px solid #eee;
-                            }
-                            .widget-tab {
-                                padding: 8px 20px; border-radius: 20px; background: rgba(0,0,0,0.05); color: #666; cursor: pointer; transition: all 0.2s; font-weight: bold;
-                            }
-                            .widget-tab.active {
-                                background: var(--accent-color); color: white; box-shadow: 0 4px 10px rgba(167, 199, 231, 0.5);
-                            }
-                            .widget-type-scroll {
-                                display: flex; gap: 15px; overflow-x: auto; padding: 15px; scrollbar-width: none;
-                            }
-                            .widget-type-scroll::-webkit-scrollbar { display: none; }
-                            .widget-type-card {
-                                flex-shrink: 0; width: 80px; height: 80px; background: rgba(255,255,255,0.6); border: 2px solid transparent;
-                                border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center;
-                                cursor: pointer; transition: all 0.2s;
-                            }
-                            .widget-type-card.selected {
-                                background: #fff; border-color: var(--accent-color); color: var(--accent-color); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                            }
-                            .widget-type-card i { font-size: 1.5rem; margin-bottom: 5px; }
-                            .widget-type-card span { font-size: 0.8rem; }
-                            
-                            .widget-preview-area {
-                                margin: 10px 15px; padding: 20px; background: #e5e5e7; border-radius: 20px; display: flex; justify-content: center; align-items: center; min-height: 240px;
-                            }
-                            /* 强制预览组件大小 */
-                            .widget-preview-area .ios-widget-large {
-                                position: relative !important; grid-column: auto !important; grid-row: auto !important; width: 100%; height: 160px; max-width: 320px;
-                            }
-                             /* 强制预览WidgetB大小 */
-                            .widget-preview-area .ios-widget-medium {
-                                position: relative !important; grid-column: auto !important; grid-row: auto !important; width: 160px; height: 160px;
-                            }
-
-                            .widget-description {
-                                padding: 0 20px; color: #666; font-size: 0.9rem; text-align: center; line-height: 1.5;
-                            }
-                        </style>
-                        
-                        <div class="widget-tabs">
-                            <div class="widget-tab ${activeTab === 'widget-a' ? 'active' : ''}" data-tab="widget-a">顶部大组件</div>
-                            <div class="widget-tab ${activeTab === 'widget-b' ? 'active' : ''}" data-tab="widget-b">中部小组件</div>
-                        </div>
-
-                        <div id="widget-settings-body"></div>
-                    `;
-                    
-                    // 根据 Tab 渲染不同内容
-                    if (activeTab === 'widget-a') {
-                        this.renderWidgetASettings(document.getElementById('widget-settings-body'), settings);
-                    } else {
-                        this.renderWidgetBSettings(document.getElementById('widget-settings-body'), settings);
-                    }
-
-                    // Tab 切换事件
-                    contentArea.querySelectorAll('.widget-tab').forEach(tab => {
-                        tab.onclick = () => {
-                            activeTab = tab.dataset.tab;
-                            renderContent();
-                        };
-                    });
-                };
-
-                renderContent();
-            },
-
-            // 拆分出 Widget A 设置逻辑 (原逻辑)
-            renderWidgetASettings(container, settings) {
                 const currentType = settings.desktopWidgetType || 'photo';
+
                 const widgetTypes = [
                     { value: 'photo', text: '相册', icon: 'fa-images', desc: '展示上传的图片，点击可更换' },
                     { value: 'time', text: '时钟', icon: 'fa-clock', desc: '显示当前时间和日期' },
                     { value: 'calendar', text: '日历', icon: 'fa-calendar-alt', desc: '显示月历和重要日倒计时' },
                     { value: 'sms', text: '短信', icon: 'fa-comment-alt', desc: '模拟短信对话框，支持自定义内容' },
-                    { value: 'music', text: '音乐', icon: 'fa-record-vinyl', desc: '复古黑胶唱片机，显示歌词' }
+                    { value: 'music', text: '音乐', icon: 'fa-record-vinyl', desc: '复古黑胶唱片机，显示歌词' },
+                    { value: 'profile', text: '个人主页', icon: 'fa-user-circle', desc: '居中展示头像与个性签名，背景透明' }
                 ];
 
                 const typesHtml = widgetTypes.map(t => `
@@ -25106,515 +24993,144 @@ async showMomentsSettingsModal() {
                     </div>
                 `).join('');
 
-                container.innerHTML = `
-                    <div class="widget-type-scroll">${typesHtml}</div>
-                    <div class="widget-preview-area" id="widget-a-preview"></div>
-                    <p class="widget-description" id="widget-desc-text">${widgetTypes.find(t => t.value === currentType).desc}</p>
+                contentArea.innerHTML = `
+                    <style>
+                        .widget-type-scroll {
+                            display: flex;
+                            gap: 15px;
+                            overflow-x: auto;
+                            padding: 15px;
+                            scrollbar-width: none; /* Firefox */
+                        }
+                        .widget-type-scroll::-webkit-scrollbar { display: none; }
+                        .widget-type-card {
+                            flex-shrink: 0;
+                            width: 80px;
+                            height: 80px;
+                            background: rgba(255,255,255,0.6);
+                            border: 2px solid transparent;
+                            border-radius: 12px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                        }
+                        .widget-type-card.selected {
+                            background: #fff;
+                            border-color: var(--accent-color);
+                            color: var(--accent-color);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                        }
+                        .widget-type-card i { font-size: 1.5rem; margin-bottom: 5px; }
+                        .widget-type-card span { font-size: 0.8rem; }
+                        
+                        .widget-preview-area {
+                            margin: 10px 15px;
+                            padding: 20px;
+                            background: #e5e5e7; /* 模拟桌面底色 */
+                            border-radius: 20px;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 200px;
+                        }
+                        /* 强制预览组件大小 */
+                        .widget-preview-area .ios-widget-large {
+                            position: relative !important;
+                            grid-column: auto !important;
+                            grid-row: auto !important;
+                            width: 100%;
+                            height: 160px; /* 固定高度模拟 */
+                            max-width: 320px;
+                        }
+                        .widget-description {
+                            padding: 0 20px;
+                            color: #666;
+                            font-size: 0.9rem;
+                            text-align: center;
+                            line-height: 1.5;
+                        }
+                    </style>
+                    
+                    <div class="widget-type-scroll">
+                        ${typesHtml}
+                    </div>
+
+                    <div class="widget-preview-area" id="widget-settings-preview">
+                        <!-- 预览内容由JS插入 -->
+                    </div>
+
+                    <p class="widget-description" id="widget-desc-text">
+                        ${widgetTypes.find(t => t.value === currentType).desc}
+                    </p>
+                    
                     <div style="padding: 20px; display:flex; justify-content:center;">
-                        <button id="widget-a-save-btn" class="modal-btn btn-primary" style="width: 80%;">应用当前组件</button>
+                        <button id="widget-save-btn" class="modal-btn btn-primary" style="width: 80%;">应用当前组件</button>
                     </div>
                 `;
-                
-                const previewEl = document.getElementById('widget-a-preview');
-                this.renderDesktopWidget(previewEl, settings); // 渲染预览
 
-                // 绑定选择
-                container.onclick = async (e) => {
+                // 立即渲染一次预览
+                this.renderDesktopWidget(document.getElementById('widget-settings-preview'), settings);
+
+                // 绑定选择事件
+                contentArea.onclick = async (e) => {
                     const card = e.target.closest('.widget-type-card');
                     if (card) {
-                        container.querySelectorAll('.widget-type-card').forEach(c => c.classList.remove('selected'));
+                        // UI 切换
+                        contentArea.querySelectorAll('.widget-type-card').forEach(c => c.classList.remove('selected'));
                         card.classList.add('selected');
+                        
                         const newValue = card.dataset.value;
-                        document.getElementById('widget-desc-text').textContent = widgetTypes.find(t => t.value === newValue).desc;
+                        const desc = widgetTypes.find(t => t.value === newValue).desc;
+                        document.getElementById('widget-desc-text').textContent = desc;
 
-                        const tempSettings = JSON.parse(JSON.stringify(settings));
+                        // 准备预览配置 (不保存到DB，仅预览)
+                        const tempSettings = JSON.parse(JSON.stringify(settings)); // 深拷贝
                         tempSettings.desktopWidgetType = newValue;
                         
-                        // 默认值初始化 (与原逻辑一致)
+                        // 赋予默认值以便预览
                         if (!tempSettings.desktopWidgetData) tempSettings.desktopWidgetData = {};
-                        if (newValue === 'sms' && !tempSettings.desktopWidgetData.sms) tempSettings.desktopWidgetData.sms = { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
-                        if (newValue === 'calendar' && !tempSettings.desktopWidgetData.countdown) tempSettings.desktopWidgetData.countdown = { title: '纪念日', date: new Date().toISOString().split('T')[0] };
+                        if (newValue === 'sms' && !tempSettings.desktopWidgetData.sms) {
+                            tempSettings.desktopWidgetData.sms = { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
+                        }
+                        if (newValue === 'calendar' && !tempSettings.desktopWidgetData.countdown) {
+                            tempSettings.desktopWidgetData.countdown = { title: '纪念日', date: new Date().toISOString().split('T')[0] };
+                        }
 
-                        this.renderDesktopWidget(previewEl, tempSettings);
+                        // 渲染预览
+                        this.renderDesktopWidget(document.getElementById('widget-settings-preview'), tempSettings);
                     }
-                    if (e.target.id === 'widget-a-save-btn') {
-                        const selectedCard = container.querySelector('.widget-type-card.selected');
+                    
+                    // 保存按钮
+                    if (e.target.id === 'widget-save-btn') {
+                        const selectedCard = contentArea.querySelector('.widget-type-card.selected');
                         if (selectedCard) {
                             const selectedType = selectedCard.dataset.value;
+                            
                             const settingsToSave = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
                             settingsToSave.desktopWidgetType = selectedType;
-                            if (!settingsToSave.desktopWidgetData) settingsToSave.desktopWidgetData = {};
-                             // 同样初始化默认值
-                            if (selectedType === 'sms' && !settingsToSave.desktopWidgetData.sms) settingsToSave.desktopWidgetData.sms = { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
-                            if (selectedType === 'calendar' && !settingsToSave.desktopWidgetData.countdown) settingsToSave.desktopWidgetData.countdown = { title: '纪念日', date: new Date().toISOString().split('T')[0] };
                             
+                            // 同样初始化默认值并保存
+                            if (!settingsToSave.desktopWidgetData) settingsToSave.desktopWidgetData = {};
+                            if (selectedType === 'sms' && !settingsToSave.desktopWidgetData.sms) {
+                                settingsToSave.desktopWidgetData.sms = { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
+                            }
+                            if (selectedType === 'calendar' && !settingsToSave.desktopWidgetData.countdown) {
+                                settingsToSave.desktopWidgetData.countdown = { title: '纪念日', date: new Date().toISOString().split('T')[0] };
+                            }
+
                             await DBHelper.put('apiConfig', settingsToSave);
-                            await this.renderDesktopWidget();
-                            UIManager.showToast("顶部组件已应用");
+                            
+                            // 更新真正的桌面组件
+                            await this.renderDesktopWidget(); 
+                            
+                            UIManager.showToast("小组件已应用");
                         }
                     }
                 };
             },
-
-            // Widget B 设置逻辑
-            renderWidgetBSettings(container, settings) {
-                const widgetBData = settings.desktopWidgetB || { type: 'single' };
-                const currentType = widgetBData.type;
-
-                const types = [
-                    { value: 'single', text: '单头像', icon: 'fa-user-circle', desc: '单头像 + 两行文本，点击可修改' },
-                    { value: 'double', text: '双人对话', icon: 'fa-user-friends', desc: '双头像 + 气泡对话，点击可修改' }
-                ];
-
-                const typesHtml = types.map(t => `
-                    <div class="widget-type-card ${currentType === t.value ? 'selected' : ''}" data-value="${t.value}">
-                        <i class="fas ${t.icon}"></i>
-                        <span>${t.text}</span>
-                    </div>
-                `).join('');
-
-                container.innerHTML = `
-                    <div class="widget-type-scroll" style="justify-content: center;">${typesHtml}</div>
-                    <div class="widget-preview-area">
-                        <div class="ios-widget-medium" id="widget-b-preview" style="background:white;"></div>
-                    </div>
-                    <p class="widget-description" id="widget-b-desc">${types.find(t => t.value === currentType).desc}</p>
-                    <div style="padding: 20px; display:flex; justify-content:center;">
-                        <button id="widget-b-save-btn" class="modal-btn btn-primary" style="width: 80%;">应用当前组件</button>
-                    </div>
-                `;
-
-                const previewEl = document.getElementById('widget-b-preview');
-                // 渲染 Widget B 预览 (传入临时配置)
-                this.renderWidgetB(previewEl, { ...settings, desktopWidgetB: widgetBData }, true); // true for previewMode
-
-                container.onclick = async (e) => {
-                    const card = e.target.closest('.widget-type-card');
-                    if (card) {
-                        container.querySelectorAll('.widget-type-card').forEach(c => c.classList.remove('selected'));
-                        card.classList.add('selected');
-                        const newValue = card.dataset.value;
-                        document.getElementById('widget-b-desc').textContent = types.find(t => t.value === newValue).desc;
-                        
-                        // 预览配置
-                        const tempSettings = JSON.parse(JSON.stringify(settings));
-                        if(!tempSettings.desktopWidgetB) tempSettings.desktopWidgetB = {};
-                        tempSettings.desktopWidgetB.type = newValue;
-                        
-                        this.renderWidgetB(previewEl, tempSettings, true);
-                    }
-                    
-                    if (e.target.id === 'widget-b-save-btn') {
-                         const selectedCard = container.querySelector('.widget-type-card.selected');
-                         if(selectedCard) {
-                             const selectedType = selectedCard.dataset.value;
-                             const settingsToSave = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
-                             if(!settingsToSave.desktopWidgetB) settingsToSave.desktopWidgetB = {};
-                             settingsToSave.desktopWidgetB.type = selectedType;
-                             
-                             await DBHelper.put('apiConfig', settingsToSave);
-                             // 渲染主界面的 Widget B
-                             await this.renderWidgetB(); 
-                             UIManager.showToast("中部组件已应用");
-                         }
-                    }
-                }
-            },
-            
-            // --- 渲染桌面小组件 (通用逻辑) ---
-            // targetEl: 渲染的目标容器，默认为桌面的 #desktop-widget
-            // previewSettings: 可选，用于预览时传入临时的配置对象
-            async renderDesktopWidget(targetEl = null, previewSettings = null) {
-                const widgetEl = targetEl || document.getElementById('desktop-widget');
-                if (!widgetEl) return;
-                
-                // 这里顺便调用 Widget B 的渲染，确保桌面加载时两个都渲染
-                if (!targetEl) {
-                    this.renderWidgetB();
-                }
-
-                let settings;
-                if (previewSettings) {
-                    settings = previewSettings;
-                } else {
-                    settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
-                }
-                
-                const type = settings.desktopWidgetType || 'photo';
-                const widgetData = settings.desktopWidgetData || {};
-
-                // 重置容器样式
-                widgetEl.className = 'ios-widget-large'; 
-                if (type !== 'photo') widgetEl.classList.add('transparent-bg');
-                
-                widgetEl.innerHTML = '';
-                
-                // 克隆节点以移除旧事件监听 (仅针对桌面主组件)
-                let container = widgetEl;
-                if (!targetEl) {
-                    const newWidgetEl = widgetEl.cloneNode(true);
-                    widgetEl.parentNode.replaceChild(newWidgetEl, widgetEl);
-                    container = newWidgetEl;
-                }
-
-                if (type === 'photo') {
-                    const img = document.createElement('img');
-                    // 如果是预览模式，尝试读取 savedImg，如果没有则显示占位
-                    const savedImg = localStorage.getItem('ios_widget_img');
-                    img.style.display = savedImg ? 'block' : 'none';
-                    img.src = savedImg || '';
-                    if (!targetEl) img.id = 'widget-img'; // 仅在桌面模式下赋予ID
-                    
-                    const placeholder = document.createElement('span');
-                    placeholder.className = 'widget-placeholder';
-                    placeholder.innerHTML = '<i class="fas fa-plus"></i> 点击上传图片';
-                    placeholder.style.display = savedImg ? 'none' : 'block';
-
-                    // 仅在桌面模式下绑定上传事件
-                    if (!targetEl) {
-                        const input = document.createElement('input');
-                        input.type = 'file';
-                        input.accept = 'image/*';
-                        input.style.display = 'none';
-                        input.addEventListener('change', async (e) => {
-                            const file = e.target.files[0];
-                            if (file) {
-                                try {
-                                    const base64 = await Utils.compressImage(file, 800, 800, 0.8);
-                                    img.src = base64;
-                                    img.style.display = 'block';
-                                    placeholder.style.display = 'none';
-                                    localStorage.setItem('ios_widget_img', base64);
-                                } catch (err) { UIManager.showToast("图片处理失败"); }
-                            }
-                        });
-                        container.appendChild(input);
-                        container.onclick = () => input.click();
-                    }
-
-                    container.appendChild(img);
-                    container.appendChild(placeholder);
-
-                } else if (type === 'time') {
-                    const updateTime = () => {
-                        const now = new Date();
-                        const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-                        const dateStr = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
-                        container.innerHTML = `
-                            <div class="widget-time-container">
-                                <div class="widget-time-large">${timeStr}</div>
-                                <div class="widget-date-small">${dateStr}</div>
-                            </div>
-                        `;
-                    };
-                    updateTime();
-                    // 仅在桌面模式下启动定时器
-                    if (!targetEl) {
-                        if (window.desktopClockTimer) clearInterval(window.desktopClockTimer);
-                        window.desktopClockTimer = setInterval(updateTime, 1000);
-                    }
-
-                } else if (type === 'calendar') {
-                    const countData = widgetData.countdown || { title: '纪念日', date: new Date().toISOString().split('T')[0] };
-                    const targetDate = new Date(countData.date);
-                    const today = new Date();
-                    targetDate.setHours(0,0,0,0);
-                    today.setHours(0,0,0,0);
-                    const diffTime = targetDate - today;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    
-                    let countDisplayHtml = '';
-                    if (diffDays > 0) {
-                        countDisplayHtml = `<div class="count-label">还剩</div><div class="count-days">${diffDays}<span style="font-size: 1rem; font-weight: normal; margin-left: 2px;">天</span></div>`;
-                    } else if (diffDays < 0) {
-                        countDisplayHtml = `<div class="count-label">已过去</div><div class="count-days">${Math.abs(diffDays)}<span style="font-size: 1rem; font-weight: normal; margin-left: 2px;">天</span></div>`;
-                    } else {
-                        countDisplayHtml = `<div class="count-days" style="color: var(--accent-color);">今天</div>`;
-                    }
-
-                    const now = new Date();
-                    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-                    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-                    
-                    let calGridHtml = '';
-                    ['S','M','T','W','T','F','S'].forEach(d => calGridHtml += `<div class="cal-day-header">${d}</div>`);
-                    for(let i=0; i<firstDay; i++) calGridHtml += `<div></div>`;
-                    for(let i=1; i<=daysInMonth; i++) {
-                        const isToday = i === now.getDate();
-                        calGridHtml += `<div class="cal-day ${isToday ? 'today' : ''}">${i}</div>`;
-                    }
-
-                    container.innerHTML = `
-                        <div class="widget-cal-count-container">
-                            <div class="widget-cal-part">
-                                <div class="cal-month-title">${monthNames[now.getMonth()]}</div>
-                                <div class="cal-grid">${calGridHtml}</div>
-                            </div>
-                            <div class="widget-count-part" id="${!targetEl ? 'widget-count-click' : ''}">
-                                <div class="count-target">${countData.title}</div>
-                                ${countDisplayHtml}
-                            </div>
-                        </div>
-                    `;
-
-                    // 仅在桌面模式下绑定点击修改
-                    if (!targetEl) {
-                        setTimeout(() => {
-                            const countPart = document.getElementById('widget-count-click');
-                            if(countPart) countPart.onclick = (e) => {
-                                e.stopPropagation();
-                                this.showCountdownEditModal(countData);
-                            }
-                        }, 0);
-                    }
-
-                } else if (type === 'sms') {
-                    const smsData = widgetData.sms || { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
-                    const themeClass = `sms-theme-${smsData.theme}`;
-
-                    container.innerHTML = `
-                        <div class="widget-sms-container ${themeClass}">
-                            <div class="widget-sms-row left">
-                                <div class="sms-name-tag"><div class="sms-name-line"></div> ${smsData.name}</div>
-                                <div class="sms-bubble-box">${smsData.msg1}</div>
-                                <div class="sms-time-tag">13:14</div>
-                            </div>
-                            <div class="widget-sms-row right">
-                                <div class="sms-time-tag">05:20</div>
-                                <div class="sms-bubble-box">${smsData.msg2}</div>
-                            </div>
-                        </div>
-                    `;
-                    // 仅在桌面模式下绑定点击修改
-                    if (!targetEl) container.onclick = () => this.showSmsEditModal(smsData);
-
-                } else if (type === 'music') {
-                    let title = '无音乐播放';
-                    let artist = '---';
-                    let displayCover = MusicManager.defaultCover;
-                    let isPlaying = false;
-
-                    // 尝试获取当前音乐信息
-                    if (window.MusicManager && MusicManager.currentPlaylist && MusicManager.currentPlaylist.length > 0 && MusicManager.currentIndex >= 0) {
-                        const currentSong = MusicManager.currentPlaylist[MusicManager.currentIndex];
-                        isPlaying = !MusicManager.audio.paused;
-                        title = currentSong.name;
-                        artist = currentSong.artist;
-                        displayCover = MusicManager.currentDisplayCover || MusicManager.defaultCover;
-                    }
-
-                    container.innerHTML = `
-                        <div class="widget-music-box">
-                            <div class="wm-disc-area">
-                                <div class="wm-disc ${isPlaying ? 'playing' : ''}" id="${!targetEl?'wm-disc':''}">
-                                    <img src="${displayCover}" class="wm-cover" id="${!targetEl?'wm-cover':''}">
-                                </div>
-                                <div class="wm-needle ${isPlaying ? 'playing' : ''}" id="${!targetEl?'wm-needle':''}"></div>
-                            </div>
-                            <div class="wm-info">
-                                <div class="wm-title" id="${!targetEl?'wm-title':''}">${title}</div>
-                                <div class="wm-artist" id="${!targetEl?'wm-artist':''}">${artist}</div>
-                                <div class="wm-lyrics" id="${!targetEl?'wm-lyrics':''}"></div>
-                            </div>
-                            <div class="wm-status-icon"><i class="fas fa-music"></i></div>
-                        </div>
-                    `;
-                    
-                    if (!targetEl) {
-                        container.onclick = () => {
-                            const musicBtn = document.getElementById('open-music-btn');
-                            if(musicBtn) musicBtn.click();
-                        };
-                    }
-                }
-            },
-            
-            // --- 新增：Widget B 渲染逻辑 (透明背景 + 1:1复刻版) ---
-            async renderWidgetB(targetEl = null, previewSettings = null, isPreviewMode = false) {
-                const widgetEl = targetEl || document.getElementById('desktop-widget-b');
-                if (!widgetEl) return;
-
-                let settings;
-                if (previewSettings) {
-                    settings = previewSettings;
-                } else {
-                    settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
-                }
-                
-                const widgetConfig = settings.desktopWidgetB || { type: 'single', data: {} };
-                if (!widgetConfig.data) widgetConfig.data = {};
-                
-                widgetEl.innerHTML = '';
-                let container = widgetEl;
-                if (!targetEl) {
-                    const newWidgetEl = widgetEl.cloneNode(true);
-                    widgetEl.parentNode.replaceChild(newWidgetEl, widgetEl);
-                    container = newWidgetEl;
-                }
-                
-                // 确保预览时强制使用中组件的大小类名，防止预览变形
-                if (isPreviewMode) {
-                    container.classList.remove('ios-widget-large');
-                    container.classList.add('ios-widget-medium');
-                }
-
-                // 样式 1: 单头像
-                if (widgetConfig.type === 'single') {
-                    const data = widgetConfig.data.single || { 
-                        avatar: 'https://z.wiki/autoupload/20240706/3g0x.250-1_2_0.png', 
-                        text1: '17号 许则', 
-                        text2: '# 我做了一个很长的梦' 
-                    };
-                    
-                    container.innerHTML = `
-                        <div class="wb-style-single">
-                            <img src="${data.avatar}" class="wb-single-avatar">
-                            <div class="wb-single-text1">${data.text1}</div>
-                            <div class="wb-single-text2">${data.text2}</div>
-                        </div>
-                    `;
-                    
-                    if (!isPreviewMode) {
-                        container.onclick = () => this.showWidgetBEditModal('single', data);
-                    }
-                } 
-                // 样式 2: 双头像对话 (头像在气泡内版)
-                else if (widgetConfig.type === 'double') {
-                    const data = widgetConfig.data.double || {
-                        avatar1: 'https://z.wiki/autoupload/20240706/3g0x.250-1_2_0.png',
-                        msg1: '被忘记两次也没关系吗',
-                        color1: '#f5f5f5', // 默认浅灰
-                        avatar2: 'https://z.wiki/autoupload/20240706/3g0x.250-1_2_0.png',
-                        msg2: '是陆赫扬的话就没关系',
-                        color2: '#f5f5f5'
-                    };
-                    
-                    container.innerHTML = `
-                        <div class="wb-style-double">
-                            <!-- 左侧胶囊 -->
-                            <div class="wb-double-pill left" style="background-color:${data.color1};">
-                                <img src="${data.avatar1}" class="wb-double-avatar">
-                                <span class="wb-double-text">${data.msg1}</span>
-                            </div>
-                            <!-- 右侧胶囊 (文字在前，头像在后) -->
-                            <div class="wb-double-pill right" style="background-color:${data.color2};">
-                                <span class="wb-double-text">${data.msg2}</span>
-                                <img src="${data.avatar2}" class="wb-double-avatar">
-                            </div>
-                        </div>
-                    `;
-
-                    if (!isPreviewMode) {
-                        container.onclick = () => this.showWidgetBEditModal('double', data);
-                    }
-                }
-            },
-
-            // Widget B 编辑弹窗
-            showWidgetBEditModal(type, currentData) {
-                if (type === 'single') {
-                    UIManager.showModal({
-                        title: '编辑小组件',
-                        body: `
-                            <div class="form-group">
-                                <label>头像</label>
-                                <div class="avatar-uploader">
-                                    <img src="${currentData.avatar}" id="wb-single-avatar-preview" class="avatar-preview">
-                                    <input type="file" id="wb-single-avatar-input" accept="image/*" style="display:none;">
-                                    <button class="upload-btn" onclick="document.getElementById('wb-single-avatar-input').click()">更换</button>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label>第一行文本</label>
-                                <input type="text" id="wb-single-text1" value="${currentData.text1}">
-                            </div>
-                            <div class="form-group">
-                                <label>第二行文本</label>
-                                <input type="text" id="wb-single-text2" value="${currentData.text2}">
-                            </div>
-                        `,
-                        actions: [
-                            { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
-                            { text: '保存', class: 'btn-primary', handler: async () => {
-                                const newData = {
-                                    avatar: $('#wb-single-avatar-preview').src,
-                                    text1: $('#wb-single-text1').value,
-                                    text2: $('#wb-single-text2').value
-                                };
-                                await this.saveWidgetBData('single', newData);
-                                UIManager.hideModal();
-                            }}
-                        ]
-                    });
-                    
-                    $('#wb-single-avatar-input').onchange = async (e) => {
-                        if (e.target.files[0]) $('#wb-single-avatar-preview').src = await Utils.fileToBase64(e.target.files[0]);
-                    };
-                } else if (type === 'double') {
-                    const createSection = (idx, label) => `
-                        <div style="border:1px solid #eee; padding:10px; border-radius:8px; margin-bottom:10px;">
-                            <p style="font-weight:bold; margin-bottom:5px;">${label}</p>
-                            <div class="avatar-uploader" style="margin-bottom:5px;">
-                                <img src="${currentData[`avatar${idx}`]}" id="wb-double-avatar${idx}-preview" class="avatar-preview" style="width:40px;height:40px;">
-                                <input type="file" id="wb-double-avatar${idx}-input" accept="image/*" style="display:none;">
-                                <button class="upload-btn" style="padding:4px 8px; font-size:0.8rem;" onclick="document.getElementById('wb-double-avatar${idx}-input').click()">换头像</button>
-                            </div>
-                            <div class="form-group" style="margin-bottom:5px;">
-                                <input type="text" id="wb-double-msg${idx}" value="${currentData[`msg${idx}`]}" placeholder="文本内容">
-                            </div>
-                            <div class="form-group" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0;">
-                                <label style="margin:0;">气泡颜色</label>
-                                <input type="color" id="wb-double-color${idx}" value="${currentData[`color${idx}`]}">
-                            </div>
-                        </div>
-                    `;
-
-                    UIManager.showModal({
-                        title: '编辑小组件',
-                        body: `
-                            ${createSection(1, '左侧角色')}
-                            ${createSection(2, '右侧角色')}
-                        `,
-                        actions: [
-                            { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
-                            { text: '保存', class: 'btn-primary', handler: async () => {
-                                const newData = {
-                                    avatar1: $('#wb-double-avatar1-preview').src,
-                                    msg1: $('#wb-double-msg1').value,
-                                    color1: $('#wb-double-color1').value,
-                                    avatar2: $('#wb-double-avatar2-preview').src,
-                                    msg2: $('#wb-double-msg2').value,
-                                    color2: $('#wb-double-color2').value
-                                };
-                                await this.saveWidgetBData('double', newData);
-                                UIManager.hideModal();
-                            }}
-                        ]
-                    });
-
-                    [1, 2].forEach(idx => {
-                        $(`#wb-double-avatar${idx}-input`).onchange = async (e) => {
-                            if (e.target.files[0]) $(`#wb-double-avatar${idx}-preview`).src = await Utils.fileToBase64(e.target.files[0]);
-                        };
-                    });
-                }
-            },
-
-            async saveWidgetBData(type, data) {
-                const settings = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
-                
-                // 修复：确保对象层级存在，防止 undefined 报错
-                if (!settings.desktopWidgetB) settings.desktopWidgetB = {};
-                if (!settings.desktopWidgetB.data) settings.desktopWidgetB.data = {};
-                
-                settings.desktopWidgetB.type = type;
-                settings.desktopWidgetB.data[type] = data;
-                
-                await DBHelper.put('apiConfig', settings);
-                await this.renderWidgetB(); // 刷新桌面
-                UIManager.showToast("小组件已更新");
-            },
             
             // --- 渲染桌面小组件 (通用逻辑) ---
             // targetEl: 渲染的目标容器，默认为桌面的 #desktop-widget
@@ -25816,6 +25332,36 @@ async showMomentsSettingsModal() {
                             const musicBtn = document.getElementById('open-music-btn');
                             if(musicBtn) musicBtn.click();
                         };
+                    }
+                } else if (type === 'profile') {
+                    // 6. 个人主页组件
+                    const profileData = widgetData.profile || {
+                        avatar: '', // 默认为空，下面处理显示
+                        text1: '⊹꙳ ˶˙ᵕ˙˶ ⊹꙳',
+                        text2: '大树会拥抱每一个抬头的人'
+                    };
+                    
+                    // 获取默认头像
+                    let avatarSrc = profileData.avatar;
+                    if (!avatarSrc) {
+                        // 尝试获取当前用户头像作为默认
+                        const myAvatarEl = document.getElementById('my-avatar');
+                        avatarSrc = myAvatarEl ? myAvatarEl.src : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDUwIDUwIj48cmVjdCB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIGZpbGw9IiNjY2MiLz48L3N2Zz4=';
+                    }
+
+                    container.innerHTML = `
+                        <div class="widget-profile-container">
+                            <img src="${avatarSrc}" class="widget-profile-avatar">
+                            <div class="widget-profile-text-row">
+                                <div class="widget-profile-text-1">${profileData.text1}</div>
+                                <div class="widget-profile-text-2">${profileData.text2}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    // 仅在桌面模式下绑定点击修改
+                    if (!targetEl) {
+                        container.onclick = () => this.showProfileWidgetEditModal(profileData);
                     }
                 }
             },
@@ -25995,6 +25541,66 @@ async showMomentsSettingsModal() {
                 });
             },
 
+            // 个人主页组件修改弹窗
+            showProfileWidgetEditModal(currentData) {
+                // 确保有默认值
+                const data = {
+                    avatar: currentData.avatar || $('#my-avatar').src,
+                    text1: currentData.text1 || '⊹꙳ ˶˙ᵕ˙˶ ⊹꙳',
+                    text2: currentData.text2 || '大树会拥抱每一个抬头的人'
+                };
+
+                UIManager.showModal({
+                    customClass: 'modal-default-style',
+                    title: "编辑个人主页组件",
+                    body: `
+                        <div class="form-group" style="text-align:center;">
+                            <div class="avatar-uploader" style="justify-content:center; flex-direction:column; gap:10px;">
+                                <img src="${data.avatar}" id="widget-profile-avatar-preview" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #eee;">
+                                <input type="file" id="widget-profile-avatar-input" accept="image/*" style="display:none;">
+                                <button class="modal-btn btn-secondary" onclick="document.getElementById('widget-profile-avatar-input').click()" style="padding: 5px 15px; font-size:0.8rem;">更换头像</button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>第一行文本</label>
+                            <input type="text" id="widget-profile-text1" value="${data.text1}" placeholder="例如：Morning~">
+                        </div>
+                        <div class="form-group">
+                            <label>第二行文本</label>
+                            <input type="text" id="widget-profile-text2" value="${data.text2}" placeholder="一句话简介">
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const newAvatar = $('#widget-profile-avatar-preview').src;
+                            const newText1 = $('#widget-profile-text1').value.trim();
+                            const newText2 = $('#widget-profile-text2').value.trim();
+
+                            const settings = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
+                            if (!settings.desktopWidgetData) settings.desktopWidgetData = {};
+                            settings.desktopWidgetData.profile = { avatar: newAvatar, text1: newText1, text2: newText2 };
+                            
+                            await DBHelper.put('apiConfig', settings);
+                            await this.renderDesktopWidget();
+                            UIManager.hideModal();
+                        }}
+                    ]
+                });
+
+                // 绑定头像上传预览
+                $('#widget-profile-avatar-input').onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        try {
+                            const base64 = await Utils.compressImage(file, 300, 300, 0.8);
+                            $('#widget-profile-avatar-preview').src = base64;
+                        } catch (err) {
+                            UIManager.showToast("图片处理失败");
+                        }
+                    }
+                };
+            },
 
             showAppIconModifyModal(appId, callback) {
                 UIManager.showModal({
