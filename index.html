@@ -840,7 +840,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 8px; /* 修改：将气泡间距从 20px 缩小到 8px */
+            gap: 12px; /* 修改：增加基础间距，以便为合并消息留出调整空间 */
             /* 关键让聊天区域拥有自己的背景，而不是透明 */
             background-color: var(--theme-color-1); 
             background-size: cover;
@@ -4228,154 +4228,204 @@
             user-select: none;
         }
 
-        /* --- 19. 番茄钟 (新) --- */
+
+        /* --- 19. 番茄钟 (温暖治愈版) --- */
+        #page-pomodoro {
+            background-color: #FFFBF0; /* 暖杏色背景 */
+            background-image: radial-gradient(#EEDCC6 15%, transparent 16%), radial-gradient(#EEDCC6 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+        
+        #page-pomodoro .page-header {
+            background: transparent;
+            border-bottom: none;
+        }
+
         #page-pomodoro .page-content {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 20px;
+            gap: 30px;
             padding: 30px;
+            height: 100%;
+        }
+
+        /* 手绘风圆环容器 */
+        .pomodoro-main-circle {
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px dashed #8D6E63; /* 虚线边框增加手作感 */
+            box-shadow: 8px 8px 0px rgba(141, 110, 99, 0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+        
+        .pomodoro-main-circle:hover {
+            transform: scale(1.02) rotate(2deg);
         }
 
         .pomodoro-timer-display {
-            font-size: 5rem;
-            font-weight: bold;
-            color: var(--text-color-dark);
-            font-family: 'Courier New', Courier, monospace;
-            letter-spacing: 2px;
+            font-family: 'Long Cang', cursive; /* 使用手写字体 */
+            font-size: 4.5rem;
+            font-weight: normal;
+            color: #5D4037;
+            line-height: 1;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.05);
+        }
+        
+        .pomodoro-status-text {
+            font-family: 'Long Cang', cursive;
+            font-size: 1.2rem;
+            color: #8D6E63;
+            margin-top: 5px;
         }
 
+        /* 装饰贴纸 */
+        .pomodoro-sticker {
+            position: absolute;
+            font-size: 2rem;
+            pointer-events: none;
+        }
+        .sticker-tomato { top: -10px; right: 20px; transform: rotate(15deg); }
+        .sticker-leaf { bottom: 10px; left: 20px; transform: rotate(-15deg); color: #81C784; }
+
         .pomodoro-goal-input {
-            width: 100%;
+            width: 80%;
             max-width: 300px;
             text-align: center;
             border: none;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid #D7CCC8;
             background: transparent;
             padding: 10px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
+            font-family: 'Long Cang', cursive; /* 手写字体 */
+            color: #5D4037;
             outline: none;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+        }
+        .pomodoro-goal-input::placeholder {
+            color: #BCAAA4;
         }
         .pomodoro-goal-input:focus {
-            border-bottom-color: var(--accent-color);
+            border-bottom-color: #8D6E63;
+            transform: scale(1.05);
         }
 
         .pomodoro-controls {
             display: flex;
-            gap: 20px;
+            gap: 25px;
+            margin-top: 10px;
         }
 
         .pomodoro-btn {
-            padding: 12px 30px;
-            font-size: 1rem;
+            padding: 12px 35px;
+            font-size: 1.1rem;
+            font-family: 'Long Cang', cursive;
             font-weight: bold;
             border-radius: 25px;
             cursor: pointer;
-            border: none;
+            border: 2px solid transparent;
             transition: all 0.2s;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.1);
+        }
+        .pomodoro-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
         }
         .pomodoro-btn.start {
-            background-color: var(--accent-color);
-            color: white;
+            background-color: #FFAB91; /* 暖橙色 */
+            color: #5D4037;
+            border: 2px solid #FFAB91;
         }
         .pomodoro-btn.start:hover {
-            background-color: var(--accent-color-deep);
-            transform: translateY(-2px);
+            background-color: #FF8A65;
+            border-color: #FF8A65;
+            color: #fff;
         }
         .pomodoro-btn.stop {
-            background-color: #e74c3c;
-            color: white;
+            background-color: #E0E0E0;
+            color: #757575;
+            border: 2px solid #E0E0E0;
         }
         .pomodoro-btn.stop:hover {
-            background-color: #c0392b;
-        }
-
-        #pomodoro-float-ball {
-            position: fixed;
-            bottom: 150px; /* 向上移动了一点 */
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background-color: rgba(255, 255, 255, 0.7); /* 降低了一点不透明度 */
-            backdrop-filter: blur(10px); /* 增强模糊效果 */
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* 增加了高光和更柔和的阴影，营造泡泡感 */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15), inset 0 2px 4px rgba(255, 255, 255, 0.5);
-            cursor: grab; /* 提示可以抓取 */
-            z-index: 1500;
-            transition: opacity 0.3s, transform 0.3s;
-            user-select: none; /* 防止长按选中文本 */
-            -webkit-user-select: none; /* 兼容老浏览器 */
-        }
-        #pomodoro-float-ball.dragging {
-            cursor: grabbing; /* 拖动时的手型 */
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); /* 拖动时阴影变大，有悬浮感 */
-            transform: scale(1.05);
-        }
-        #pomodoro-float-ball.hidden {
-            opacity: 0;
-            transform: scale(0.5);
-            pointer-events: none;
-        }
-        #pomodoro-float-ball .progress-ring {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(var(--accent-color) 0deg, #e0e0e0 0deg);
-            z-index: -1;
-        }
-        #pomodoro-float-ball .time-left {
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: var(--text-color-dark);
-        }
-
-        .pomodoro-notification-banner {
-            pointer-events: auto;
-            position: relative;
-            width: 48px;
-            height: 48px;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #000;
+            background-color: #BDBDBD;
+            border-color: #BDBDBD;
             color: #fff;
-            border-radius: 50px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            cursor: pointer;
-            transition: width 0.5s cubic-bezier(0.65, 0, 0.35, 1);
         }
-        .pomodoro-notification-banner.is-playing {
-            animation: expand-toast 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-        }
-        .pomodoro-notification-banner .icon-wrapper {
-            position: absolute;
-            top: 50%;
+
+        /* --- 番茄钟灵动岛样式 (替代旧悬浮球) --- */
+        #pomodoro-island {
+            position: fixed;
+            top: 10px; /* 顶部显示 */
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translateX(-50%) translateY(-150%); /* 默认向上隐藏 */
+            z-index: 9999;
+            background: #2D2D2D; /* 深灰色岛 */
+            color: #FFF8F0;
+            border-radius: 30px;
+            padding: 8px 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 100%;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            min-width: 160px;
+            justify-content: space-between;
+        }
+        
+        #pomodoro-island.active {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .island-icon-area {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #FFAB91;
+        }
+        
+        .island-tomato-icon {
+            font-size: 1.2rem;
+            animation: breathing 2s infinite ease-in-out;
+        }
+
+        .island-timer-text {
+            font-family: 'Courier New', monospace; /* 复古等宽字体 */
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .island-progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .island-progress-fill {
             height: 100%;
+            background: #FFAB91;
+            width: 100%;
+            transition: width 1s linear;
         }
-        .pomodoro-notification-banner.is-playing .icon-wrapper {
-             animation: move-icon 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
-        }
-        .pomodoro-notification-banner .text-content {
-            opacity: 0;
-            white-space: nowrap;
-            padding-left: 52px; /* 给图标留出空间 */
-        }
-        .pomodoro-notification-banner.is-playing .text-content {
-            animation: show-text 1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        
+        @keyframes breathing {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(0.9); opacity: 0.8; }
         }
         /* --- 8.5.2 视频通话浮窗 (新增) --- */
         .video-call-notification-banner {
@@ -7812,7 +7862,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 
         /* --- 消息头像合并样式 (新增) --- */
         .message-row.merged-avatar {
-            margin-top: -8px; /* 减少与上一条消息的间距，让它们看起来是一组 */
+            margin-top: -8px; /* 配合gap:12px，实际视觉间距约为4px，使同组消息紧凑 */
         }
         .message-row.merged-avatar .message-avatar {
             visibility: hidden; /* 隐藏头像但保留占位，保持对齐 */
@@ -8852,18 +8902,25 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                 </div>
             </div>
             
-            <!-- 番茄钟页面 (新) -->
+            <!-- 番茄钟页面 (温暖治愈版) -->
             <div id="page-pomodoro" class="page">
                 <div class="page-header">
-                    <div id="pomodoro-back-btn" class="header-icon"><i class="fas fa-chevron-left"></i></div>
-                    <h1>番茄钟</h1>
+                    <div id="pomodoro-back-btn" class="header-icon" style="color: #8D6E63;"><i class="fas fa-chevron-left"></i></div>
+                    <h1 style="color: #5D4037; font-family: 'Long Cang', cursive;">专注时光</h1>
                 </div>
                 <div class="page-content">
-                    <div id="pomodoro-timer-display" class="pomodoro-timer-display">25:00</div>
-                    <input type="text" id="pomodoro-goal-input" class="pomodoro-goal-input" placeholder="输入本次专注的目标...">
+                    <div class="pomodoro-main-circle">
+                        <div class="pomodoro-sticker sticker-tomato">🍅</div>
+                        <div id="pomodoro-timer-display" class="pomodoro-timer-display">25:00</div>
+                        <div class="pomodoro-status-text" id="pomodoro-status-text">Focus</div>
+                        <div class="pomodoro-sticker sticker-leaf"><i class="fas fa-leaf"></i></div>
+                    </div>
+                    
+                    <input type="text" id="pomodoro-goal-input" class="pomodoro-goal-input" placeholder="写下此刻的小目标...">
+                    
                     <div class="pomodoro-controls">
                         <button id="pomodoro-start-btn" class="pomodoro-btn start">开始专注</button>
-                        <button id="pomodoro-stop-btn" class="pomodoro-btn stop" style="display: none;">停止</button>
+                        <button id="pomodoro-stop-btn" class="pomodoro-btn stop" style="display: none;">放弃</button>
                     </div>
                 </div>
             </div>
@@ -9278,10 +9335,16 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
     <!-- 点击特效层 -->
     <div id="click-effect-layer"></div>
 
-    <!-- 番茄钟悬浮球 -->
-    <div id="pomodoro-float-ball" class="hidden">
-        <div class="progress-ring"></div>
-        <span class="time-left">25:00</span>
+    <!-- 番茄钟灵动岛 -->
+    <div id="pomodoro-island">
+        <div class="island-icon-area">
+            <i class="fas fa-clock island-tomato-icon"></i>
+            <span style="font-size: 0.8rem; opacity: 0.8;">专注中</span>
+        </div>
+        <span class="island-timer-text" id="island-timer-display">25:00</span>
+        <div class="island-progress-bar">
+            <div class="island-progress-fill" id="island-progress-bar"></div>
+        </div>
     </div>
     
     <!-- 个人信息侧边栏 -->
@@ -10603,6 +10666,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
         },
 
         // 修改：增加了 isMerged 参数，默认为 false
+        // 修改：增加了 isMerged 参数，默认为 false
         async createMessageElement(msg, senderInfo, isTyping = false, isReadOnly = false, isMerged = false) {
             const messageRow = document.createElement('div');
             // 如果是合并消息，添加 merged-avatar 类
@@ -10860,20 +10924,20 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             const isMyMessage = msg.type === 'sent';
             let displayNameHtml = '';
             
+            // 提前获取实体信息以获取颜色
+            const chatEntity = await DBHelper.get(isGroup ? 'groups' : 'contacts', appState.currentChatId);
+            const nameColor = chatEntity?.nameColor; // 获取专属名字颜色
+            const nameColorStyle = nameColor ? `style="color: ${nameColor};"` : '';
             
             let timestampHtml = '';
             if (msg.isAutoReply && msg.displayTimestamp) {
-                timestampHtml = `<div class="message-timestamp">${msg.displayTimestamp}<span class="auto-reply-tag">未读</span></div>`;
+                // 主动回复时间戳颜色跟随名字颜色
+                timestampHtml = `<div class="message-timestamp" ${nameColorStyle}>${msg.displayTimestamp}<span class="auto-reply-tag">未读</span></div>`;
             }
 
             if (isReadOnly) {
-                const chatEntity = await DBHelper.get(isGroup ? 'groups' : 'contacts', appState.currentChatId);
-                const nameColorStyle = chatEntity?.nameColor ? `style="color: ${chatEntity.nameColor};"` : '';
                 displayNameHtml = `<div class="message-name" ${nameColorStyle}>${senderInfo.name}</div>`;
             } else if (!isTyping && !['transfer-receipt'].includes(msg.segmentType)) {
-                const chatEntity = await DBHelper.get(isGroup ? 'groups' : 'contacts', appState.currentChatId);
-                const nameColorStyle = chatEntity?.nameColor ? `style="color: ${chatEntity.nameColor};"` : '';
-
                 if (isGroup) {
                     const memberNicknames = chatEntity.memberNicknames || {};
                     const myProfile = await EventManager.getPlayerProfileForContext(appState.currentChatId);
@@ -10947,6 +11011,8 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                         const timestampEl = document.createElement('div');
                         timestampEl.className = 'bubble-timestamp';
                         timestampEl.textContent = Utils.formatTimestampForBubble(msg.timestamp);
+                        // 常规气泡时间戳颜色跟随名字颜色
+                        if (nameColor) timestampEl.style.color = nameColor;
                         wrapper.appendChild(timestampEl);
                     }
                 }
@@ -13090,7 +13156,7 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
                         </div>
                         ` : ''}
                     </div>
-                    <div class="prompt-folder-content collapsed" style="display: block; grid-template-columns: 1fr;">${contactsHtml}</div>
+                    <div class="prompt-folder-content collapsed" style="grid-template-columns: 1fr;">${contactsHtml}</div>
                 `;
                 return folderDiv;
             },
@@ -14081,52 +14147,70 @@ ${promptLines.join('\n\n')}
 
                 // --- 组装最终 Prompt (表情包库) ---
                 const useBuiltin = chatSettings.useBuiltinEmojis !== false;
-                let emojiNamesForPrompt = [];
+                
+                // 1. 收集通用表情包 (所有角色均可使用)
+                let universalEmojiNames = [];
 
-                // 1. 内置表情包
+                // 1.1 内置表情包
                 if (useBuiltin) {
-                    emojiNamesForPrompt.push(...Object.values(BUILTIN_AI_EMOJIS));
+                    universalEmojiNames.push(...Object.values(BUILTIN_AI_EMOJIS));
                 }
 
-                // 2. 获取所有相册和资源
+                // 1.2 获取所有相册和资源
                 const allAlbums = await DBHelper.getAll('photoAlbums');
                 const allAssets = await DBHelper.getAll('photoAssets');
                 
-                // 3. 获取通用的相册ID
+                // 1.3 获取“通用类型”相册 + “当前聊天(群/人)”绑定的相册
                 const universalAlbumIds = allAlbums.filter(a => !a.type || a.type === 'universal').map(a => a.id);
-                
-                // 4. 获取当前聊天绑定的专属相册ID
-                let boundAlbumIds = [];
                 if (chatEntity && chatEntity.boundAlbumIds) {
-                    boundAlbumIds = [...chatEntity.boundAlbumIds];
+                    // 群聊本身绑定的，或者私聊对象绑定的，都视为当前场景下的“通用”
+                    universalAlbumIds.push(...chatEntity.boundAlbumIds);
                 }
                 
-                // 如果是群聊，还可以选择是否包含群成员绑定的表情包（可选逻辑，这里暂时只包含群组本身的绑定）
-                // 如果需要更高级逻辑：遍历 chatEntity.members，获取每个 contact，合并他们的 boundAlbumIds
+                // 1.4 提取通用资源名称
+                const universalAssets = allAssets.filter(a => universalAlbumIds.includes(a.albumId));
+                universalAssets.forEach(a => {
+                    if (a.name) universalEmojiNames.push(a.name);
+                });
+                
+                // 通用列表去重
+                universalEmojiNames = [...new Set(universalEmojiNames)];
+
+                // 2. 收集专属表情包 (仅特定角色可用)
+                let exclusiveEmojiInfo = [];
+                
                 if (isGroup) {
                     for (const memberId of chatEntity.members) {
                         const member = allContacts.find(c => c.id === memberId);
-                        if (member && member.boundAlbumIds) {
-                            boundAlbumIds.push(...member.boundAlbumIds);
+                        // 如果成员有绑定相册
+                        if (member && member.boundAlbumIds && member.boundAlbumIds.length > 0) {
+                            // 找出该成员绑定的所有图片资源
+                            const memberAssets = allAssets.filter(a => member.boundAlbumIds.includes(a.albumId));
+                            let memberEmojiNames = memberAssets.map(a => a.name).filter(Boolean);
+                            
+                            // 去重
+                            memberEmojiNames = [...new Set(memberEmojiNames)];
+
+                            // 过滤掉已经在通用列表里的（可选，为了Prompt简洁）
+                            // const uniqueMemberEmojis = memberEmojiNames.filter(name => !universalEmojiNames.includes(name));
+                            
+                            if (memberEmojiNames.length > 0) {
+                                exclusiveEmojiInfo.push(`${member.name}专属: [${memberEmojiNames.join('、')}]`);
+                            }
                         }
                     }
                 }
 
-                // 5. 合并ID并去重
-                const activeAlbumIds = new Set([...universalAlbumIds, ...boundAlbumIds]);
-
-                // 6. 筛选资源
-                const activeAssets = allAssets.filter(a => activeAlbumIds.has(a.albumId));
+                // 3. 构建最终的 Prompt 字符串
+                // 格式示例: 
+                // [通用]: 哈哈, 嘿嘿
+                // 张三专属: [哭哭]
+                // (指令...)
+                let emojiListString = `[通用]: ${universalEmojiNames.join('、')}`;
                 
-                // 7. 提取名字并去重
-                activeAssets.forEach(a => {
-                    if (a.name) emojiNamesForPrompt.push(a.name);
-                });
-                
-                // 最终去重
-                emojiNamesForPrompt = [...new Set(emojiNamesForPrompt)];
-                
-                const emojiListString = emojiNamesForPrompt.join('、');
+                if (exclusiveEmojiInfo.length > 0) {
+                    emojiListString += `\n${exclusiveEmojiInfo.join('\n')}\n(重要：标记为"xx专属"的表情包**仅限**该角色使用，禁止其他角色使用。通用表情包所有角色均可使用)`;
+                }
                 
                 let patAPatRulesForPrompt = '';
                 if (chatSettings.enablePatAPat !== false) {
@@ -19827,7 +19911,10 @@ ${globalPromptsSection}
                     return;
                 }
 
-                container.innerHTML = prompts.map(p => this.createListItemHTML(p.id, p.name, p.content.substring(0, 20) + '...', '#FF9500', 'fa-globe')).join('');
+                // 修复HTML标签显示问题
+                const escapeHtml = (str) => str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
+                container.innerHTML = prompts.map(p => this.createListItemHTML(p.id, p.name, escapeHtml(p.content.substring(0, 20)) + '...', '#FF9500', 'fa-globe')).join('');
                 if (this.isGlobalEditing) this.enableEditStyle(container);
             },
 
@@ -20593,14 +20680,13 @@ async showGroupMentionPopup(chatId) {
                 $('#pomodoro-back-btn').addEventListener('click', () => UIManager.navigateTo('discover'));
                 $('#pomodoro-start-btn').addEventListener('click', () => this.startPomodoro());
                 $('#pomodoro-stop-btn').addEventListener('click', () => this.stopPomodoro());
-                $('#pomodoro-float-ball').addEventListener('click', () => {
-                    
-                    if ($('#pomodoro-float-ball').isDragging) {
-                        $('#pomodoro-float-ball').isDragging = false; 
-                        return;
-                    }
-                    UIManager.navigateTo('pomodoro');
-                });
+                // 灵动岛点击回番茄钟页面
+                const pomodoroIsland = $('#pomodoro-island');
+                if (pomodoroIsland) {
+                    pomodoroIsland.addEventListener('click', () => {
+                        UIManager.navigateTo('pomodoro');
+                    });
+                }
                 
                 
                 const setupPomodoroDrag = () => {
@@ -20667,7 +20753,6 @@ async showGroupMentionPopup(chatId) {
                     floatBall.addEventListener('mousedown', onDragStart);
                     floatBall.addEventListener('touchstart', onDragStart, { passive: false });
                 };
-                setupPomodoroDrag();
                 
                 
                 const messageListUl = $('#message-list-ul');
@@ -24705,10 +24790,14 @@ async showMomentsSettingsModal() {
             },
 
             // --- 桌面设置相关逻辑 (新增) ---
+            // --- 桌面设置主页面 ---
             async renderDesktopSettingsPage() {
                 const contentArea = $('#desktop-settings-content');
                 $('#desktop-settings-title').textContent = "桌面设置";
                 
+                // 核心修复：重置返回按钮逻辑，使其返回系统设置
+                $('#desktop-settings-back-btn').onclick = () => UIManager.navigateTo('os-settings');
+
                 contentArea.innerHTML = `
                     <div class="settings-list" style="padding-top: 10px;">
                         <div class="setting-item" id="desktop-set-wallpaper">
@@ -24730,8 +24819,459 @@ async showMomentsSettingsModal() {
                 `;
 
                 $('#desktop-set-wallpaper').onclick = () => this.showDesktopWallpaperModal();
-                $('#desktop-set-widget').onclick = () => this.showWidgetSettingsModal();
+                // 修改：点击进入新的小组件设置子页面
+                $('#desktop-set-widget').onclick = () => this.renderDesktopWidgetSettingsSubPage(); 
                 $('#desktop-set-icons').onclick = () => this.renderDesktopAppIconsSubPage();
+            },
+
+            // --- 桌面图标修改子页面 ---
+            async renderDesktopAppIconsSubPage() {
+                const contentArea = $('#desktop-settings-content');
+                $('#desktop-settings-title').textContent = "修改图标";
+                
+                // 核心修复：重写返回按钮逻辑，使其返回上一级（桌面设置）而不是退出
+                $('#desktop-settings-back-btn').onclick = () => this.renderDesktopSettingsPage();
+                
+                const settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
+                const customIcons = settings.desktopIcons || {};
+
+                // 定义应用列表映射
+                const appList = [
+                    { id: 'open-33chat-btn', name: '33Chat', defaultClass: 'icon-chat', defaultIcon: '<i class="fas fa-comments"></i>' },
+                    { id: 'open-music-btn', name: '音乐', defaultClass: 'icon-music', defaultIcon: '<i class="fas fa-music"></i>' },
+                    { id: 'open-forum-btn', name: '论坛', defaultClass: 'icon-forum', defaultIcon: '<i class="fas fa-globe"></i>' },
+                    { id: 'open-settings-btn', name: '设置', defaultClass: 'icon-settings', defaultIcon: '<i class="fas fa-cog"></i>' },
+                    { id: 'open-prompts-app-btn', name: '提示词', defaultClass: 'icon-prompts', defaultIcon: '<i class="fas fa-lightbulb"></i>' },
+                    { id: 'open-photos-btn', name: '相册', defaultClass: 'icon-photos', defaultIcon: '<i class="fas fa-images"></i>' },
+                    { id: 'dock-sms-btn', name: '短信', defaultClass: 'icon-sms', defaultIcon: '<i class="fas fa-comment-alt"></i>' },
+                    { id: 'dock-unknown-1', name: '未知应用 A', defaultClass: 'icon-unknown', defaultIcon: '<i class="fas fa-question"></i>' },
+                    { id: 'open-my-info-app-btn', name: '我的信息', defaultClass: 'icon-my-info', defaultIcon: '<i class="fas fa-address-card"></i>' }
+                ];
+
+                const createRow = (app) => {
+                    const customIcon = customIcons[app.id];
+                    let iconDisplay;
+                    if (customIcon) {
+                        iconDisplay = `<img src="${customIcon}" style="width:100%; height:100%; object-fit:cover;">`;
+                    } else {
+                        iconDisplay = app.defaultIcon;
+                    }
+                    
+                    const mockStyle = !customIcon ? `background: var(--text-color-light);` : ''; 
+
+                    return `
+                        <div class="app-icon-row" data-app-id="${app.id}">
+                            <div class="app-info-left">
+                                <div class="settings-app-preview ${!customIcon ? app.defaultClass : ''}" style="${mockStyle}">
+                                    ${iconDisplay}
+                                </div>
+                                <span class="settings-app-name">${app.name}</span>
+                            </div>
+                            <div class="app-edit-controls">
+                                <button class="app-edit-btn modify-btn">修改</button>
+                                <button class="app-edit-btn reset-btn" style="${customIcon ? '' : 'display:none; color:#e74c3c;'}">重置</button>
+                            </div>
+                        </div>
+                    `;
+                };
+
+                contentArea.innerHTML = `
+                    <div style="padding: 15px;">
+                        <p style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">点击“修改”可上传图片或输入图片链接。</p>
+                        <div class="settings-list" style="padding: 0; margin: 0; border-radius: 12px; overflow: hidden;">
+                            ${appList.map(app => createRow(app)).join('')}
+                        </div>
+                    </div>
+                    <input type="file" id="app-icon-upload-input" accept="image/*" style="display: none;">
+                `;
+
+                contentArea.onclick = async (e) => {
+                    const row = e.target.closest('.app-icon-row');
+                    if (!row) return;
+                    const appId = row.dataset.appId;
+                    
+                    if (e.target.classList.contains('modify-btn')) {
+                        this.showAppIconModifyModal(appId, () => this.renderDesktopAppIconsSubPage());
+                    } else if (e.target.classList.contains('reset-btn')) {
+                        const newSettings = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
+                        if (newSettings.desktopIcons) {
+                            delete newSettings.desktopIcons[appId];
+                            await DBHelper.put('apiConfig', newSettings);
+                            await this.applyDesktopSettings();
+                            this.renderDesktopAppIconsSubPage();
+                            UIManager.showToast("图标已重置");
+                        }
+                    }
+                };
+            },
+
+            // --- 桌面小组件设置子页面 ---
+            async renderDesktopWidgetSettingsSubPage() {
+                const contentArea = $('#desktop-settings-content');
+                $('#desktop-settings-title').textContent = "小组件设置";
+                
+                // 核心修复：设置返回按钮
+                $('#desktop-settings-back-btn').onclick = () => this.renderDesktopSettingsPage();
+
+                const settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
+                const currentType = settings.desktopWidgetType || 'photo';
+
+                const widgetTypes = [
+                    { value: 'photo', text: '相册', icon: 'fa-images', desc: '展示上传的图片，点击可更换' },
+                    { value: 'time', text: '时钟', icon: 'fa-clock', desc: '显示当前时间和日期' },
+                    { value: 'calendar', text: '日历', icon: 'fa-calendar-alt', desc: '显示月历和重要日倒计时' },
+                    { value: 'sms', text: '短信', icon: 'fa-comment-alt', desc: '模拟短信对话框，支持自定义内容' },
+                    { value: 'music', text: '音乐', icon: 'fa-record-vinyl', desc: '复古黑胶唱片机，显示歌词' }
+                ];
+
+                const typesHtml = widgetTypes.map(t => `
+                    <div class="widget-type-card ${currentType === t.value ? 'selected' : ''}" data-value="${t.value}">
+                        <i class="fas ${t.icon}"></i>
+                        <span>${t.text}</span>
+                    </div>
+                `).join('');
+
+                contentArea.innerHTML = `
+                    <style>
+                        .widget-type-scroll {
+                            display: flex;
+                            gap: 15px;
+                            overflow-x: auto;
+                            padding: 15px;
+                            scrollbar-width: none; /* Firefox */
+                        }
+                        .widget-type-scroll::-webkit-scrollbar { display: none; }
+                        .widget-type-card {
+                            flex-shrink: 0;
+                            width: 80px;
+                            height: 80px;
+                            background: rgba(255,255,255,0.6);
+                            border: 2px solid transparent;
+                            border-radius: 12px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                        }
+                        .widget-type-card.selected {
+                            background: #fff;
+                            border-color: var(--accent-color);
+                            color: var(--accent-color);
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                        }
+                        .widget-type-card i { font-size: 1.5rem; margin-bottom: 5px; }
+                        .widget-type-card span { font-size: 0.8rem; }
+                        
+                        .widget-preview-area {
+                            margin: 10px 15px;
+                            padding: 20px;
+                            background: #e5e5e7; /* 模拟桌面底色 */
+                            border-radius: 20px;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            min-height: 200px;
+                        }
+                        /* 强制预览组件大小 */
+                        .widget-preview-area .ios-widget-large {
+                            position: relative !important;
+                            grid-column: auto !important;
+                            grid-row: auto !important;
+                            width: 100%;
+                            height: 160px; /* 固定高度模拟 */
+                            max-width: 320px;
+                        }
+                        .widget-description {
+                            padding: 0 20px;
+                            color: #666;
+                            font-size: 0.9rem;
+                            text-align: center;
+                            line-height: 1.5;
+                        }
+                    </style>
+                    
+                    <div class="widget-type-scroll">
+                        ${typesHtml}
+                    </div>
+
+                    <div class="widget-preview-area" id="widget-settings-preview">
+                        <!-- 预览内容由JS插入 -->
+                    </div>
+
+                    <p class="widget-description" id="widget-desc-text">
+                        ${widgetTypes.find(t => t.value === currentType).desc}
+                    </p>
+                    
+                    <div style="padding: 20px; display:flex; justify-content:center;">
+                        <button id="widget-save-btn" class="modal-btn btn-primary" style="width: 80%;">应用当前组件</button>
+                    </div>
+                `;
+
+                // 立即渲染一次预览
+                this.renderDesktopWidget(document.getElementById('widget-settings-preview'), settings);
+
+                // 绑定选择事件
+                contentArea.onclick = async (e) => {
+                    const card = e.target.closest('.widget-type-card');
+                    if (card) {
+                        // UI 切换
+                        contentArea.querySelectorAll('.widget-type-card').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                        
+                        const newValue = card.dataset.value;
+                        const desc = widgetTypes.find(t => t.value === newValue).desc;
+                        document.getElementById('widget-desc-text').textContent = desc;
+
+                        // 准备预览配置 (不保存到DB，仅预览)
+                        const tempSettings = JSON.parse(JSON.stringify(settings)); // 深拷贝
+                        tempSettings.desktopWidgetType = newValue;
+                        
+                        // 赋予默认值以便预览
+                        if (!tempSettings.desktopWidgetData) tempSettings.desktopWidgetData = {};
+                        if (newValue === 'sms' && !tempSettings.desktopWidgetData.sms) {
+                            tempSettings.desktopWidgetData.sms = { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
+                        }
+                        if (newValue === 'calendar' && !tempSettings.desktopWidgetData.countdown) {
+                            tempSettings.desktopWidgetData.countdown = { title: '纪念日', date: new Date().toISOString().split('T')[0] };
+                        }
+
+                        // 渲染预览
+                        this.renderDesktopWidget(document.getElementById('widget-settings-preview'), tempSettings);
+                    }
+                    
+                    // 保存按钮
+                    if (e.target.id === 'widget-save-btn') {
+                        const selectedCard = contentArea.querySelector('.widget-type-card.selected');
+                        if (selectedCard) {
+                            const selectedType = selectedCard.dataset.value;
+                            
+                            const settingsToSave = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
+                            settingsToSave.desktopWidgetType = selectedType;
+                            
+                            // 同样初始化默认值并保存
+                            if (!settingsToSave.desktopWidgetData) settingsToSave.desktopWidgetData = {};
+                            if (selectedType === 'sms' && !settingsToSave.desktopWidgetData.sms) {
+                                settingsToSave.desktopWidgetData.sms = { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
+                            }
+                            if (selectedType === 'calendar' && !settingsToSave.desktopWidgetData.countdown) {
+                                settingsToSave.desktopWidgetData.countdown = { title: '纪念日', date: new Date().toISOString().split('T')[0] };
+                            }
+
+                            await DBHelper.put('apiConfig', settingsToSave);
+                            
+                            // 更新真正的桌面组件
+                            await this.renderDesktopWidget(); 
+                            
+                            UIManager.showToast("小组件已应用");
+                        }
+                    }
+                };
+            },
+            
+            // --- 渲染桌面小组件 (通用逻辑) ---
+            // targetEl: 渲染的目标容器，默认为桌面的 #desktop-widget
+            // previewSettings: 可选，用于预览时传入临时的配置对象
+            async renderDesktopWidget(targetEl = null, previewSettings = null) {
+                const widgetEl = targetEl || document.getElementById('desktop-widget');
+                if (!widgetEl) return;
+
+                let settings;
+                if (previewSettings) {
+                    settings = previewSettings;
+                } else {
+                    settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
+                }
+                
+                const type = settings.desktopWidgetType || 'photo';
+                const widgetData = settings.desktopWidgetData || {};
+
+                // 重置容器样式
+                widgetEl.className = 'ios-widget-large'; 
+                if (type !== 'photo') widgetEl.classList.add('transparent-bg');
+                
+                widgetEl.innerHTML = '';
+                
+                // 克隆节点以移除旧事件监听 (仅针对桌面主组件)
+                let container = widgetEl;
+                if (!targetEl) {
+                    const newWidgetEl = widgetEl.cloneNode(true);
+                    widgetEl.parentNode.replaceChild(newWidgetEl, widgetEl);
+                    container = newWidgetEl;
+                }
+
+                if (type === 'photo') {
+                    const img = document.createElement('img');
+                    // 如果是预览模式，尝试读取 savedImg，如果没有则显示占位
+                    const savedImg = localStorage.getItem('ios_widget_img');
+                    img.style.display = savedImg ? 'block' : 'none';
+                    img.src = savedImg || '';
+                    if (!targetEl) img.id = 'widget-img'; // 仅在桌面模式下赋予ID
+                    
+                    const placeholder = document.createElement('span');
+                    placeholder.className = 'widget-placeholder';
+                    placeholder.innerHTML = '<i class="fas fa-plus"></i> 点击上传图片';
+                    placeholder.style.display = savedImg ? 'none' : 'block';
+
+                    // 仅在桌面模式下绑定上传事件
+                    if (!targetEl) {
+                        const input = document.createElement('input');
+                        input.type = 'file';
+                        input.accept = 'image/*';
+                        input.style.display = 'none';
+                        input.addEventListener('change', async (e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                                try {
+                                    const base64 = await Utils.compressImage(file, 800, 800, 0.8);
+                                    img.src = base64;
+                                    img.style.display = 'block';
+                                    placeholder.style.display = 'none';
+                                    localStorage.setItem('ios_widget_img', base64);
+                                } catch (err) { UIManager.showToast("图片处理失败"); }
+                            }
+                        });
+                        container.appendChild(input);
+                        container.onclick = () => input.click();
+                    }
+
+                    container.appendChild(img);
+                    container.appendChild(placeholder);
+
+                } else if (type === 'time') {
+                    const updateTime = () => {
+                        const now = new Date();
+                        const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                        const dateStr = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
+                        container.innerHTML = `
+                            <div class="widget-time-container">
+                                <div class="widget-time-large">${timeStr}</div>
+                                <div class="widget-date-small">${dateStr}</div>
+                            </div>
+                        `;
+                    };
+                    updateTime();
+                    // 仅在桌面模式下启动定时器
+                    if (!targetEl) {
+                        if (window.desktopClockTimer) clearInterval(window.desktopClockTimer);
+                        window.desktopClockTimer = setInterval(updateTime, 1000);
+                    }
+
+                } else if (type === 'calendar') {
+                    const countData = widgetData.countdown || { title: '纪念日', date: new Date().toISOString().split('T')[0] };
+                    const targetDate = new Date(countData.date);
+                    const today = new Date();
+                    targetDate.setHours(0,0,0,0);
+                    today.setHours(0,0,0,0);
+                    const diffTime = targetDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    let countDisplayHtml = '';
+                    if (diffDays > 0) {
+                        countDisplayHtml = `<div class="count-label">还剩</div><div class="count-days">${diffDays}<span style="font-size: 1rem; font-weight: normal; margin-left: 2px;">天</span></div>`;
+                    } else if (diffDays < 0) {
+                        countDisplayHtml = `<div class="count-label">已过去</div><div class="count-days">${Math.abs(diffDays)}<span style="font-size: 1rem; font-weight: normal; margin-left: 2px;">天</span></div>`;
+                    } else {
+                        countDisplayHtml = `<div class="count-days" style="color: var(--accent-color);">今天</div>`;
+                    }
+
+                    const now = new Date();
+                    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+                    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+                    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+                    
+                    let calGridHtml = '';
+                    ['S','M','T','W','T','F','S'].forEach(d => calGridHtml += `<div class="cal-day-header">${d}</div>`);
+                    for(let i=0; i<firstDay; i++) calGridHtml += `<div></div>`;
+                    for(let i=1; i<=daysInMonth; i++) {
+                        const isToday = i === now.getDate();
+                        calGridHtml += `<div class="cal-day ${isToday ? 'today' : ''}">${i}</div>`;
+                    }
+
+                    container.innerHTML = `
+                        <div class="widget-cal-count-container">
+                            <div class="widget-cal-part">
+                                <div class="cal-month-title">${monthNames[now.getMonth()]}</div>
+                                <div class="cal-grid">${calGridHtml}</div>
+                            </div>
+                            <div class="widget-count-part" id="${!targetEl ? 'widget-count-click' : ''}">
+                                <div class="count-target">${countData.title}</div>
+                                ${countDisplayHtml}
+                            </div>
+                        </div>
+                    `;
+
+                    // 仅在桌面模式下绑定点击修改
+                    if (!targetEl) {
+                        setTimeout(() => {
+                            const countPart = document.getElementById('widget-count-click');
+                            if(countPart) countPart.onclick = (e) => {
+                                e.stopPropagation();
+                                this.showCountdownEditModal(countData);
+                            }
+                        }, 0);
+                    }
+
+                } else if (type === 'sms') {
+                    const smsData = widgetData.sms || { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
+                    const themeClass = `sms-theme-${smsData.theme}`;
+
+                    container.innerHTML = `
+                        <div class="widget-sms-container ${themeClass}">
+                            <div class="widget-sms-row left">
+                                <div class="sms-name-tag"><div class="sms-name-line"></div> ${smsData.name}</div>
+                                <div class="sms-bubble-box">${smsData.msg1}</div>
+                                <div class="sms-time-tag">13:14</div>
+                            </div>
+                            <div class="widget-sms-row right">
+                                <div class="sms-time-tag">05:20</div>
+                                <div class="sms-bubble-box">${smsData.msg2}</div>
+                            </div>
+                        </div>
+                    `;
+                    // 仅在桌面模式下绑定点击修改
+                    if (!targetEl) container.onclick = () => this.showSmsEditModal(smsData);
+
+                } else if (type === 'music') {
+                    let title = '无音乐播放';
+                    let artist = '---';
+                    let displayCover = MusicManager.defaultCover;
+                    let isPlaying = false;
+
+                    // 尝试获取当前音乐信息
+                    if (window.MusicManager && MusicManager.currentPlaylist && MusicManager.currentPlaylist.length > 0 && MusicManager.currentIndex >= 0) {
+                        const currentSong = MusicManager.currentPlaylist[MusicManager.currentIndex];
+                        isPlaying = !MusicManager.audio.paused;
+                        title = currentSong.name;
+                        artist = currentSong.artist;
+                        displayCover = MusicManager.currentDisplayCover || MusicManager.defaultCover;
+                    }
+
+                    container.innerHTML = `
+                        <div class="widget-music-box">
+                            <div class="wm-disc-area">
+                                <div class="wm-disc ${isPlaying ? 'playing' : ''}" id="${!targetEl?'wm-disc':''}">
+                                    <img src="${displayCover}" class="wm-cover" id="${!targetEl?'wm-cover':''}">
+                                </div>
+                                <div class="wm-needle ${isPlaying ? 'playing' : ''}" id="${!targetEl?'wm-needle':''}"></div>
+                            </div>
+                            <div class="wm-info">
+                                <div class="wm-title" id="${!targetEl?'wm-title':''}">${title}</div>
+                                <div class="wm-artist" id="${!targetEl?'wm-artist':''}">${artist}</div>
+                                <div class="wm-lyrics" id="${!targetEl?'wm-lyrics':''}"></div>
+                            </div>
+                            <div class="wm-status-icon"><i class="fas fa-music"></i></div>
+                        </div>
+                    `;
+                    
+                    if (!targetEl) {
+                        container.onclick = () => {
+                            const musicBtn = document.getElementById('open-music-btn');
+                            if(musicBtn) musicBtn.click();
+                        };
+                    }
+                }
             },
 
             async showDesktopWallpaperModal() {
@@ -24826,217 +25366,6 @@ async showMomentsSettingsModal() {
             },
 
 
-            async renderDesktopWidget() {
-                const widgetEl = document.getElementById('desktop-widget');
-                if (!widgetEl) return;
-
-                const settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
-                const type = settings.desktopWidgetType || 'photo';
-                const widgetData = settings.desktopWidgetData || {};
-
-                // 清除旧类和内容
-                widgetEl.className = 'ios-widget-large'; 
-                widgetEl.innerHTML = '';
-                
-                // 移除之前的事件监听器 (通过克隆节点)
-                const newWidgetEl = widgetEl.cloneNode(true);
-                widgetEl.parentNode.replaceChild(newWidgetEl, widgetEl);
-                const container = newWidgetEl;
-
-                if (type === 'photo') {
-                    // 1. 相册组件 (旧逻辑)
-                    const img = document.createElement('img');
-                    const savedImg = localStorage.getItem('ios_widget_img');
-                    img.style.display = savedImg ? 'block' : 'none';
-                    img.src = savedImg || '';
-                    img.id = 'widget-img';
-                    
-                    const placeholder = document.createElement('span');
-                    placeholder.className = 'widget-placeholder';
-                    placeholder.innerHTML = '<i class="fas fa-plus"></i> 点击上传图片';
-                    placeholder.style.display = savedImg ? 'none' : 'block';
-
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.style.display = 'none';
-                    input.addEventListener('change', async (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                            try {
-                                const base64 = await Utils.compressImage(file, 800, 800, 0.8);
-                                img.src = base64;
-                                img.style.display = 'block';
-                                placeholder.style.display = 'none';
-                                localStorage.setItem('ios_widget_img', base64);
-                            } catch (err) { UIManager.showToast("图片处理失败"); }
-                        }
-                    });
-
-                    container.appendChild(img);
-                    container.appendChild(placeholder);
-                    container.appendChild(input);
-                    container.onclick = () => input.click();
-
-                } else if (type === 'time') {
-                    // 2. 时间组件
-                    container.classList.add('transparent-bg');
-                    
-                    const updateTime = () => {
-                        const now = new Date();
-                        const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-                        const dateStr = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
-                        container.innerHTML = `
-                            <div class="widget-time-container">
-                                <div class="widget-time-large">${timeStr}</div>
-                                <div class="widget-date-small">${dateStr}</div>
-                            </div>
-                        `;
-                    };
-                    updateTime();
-                    // 存储 interval ID 以便清理 (这里简单处理，实际应用可能需要全局管理timer)
-                    if (window.desktopClockTimer) clearInterval(window.desktopClockTimer);
-                    window.desktopClockTimer = setInterval(updateTime, 1000);
-
-                } else if (type === 'calendar') {
-                    // 3. 日历+倒计时组件
-                    const countData = widgetData.countdown || { title: '纪念日', date: new Date().toISOString().split('T')[0] };
-                    
-                    // 计算倒计时天数
-                    const targetDate = new Date(countData.date);
-                    const today = new Date();
-                    targetDate.setHours(0,0,0,0);
-                    today.setHours(0,0,0,0);
-                    const diffTime = targetDate - today;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    
-                    // 构建显示的 HTML
-                    let countDisplayHtml = '';
-                    if (diffDays > 0) {
-                        countDisplayHtml = `
-                            <div class="count-label">还剩</div>
-                            <div class="count-days">${diffDays}<span style="font-size: 1rem; font-weight: normal; margin-left: 2px;">天</span></div>
-                        `;
-                    } else if (diffDays < 0) {
-                        countDisplayHtml = `
-                            <div class="count-label">已过去</div>
-                            <div class="count-days">${Math.abs(diffDays)}<span style="font-size: 1rem; font-weight: normal; margin-left: 2px;">天</span></div>
-                        `;
-                    } else {
-                        countDisplayHtml = `
-                            <div class="count-days" style="color: var(--accent-color);">今天</div>
-                        `;
-                    }
-
-                    // 生成日历HTML
-                    const now = new Date();
-                    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-                    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-                    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay(); // 0 is Sunday
-                    
-                    let calGridHtml = '';
-                    // 表头
-                    ['S','M','T','W','T','F','S'].forEach(d => calGridHtml += `<div class="cal-day-header">${d}</div>`);
-                    // 空白
-                    for(let i=0; i<firstDay; i++) calGridHtml += `<div></div>`;
-                    // 日期
-                    for(let i=1; i<=daysInMonth; i++) {
-                        const isToday = i === now.getDate();
-                        calGridHtml += `<div class="cal-day ${isToday ? 'today' : ''}">${i}</div>`;
-                    }
-
-                    container.innerHTML = `
-                        <div class="widget-cal-count-container">
-                            <div class="widget-cal-part">
-                                <div class="cal-month-title">${monthNames[now.getMonth()]}</div>
-                                <div class="cal-grid">${calGridHtml}</div>
-                            </div>
-                            <div class="widget-count-part" id="widget-count-click">
-                                <div class="count-target">${countData.title}</div>
-                                ${countDisplayHtml}
-                            </div>
-                        </div>
-                    `;
-
-                    // 绑定倒计时点击修改
-                    setTimeout(() => {
-                        const countPart = document.getElementById('widget-count-click');
-                        if(countPart) countPart.onclick = (e) => {
-                            e.stopPropagation();
-                            this.showCountdownEditModal(countData);
-                        }
-                    }, 0);
-
-                } else if (type === 'sms') {
-                    // 4. 短信风组件
-                    container.classList.add('transparent-bg');
-                    const smsData = widgetData.sms || { theme: 'bw', name: '宝宝', msg1: '永远是我和你的约定 ❤️', msg2: '要永远永远在一起 ( ˘ ³˘)♥' };
-                    
-                    // 映射主题到class
-                    const themeClass = `sms-theme-${smsData.theme}`; // bw, pink, blue, green
-
-                    container.innerHTML = `
-                        <div class="widget-sms-container ${themeClass}">
-                            <div class="widget-sms-row left">
-                                <div class="sms-name-tag">
-                                    <div class="sms-name-line"></div> ${smsData.name}
-                                </div>
-                                <div class="sms-bubble-box">${smsData.msg1}</div>
-                                <div class="sms-time-tag">13:14</div>
-                            </div>
-                            <div class="widget-sms-row right">
-                                <div class="sms-time-tag">05:20</div>
-                                <div class="sms-bubble-box">${smsData.msg2}</div>
-                            </div>
-                        </div>
-                    `;
-
-                    container.onclick = () => this.showSmsEditModal(smsData);
-                } else if (type === 'music') {
-                    // 5. 音乐播放器组件
-                    container.classList.add('transparent-bg'); // 清除默认背景
-                    
-                    // 获取当前音乐状态
-                    const currentSong = MusicManager.currentPlaylist[MusicManager.currentIndex];
-                    const isPlaying = !MusicManager.audio.paused;
-                    const title = currentSong ? currentSong.name : '无音乐播放';
-                    const artist = currentSong ? currentSong.artist : '---';
-                    const cover = (currentSong && currentSong.sourceType === 'local' && MusicManager.currentObjectUrl) 
-                        ? MusicManager.defaultCover // 本地音乐暂时无法在组件显示blob图片，使用默认
-                        : (currentSong && currentSong.cover ? currentSong.cover : MusicManager.defaultCover);
-                    
-                    // 为了能显示本地封面，尝试直接读取 MusicManager 的 cover
-                    // 如果是播放列表里的 cover 属性，应该可以直接用
-                    const displayCover = (currentSong && currentSong.playlistId) 
-                        ? (MusicManager.playlists.find(p=>p.id===currentSong.playlistId)?.cover || MusicManager.defaultCover) 
-                        : MusicManager.defaultCover;
-
-                    container.innerHTML = `
-                        <div class="widget-music-box">
-                            <div class="wm-disc-area">
-                                <div class="wm-disc ${isPlaying ? 'playing' : ''}" id="wm-disc">
-                                    <img src="${displayCover}" class="wm-cover" id="wm-cover">
-                                </div>
-                                <div class="wm-needle ${isPlaying ? 'playing' : ''}" id="wm-needle"></div>
-                            </div>
-                            <div class="wm-info">
-                                <div class="wm-title" id="wm-title">${title}</div>
-                                <div class="wm-artist" id="wm-artist">${artist}</div>
-                                <!-- 新增歌词容器 -->
-                                <div class="wm-lyrics" id="wm-lyrics"></div>
-                            </div>
-                            <div class="wm-status-icon"><i class="fas fa-music"></i></div>
-                        </div>
-                    `;
-                    
-                    // 点击跳转到音乐APP
-                    container.onclick = () => {
-                        const musicBtn = document.getElementById('open-music-btn');
-                        if(musicBtn) musicBtn.click();
-                    };
-                }
-            },
-
 
             // 倒计时修改弹窗
             showCountdownEditModal(currentData) {
@@ -25120,98 +25449,6 @@ async showMomentsSettingsModal() {
                 });
             },
 
-            async saveDesktopWallpaper(src) {
-                const settingsToSave = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
-                settingsToSave.desktopWallpaper = src;
-                await DBHelper.put('apiConfig', settingsToSave);
-                
-                await this.applyDesktopSettings();
-                
-                $('#desktop-wp-preview').src = src;
-                $('#desktop-wp-preview').style.display = 'block';
-                $('#desktop-wp-placeholder').style.display = 'none';
-                UIManager.showToast("桌面壁纸已更新");
-            },
-
-            async renderDesktopAppIconsSubPage() {
-                const contentArea = $('#desktop-settings-content');
-                $('#desktop-settings-title').textContent = "修改图标";
-                
-                const settings = await DBHelper.get('apiConfig', 'themeSettings') || {};
-                const customIcons = settings.desktopIcons || {};
-
-                // 定义应用列表映射
-                const appList = [
-                    { id: 'open-33chat-btn', name: '33Chat', defaultClass: 'icon-chat', defaultIcon: '<i class="fas fa-comments"></i>' },
-                    { id: 'open-music-btn', name: '音乐', defaultClass: 'icon-music', defaultIcon: '<i class="fas fa-music"></i>' },
-                    { id: 'open-forum-btn', name: '论坛', defaultClass: 'icon-forum', defaultIcon: '<i class="fas fa-globe"></i>' },
-                    { id: 'open-settings-btn', name: '设置', defaultClass: 'icon-settings', defaultIcon: '<i class="fas fa-cog"></i>' },
-                    { id: 'open-prompts-app-btn', name: '提示词', defaultClass: 'icon-prompts', defaultIcon: '<i class="fas fa-lightbulb"></i>' },
-                    { id: 'open-photos-btn', name: '相册', defaultClass: 'icon-photos', defaultIcon: '<i class="fas fa-images"></i>' }, // 使用简单的图标作为默认备选
-                    { id: 'dock-sms-btn', name: '短信', defaultClass: 'icon-sms', defaultIcon: '<i class="fas fa-comment-alt"></i>' },
-                    { id: 'dock-unknown-1', name: '未知应用 A', defaultClass: 'icon-unknown', defaultIcon: '<i class="fas fa-question"></i>' },
-                    { id: 'open-my-info-app-btn', name: '我的信息', defaultClass: 'icon-my-info', defaultIcon: '<i class="fas fa-address-card"></i>' }
-                ];
-
-                const createRow = (app) => {
-                    const customIcon = customIcons[app.id];
-                    let iconDisplay;
-                    if (customIcon) {
-                        iconDisplay = `<img src="${customIcon}" style="width:100%; height:100%; object-fit:cover;">`;
-                    } else {
-                        // 使用默认样式渲染预览
-                        iconDisplay = app.defaultIcon; // 这里简化，直接显示图标符号，背景色由父级控制有点复杂，简单处理
-                    }
-                    
-                    // 为了预览，我们需要模拟 icon 的背景色
-                    const mockStyle = !customIcon ? `background: var(--text-color-light);` : ''; // 简单给个灰背景，实际背景在class里
-
-                    return `
-                        <div class="app-icon-row" data-app-id="${app.id}">
-                            <div class="app-info-left">
-                                <div class="settings-app-preview ${!customIcon ? app.defaultClass : ''}" style="${mockStyle}">
-                                    ${iconDisplay}
-                                </div>
-                                <span class="settings-app-name">${app.name}</span>
-                            </div>
-                            <div class="app-edit-controls">
-                                <button class="app-edit-btn modify-btn">修改</button>
-                                <button class="app-edit-btn reset-btn" style="${customIcon ? '' : 'display:none; color:#e74c3c;'}">重置</button>
-                            </div>
-                        </div>
-                    `;
-                };
-
-                contentArea.innerHTML = `
-                    <div style="padding: 15px;">
-                        <p style="font-size: 0.9rem; color: #888; margin-bottom: 10px;">点击“修改”可上传图片或输入图片链接。</p>
-                        <div class="settings-list" style="padding: 0; margin: 0; border-radius: 12px; overflow: hidden;">
-                            ${appList.map(app => createRow(app)).join('')}
-                        </div>
-                    </div>
-                    <input type="file" id="app-icon-upload-input" accept="image/*" style="display: none;">
-                `;
-
-                // 绑定事件
-                contentArea.onclick = async (e) => {
-                    const row = e.target.closest('.app-icon-row');
-                    if (!row) return;
-                    const appId = row.dataset.appId;
-                    
-                    if (e.target.classList.contains('modify-btn')) {
-                        this.showAppIconModifyModal(appId, () => this.renderDesktopAppIconsSubPage());
-                    } else if (e.target.classList.contains('reset-btn')) {
-                        const newSettings = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
-                        if (newSettings.desktopIcons) {
-                            delete newSettings.desktopIcons[appId];
-                            await DBHelper.put('apiConfig', newSettings);
-                            await this.applyDesktopSettings();
-                            this.renderDesktopAppIconsSubPage(); // 刷新列表
-                            UIManager.showToast("图标已重置");
-                        }
-                    }
-                };
-            },
 
             showAppIconModifyModal(appId, callback) {
                 UIManager.showModal({
@@ -28984,7 +29221,12 @@ bindGlobalPromptsPageEvents() {
                         { text: '删除', class: 'btn-danger', handler: async () => {
                             await DBHelper.delete('prompts', promptId);
                             UIManager.hideModal();
-                            this.renderPromptsPage();
+                            // 核心修复：使用 PromptsAppManager 明确指定对象，防止 this 丢失
+                            if (PromptsAppManager.currentFolderId && $('#prompts-view-folder-detail').classList.contains('active')) {
+                                PromptsAppManager.openFolderDetail(PromptsAppManager.currentFolderId);
+                            } else {
+                                PromptsAppManager.renderFolderList();
+                            }
                         }}
                     ]
                 });
@@ -29057,7 +29299,8 @@ bindGlobalPromptsPageEvents() {
                             
                             await DBHelper.delete('promptFolders', folderId);
                             UIManager.hideModal();
-                            this.renderPromptsPage();
+                            // 核心修复：使用 PromptsAppManager 明确指定对象，防止 this 丢失
+                            PromptsAppManager.renderFolderList();
                         }}
                     ]
                 });
@@ -31154,21 +31397,20 @@ async handleAddCircle() {
             startPomodoro() {
                 const goal = $('#pomodoro-goal-input').value.trim();
                 if (!goal) {
-                    UIManager.showToast("先为你的专注时段定一个目标吧！");
+                    UIManager.showToast("写一个小目标，开始专注吧~");
                     return;
                 }
 
                 appState.pomodoro.isActive = true;
                 appState.pomodoro.goal = goal;
-                appState.pomodoro.totalSeconds = 1500; 
+                appState.pomodoro.totalSeconds = 1500; // 25分钟
                 appState.pomodoro.endTime = Date.now() + appState.pomodoro.totalSeconds * 1000;
                 appState.pomodoro.timerId = setInterval(() => this.updatePomodoroTimer(), 1000);
 
-                
                 localStorage.setItem('pomodoroState', JSON.stringify(appState.pomodoro));
 
                 UIManager.renderPomodoroPage();
-                this.updateFloatingBallVisibility();
+                this.updateFloatingBallVisibility(); // 更新灵动岛状态
             },
 
             stopPomodoro(isCompleted = false) {
@@ -31184,7 +31426,6 @@ async handleAddCircle() {
                 appState.pomodoro.goal = '';
                 appState.pomodoro.endTime = null;
                 appState.pomodoro.timerId = null;
-                
                 
                 localStorage.setItem('pomodoroState', JSON.stringify(appState.pomodoro));
 
@@ -31210,24 +31451,36 @@ async handleAddCircle() {
                 const seconds = remainingSeconds % 60;
                 const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
+                // 更新主页面
                 if (appState.currentPage === 'pomodoro') {
-                    $('#pomodoro-timer-display').textContent = timeString;
+                    const display = $('#pomodoro-timer-display');
+                    if(display) display.textContent = timeString;
                 }
                 
-                const floatBall = $('#pomodoro-float-ball');
-                if (floatBall) {
-                    floatBall.querySelector('.time-left').textContent = timeString;
-                    const progress = (appState.pomodoro.totalSeconds - remainingSeconds) / appState.pomodoro.totalSeconds;
-                    floatBall.querySelector('.progress-ring').style.background = `conic-gradient(var(--accent-color) ${progress * 360}deg, #e0e0e0 0deg)`;
+                // 更新灵动岛
+                const island = $('#pomodoro-island');
+                if (island) {
+                    const timerText = document.getElementById('island-timer-display');
+                    const progressBar = document.getElementById('island-progress-bar');
+                    
+                    if(timerText) timerText.textContent = timeString;
+                    
+                    if(progressBar) {
+                        const progressPercent = (remainingSeconds / appState.pomodoro.totalSeconds) * 100;
+                        progressBar.style.width = `${progressPercent}%`;
+                    }
                 }
             },
 
             updateFloatingBallVisibility() {
-                const floatBall = $('#pomodoro-float-ball');
+                const island = $('#pomodoro-island');
+                if (!island) return;
+                
+                // 如果番茄钟激活，且不在番茄钟页面，显示灵动岛
                 if (appState.pomodoro.isActive && appState.currentPage !== 'pomodoro') {
-                    floatBall.classList.remove('hidden');
+                    island.classList.add('active');
                 } else {
-                    floatBall.classList.add('hidden');
+                    island.classList.remove('active');
                 }
             },
 
