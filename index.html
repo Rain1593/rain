@@ -13787,15 +13787,16 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
 **你当前的状态/行程：{SCHEDULE_DESC}**
 
 任务：
-虽然你现在处于上述状态，且玩家的回复停止在上述聊天记录里，并没有给你发新消息，但你突然想给玩家发个消息。
+玩家的回复停止在上述聊天记录里，并没有给你回复新消息。
 请结合你当前正在做的事（{SCHEDULE_DESC}）来决定发送的内容。
 
 **话题选择策略（请灵活选择）：**
-1. **新话题（高优先级）：** 当当前时间与上一条最新消息的时间间隔超过多个小时，可以开启一个新话题。分享你刚刚看到有趣的、好玩的、或者与你自己/玩家有关的事情。比如看到了好吃的、想到了玩家喜欢的某样东西、或者单纯想吐槽一下现在的状态。
+1. **新话题（高优先级）：** 当当前时间与上一条最新消息的时间间隔超过多个小时，或者你认为上一个话题已经重复提了太多遍了（如一直提一只猫/等待/重复催促等），可以开启一个新话题。分享你刚刚看到有趣的、好玩的、或者与你自己/玩家有关的事情。比如看到了好吃的、想到了玩家喜欢的某样东西、或者单纯想吐槽一下现在的状态；也可以适当分享一些糟糕的事情，比较生活不是一帆风顺的，分享一些生活里的小糟糕小烦恼和小情绪。
 2. **延续话题（高优先级）：**  当当前时间与上一条最新消息的时间间隔不久时，观察【最近聊天记录】，如果上一段对话似乎意犹未尽，或者是戛然而止的，你可以尝试接上之前的话题，或者对之前的话题做一个收尾/补充。
 3. **朋友圈（特殊）：** 如果你绑定了朋友圈，且此刻觉得发一条动态比私聊更合适（比如看到风景、吃美食），可以使用朋友圈格式发布。
 
 **回复格式要求（严格遵守）：**
+ - 你的所有回复都必须严格遵循以下格式，使用**角色名**，而不是其他昵称/称呼，每一句话都是一个独立的单元。
 1. **普通格式**：
    - **普通文本消息**：请将你的普通回复拆分成多个通畅的短句，并使用格式：[角色名|消息内容]。例如：[陈奚楷|你好啊]。
    - 表情包：<角色名|表情包名称>，**禁止在<>外面包裹[]**。你必须在< >中使用提供的表情包名称。没有合适的就不使用表情包，禁止虚构表情包名称，可用表情包名称：{EMOJI_LIST}
@@ -13814,6 +13815,10 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
 3. **心声**：
    - 必填：【心声|角色名|你的心声】
 
+**活人感原则**
+- 避免与前两次回复使用一致的格式（如1次文本+一次图片+语音）等消息类型，会给玩家带来疲惫感
+- 每次的回复根据人设和间隔时长有所区分（间隔比较短时可以少回复几句，人设越高冷，回复的话越少;情绪激动/失控时例外）
+
 **严禁事项：**
 - 严禁代入玩家发言。
 - 严禁输出分析过程，直接输出结果。
@@ -13831,9 +13836,7 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
                         const retracter = (msg.type === 'sent') ? myName : senderName;
                         return `{${retracter}|${msg.content}}`;
                     }
-                    if (msg.segmentType === 'inner_voice') {
-                         return `【心声|${senderName}|${msg.content}】`;
-                    }
+                    // 已移除心声的格式化逻辑
                     switch (msg.segmentType) {
                         case 'text': return `[${senderName}|${msg.content}]`;
                         case 'emoji-image': return `<${senderName}|${msg.content}>`;
@@ -13882,7 +13885,8 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
                     }
                 };
 
-                const relevantHistory = history.filter(m => m.segmentType !== 'essay' && (!m.isHidden || (m.isHidden && m.forAi === true)));
+                // 修改：在过滤器中排除 inner_voice 类型
+                const relevantHistory = history.filter(m => m.segmentType !== 'essay' && m.segmentType !== 'inner_voice' && (!m.isHidden || (m.isHidden && m.forAi === true)));
                 if (relevantHistory.length === 0) return [];
 
                 let turns = [];
@@ -14806,13 +14810,13 @@ ${promptLines.join('\n\n')}
                 if (isGroup) {
                     situationPrompt = `你们上次聊天是 ${lastTimeFormatted}，现在是 ${currentTimeFormatted}，距离现在过去 ${durationString} 了。在这段时间内，玩家“${myProfile.name}”并不在线，你们可以互相之间进行自由交流。交流内容可以与玩家有关，也可以与玩家无关。**请注意，你生成的所有回复的时间都必须严格介于上次聊天时间和当前时间之间，绝不能超出。**`;
                 } else {
-                    situationPrompt = `“${myProfile.name}”上次和你聊天时间是 ${lastTimeFormatted}，现在是 ${currentTimeFormatted}，距离现在已经过去了 ${durationString}。请你根据你的人设，说一些在这段时间里你可能会对“${myProfile.name}”说的话，也可能是这段时间内你遇到的新鲜的事，想和TA分享。这些话不一定是同一时间发的，有时候只隔了一两分钟，有可能你可能隔了十几二十分钟才发下一条，所以注意消息的口吻。**你生成的所有回复的时间都必须严格介于上次聊天时间和当前时间之间，绝不能超出。**如果对方离开的时间只有几个小时或者只是晚上到白天(睡觉)，可以不用发很多条消息。`;
+                    situationPrompt = `“${myProfile.name}”上次和你聊天时间是 ${lastTimeFormatted}，现在是 ${currentTimeFormatted}，距离现在已经过去了 ${durationString}。请你根据你的人设，说一些在这段时间里你遇到的新鲜的事，想和TA分享。这些话不一定是同一时间发的，有时候只隔了一两分钟，有可能你可能隔了十几二十分钟才发下一条，所以注意消息的口吻。**你生成的所有回复的时间都必须严格介于上次聊天时间和当前时间之间，绝不能超出。**如果对方离开的时间只有几个小时或者只是晚上到白天(睡觉)，可以不用发很多条消息。`;
                 }
 
                 const formatMessageContent = (msg, senderName, myName) => { 
                     const recipientName = msg.cardData?.recipientName || '对方'; 
                     if (msg.isRetracted) return `{${(msg.type === 'sent') ? myName : senderName}|${msg.content}}`;
-                    if (msg.segmentType === 'inner_voice') return `【心声|${senderName}|${msg.content}】`;
+                    // 已移除心声处理
                     switch (msg.segmentType) {
                         case 'text': return `[${senderName}|${msg.content}]`;
                         case 'emoji-image': return `<${senderName}|${msg.content}>`;
@@ -14840,7 +14844,8 @@ ${promptLines.join('\n\n')}
                 const buildHistoryBlock = (history, title, turnLimit) => { 
                     if (!history || history.length === 0) return '';
                     let promptHistoryTurns = [];
-                    for (const msg of history.filter(m => m.segmentType !== 'essay')) {
+                    // 修改：过滤器中增加 inner_voice 排除
+                    for (const msg of history.filter(m => m.segmentType !== 'essay' && m.segmentType !== 'inner_voice')) {
                         const sender = (msg.type === 'sent') ? myProfile : allContacts.find(c => c.id === msg.senderId);
                         if (!sender && msg.segmentType !== 'system') continue;
                         const formattedContent = formatMessageContent(msg, sender ? sender.name : '系统', myProfile.name);
@@ -15008,13 +15013,21 @@ ${promptLines.join('\n\n')}
                         return null;
                     }
 
-                    // 新增：私聊验证逻辑
+                    // 新增：私聊验证逻辑 (修复后台报错及误杀)
                     const currentChatId = appState.currentChatId;
-                    const isGroupChat = currentChatId.startsWith('group-');
-                    if (!isGroupChat) {
-                        if (sender.id !== currentChatId) {
-                            console.warn(`【私聊过滤】AI尝试让角色“${senderName}”在错误的私聊窗口发言，已阻止。当前私聊对象ID: ${currentChatId}`);
-                            return null; // 关键：阻止消息创建
+                    
+                    // 逻辑修正：
+                    // 1. 必须当前有打开聊天窗口 (currentChatId 存在)
+                    // 2. 且当前处理的消息目标 (chatId) 就是当前打开的窗口 (currentChatId)
+                    // 只有满足这两个条件，才需要校验“发送者是否匹配”，防止AI幻觉串台。
+                    // 如果是后台任务(currentChatId为null) 或者 后台收到了其他人的消息(chatId !== currentChatId)，则不应该拦截。
+                    if (currentChatId && currentChatId === chatId) {
+                        const isGroupChat = currentChatId.startsWith('group-');
+                        if (!isGroupChat) {
+                            if (sender.id !== currentChatId) {
+                                console.warn(`【私聊过滤】AI尝试让角色“${senderName}”在错误的私聊窗口发言，已阻止。当前私聊对象ID: ${currentChatId}`);
+                                return null; // 关键：阻止消息创建
+                            }
                         }
                     }
 
@@ -15144,7 +15157,7 @@ ${promptLines.join('\n\n')}
                                     const isUrl = imageContent.startsWith('http');
                                     baseMessage.content = `[图片] ${imageContent}`;
                                     baseMessage.cardData = {
-                                        imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/图片加载中.jpg',
+                                        imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/加载中_1.png',
                                         description: imageContent
                                     };
                                     break;
@@ -15199,7 +15212,8 @@ ${promptLines.join('\n\n')}
                 }
                 if (displayableMessages.length > 0) {
                     const lastDisplayableMsg = displayableMessages[displayableMessages.length - 1];
-                    const isUnread = chatId !== appState.currentChatId;
+                    // 修改：如果当前不在该聊天窗口，或者页面处于后台(不可见)状态，都视为未读
+                    const isUnread = chatId !== appState.currentChatId || document.hidden;
                     await UIManager.updateChatMetadata(chatId, lastDisplayableMsg, isUnread ? displayableMessages.length : 0);
                 }
                 
@@ -16269,7 +16283,7 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                                 const isUrl = imageContent.startsWith('http');
                                 baseMessage.content = `[图片] ${imageContent}`;
                                 baseMessage.cardData = {
-                                    imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/图片加载中.jpg',
+                                    imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/加载中_1.png',
                                     description: imageContent
                                 };
                             }
@@ -16543,7 +16557,7 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                                     const isUrl = imageContent.startsWith('http');
                                     baseMessage.content = `[图片] ${imageContent}`;
                                     baseMessage.cardData = {
-                                        imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/图片加载中.jpg',
+                                        imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/加载中_1.png',
                                         description: imageContent
                                     };
                                     break;
@@ -16617,7 +16631,8 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
 
                 if (displayableMessages.length > 0) {
                     const lastDisplayableMsg = displayableMessages[displayableMessages.length - 1];
-                    const isUnread = chatId !== appState.currentChatId;
+                    // 修改：如果当前不在该聊天窗口，或者页面处于后台(不可见)状态，都视为未读
+                    const isUnread = chatId !== appState.currentChatId || document.hidden;
                     await UIManager.updateChatMetadata(chatId, lastDisplayableMsg, isUnread ? displayableMessages.length : 0);
                 }
 
@@ -16653,6 +16668,11 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                         
                         UIManager.showTopNotification(msg);
                     }
+                }
+
+                // 新增：如果当前页面是消息列表，刷新列表以显示最新的未读红点和最后一条消息
+                if (appState.currentPage === 'messages') {
+                    await UIManager.renderMessagesListPage();
                 }
             },
 
@@ -16853,8 +16873,9 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                 
                 // 1. 时间信息
                 const now = new Date();
-                const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
                 const dateStr = `${now.getMonth() + 1}/${now.getDate()}`;
+                const headerTimeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${timeStr}`; // 新增：带日期的完整时间
                 
                 // 2. 收集表情包
                 let emojiList = [];
@@ -16907,9 +16928,12 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
 
                 // 6. 组装 Prompt
                 let prompt = this.backgroundReplyPromptTpl
-                    .replace('{CURRENT_TIME}', timeStr)
+                    // 第一次替换：修改Prompt开头的【当前时间】，带日期
+                    .replace('{CURRENT_TIME}', headerTimeStr)
                     .replace('{CURRENT_DATE}', dateStr)
                     .replace('{SCHEDULE_DESC}', statusDesc)
+                    // 第二次替换：修改Prompt下方朋友圈示例里的{CURRENT_TIME}，保持仅显示时间
+                    .replace('{CURRENT_TIME}', timeStr)
                     .replace('{EMOJI_LIST}', emojiList.slice(0, 30).join('、'));
 
                 const charInfo = `你的角色资料：\n角色名: ${contact.name}\n性别: ${contact.gender}\n背景: ${contact.background || '无'}`;
@@ -20489,10 +20513,15 @@ ${globalPromptsSection}
                         return;
                     }
 
-                    if (e.target.matches('.heartbeat-toggle')) {
+                    // 修改：更精确地捕捉开关点击，并阻止冒泡防止触发进入详情页
+                    const switchEl = e.target.closest('.switch');
+                    if (switchEl) {
                         e.stopPropagation();
-                        const isActive = e.target.checked;
-                        await this.toggleCharacterActive(charId, isActive);
+                        // 只有当事件目标确实是input改变时才执行逻辑
+                        if (e.target.tagName === 'INPUT') {
+                            const isActive = e.target.checked;
+                            await this.toggleCharacterActive(charId, isActive);
+                        }
                         return;
                     }
 
@@ -20630,10 +20659,11 @@ ${globalPromptsSection}
                 if (!config || !config.heartbeatGlobal || !config.heartbeatGlobal.enabled) return;
 
                 const checkIntervalMinutes = config.heartbeatGlobal.interval || 15; 
-                const cooldownMinutes = config.heartbeatGlobal.cooldown || 60; // 获取用户设置的冷却时间
+                const cooldownMinutes = config.heartbeatGlobal.cooldown || 60; 
                 
                 const currentMinute = new Date().getMinutes();
-                // 简单取模判定是否到达检测周期
+                
+                // 简单取模判定是否到达检测周期 (增加容错，允许在周期的这一分钟内任何秒数触发)
                 if (currentMinute % checkIntervalMinutes !== 0) {
                      return; 
                 }
@@ -20644,12 +20674,19 @@ ${globalPromptsSection}
                 const currentHour = new Date().getHours();
                 const now = Date.now();
 
+                // 使用 map 而不是 for...of 可以更好地处理并发，但为了保持逻辑清晰，我们依然用循环
+                // 关键是内部不要 await 耗时操作
                 for (const char of contacts) {
+                    // 新增：如果玩家处于对应角色的聊天界面，且页面是可见的，则不触发
+                    if (appState.currentChatId === char.id && !document.hidden) {
+                        console.log(`[Heartbeat] ${char.name} 处于聊天界面，不触发后台回复`);
+                        continue;
+                    }
+
                     // 1. 检查角色开关
                     if (!char.heartbeatSettings || !char.heartbeatSettings.enabled) continue;
                     
-                    // 2. 检查冷却时间 (使用用户设置的值)
-                    // 获取该角色最后一条消息的时间（无论是发的还是收的）
+                    // 2. 检查冷却时间
                     const lastMsgArr = await DBHelper.getMessages(char.id, 1);
                     if (lastMsgArr && lastMsgArr.length > 0) {
                         const diffMins = (now - lastMsgArr[0].timestamp) / 60000;
@@ -20663,11 +20700,7 @@ ${globalPromptsSection}
                     const schedule = char.heartbeatSettings.schedule || [];
                     const currentSlot = schedule.find(s => currentHour >= s.start && currentHour < s.end);
 
-                    if (!currentSlot) {
-                        // console.log(`[Heartbeat] ${char.name} 当前时间段无安排`);
-                        continue;
-                    }
-
+                    if (!currentSlot) continue;
                     if (currentSlot.rate <= 0) continue;
 
                     // 4. 概率判定
@@ -20676,7 +20709,13 @@ ${globalPromptsSection}
                     
                     if (roll < currentSlot.rate) {
                         // >>> 触发！<<<
-                        await AIHandler.triggerBackgroundReply(char.id, currentSlot.desc);
+                        console.log(`[Heartbeat] ✅ ${char.name} 判定通过，正在后台生成回复...`);
+                        
+                        // 核心修改：移除 await，让它在后台跑，不阻塞循环去检查下一个角色
+                        // 使用 catch 捕获潜在错误，防止未处理的 Promise 警告
+                        AIHandler.triggerBackgroundReply(char.id, currentSlot.desc).catch(err => {
+                            console.error(`[Heartbeat] ${char.name} 后台任务出错:`, err);
+                        });
                     }
                 }
             },
@@ -25706,6 +25745,7 @@ async showMomentsSettingsModal() {
                     { id: 'open-settings-btn', name: '设置', defaultClass: 'icon-settings', defaultIcon: '<i class="fas fa-cog"></i>' },
                     { id: 'open-prompts-app-btn', name: '提示词', defaultClass: 'icon-prompts', defaultIcon: '<i class="fas fa-lightbulb"></i>' },
                     { id: 'open-photos-btn', name: '相册', defaultClass: 'icon-photos', defaultIcon: '<i class="fas fa-images"></i>' },
+                    { id: 'open-heartbeat-app-btn', name: '心跳', defaultClass: 'icon-heartbeat', defaultIcon: '<i class="fas fa-heartbeat"></i>' }, // 新增心跳App
                     { id: 'dock-sms-btn', name: '短信', defaultClass: 'icon-sms', defaultIcon: '<i class="fas fa-comment-alt"></i>' },
                     { id: 'dock-unknown-1', name: '未知应用 A', defaultClass: 'icon-unknown', defaultIcon: '<i class="fas fa-question"></i>' },
                     { id: 'open-my-info-app-btn', name: '我的信息', defaultClass: 'icon-my-info', defaultIcon: '<i class="fas fa-address-card"></i>' }
@@ -26471,9 +26511,9 @@ async showMomentsSettingsModal() {
                     'open-music-btn': { icon: '<i class="fas fa-music"></i>', bgClass: 'icon-music' },
                     'open-forum-btn': { icon: '<i class="fas fa-globe"></i>', bgClass: 'icon-forum' },
                     'open-settings-btn': { icon: '<i class="fas fa-cog"></i>', bgClass: 'icon-settings' },
-                    // 新增：提示词App配置，确保系统知道如何渲染它
                     'open-prompts-app-btn': { icon: '<i class="fas fa-lightbulb"></i>', bgClass: 'icon-prompts' },
-                    'open-photos-btn': { icon: '<img src="https://img.icons8.com/color/96/ios-photos.png" style="width:100%; height:100%; object-fit:cover;">', bgClass: 'icon-photos' }, 
+                    'open-photos-btn': { icon: '<img src="https://img.icons8.com/color/96/ios-photos.png" style="width:100%; height:100%; object-fit:cover;">', bgClass: 'icon-photos' },
+                    'open-heartbeat-app-btn': { icon: '<i class="fas fa-heartbeat"></i>', bgClass: 'icon-heartbeat' }, // 新增心跳App配置
                     'dock-sms-btn': { icon: '<i class="fas fa-comment-alt"></i>', bgClass: 'icon-sms' },
                     'dock-unknown-1': { icon: '<i class="fas fa-question"></i>', bgClass: 'icon-unknown' },
                     'open-my-info-app-btn': { icon: '<i class="fas fa-address-card"></i>', bgClass: 'icon-my-info' }
@@ -34328,6 +34368,10 @@ async showGiftDetailsModal(messageId) {
                 
                 await EventManager.initEmojiPanel(); 
                 MyInfoManager.init(); // 新增初始化
+                
+                // 新增：初始化心跳管理器，确保刷新后自动检查开关状态并启动调度器
+                HeartbeatAppManager.init(); 
+                
                 await UIManager.navigateTo('messages');
                 
             } catch (error) {
