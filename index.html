@@ -6845,6 +6845,10 @@
             flex-grow: 1;
             overflow-y: auto;
             padding: 5px 0;
+            -webkit-overflow-scrolling: touch; /* 关键：开启iOS惯性滚动 */
+            overscroll-behavior: contain; /* 关键：阻止滚动链，防止带动背景 */
+            min-height: 0; /* 关键：修复Flex容器内的滚动计算 */
+            touch-action: pan-y; /* 明确允许垂直拖动 */
         }
         .music-playlist-body::-webkit-scrollbar {
             width: 4px;
@@ -20757,7 +20761,16 @@ ${globalPromptsSection}
 
                     // 3. 检查日程表
                     const schedule = char.heartbeatSettings.schedule || [];
-                    const currentSlot = schedule.find(s => currentHour >= s.start && currentHour < s.end);
+                    const currentSlot = schedule.find(s => {
+                        if (s.start < s.end) {
+                            // 正常情况 (例如 09:00 - 18:00)
+                            return currentHour >= s.start && currentHour < s.end;
+                        } else {
+                            // 跨天情况 (例如 23:00 - 07:00)
+                            // 只要当前时间 大于等于开始时间 (23,24...) 或者 小于结束时间 (0,1...6) 即视为在时间段内
+                            return currentHour >= s.start || currentHour < s.end;
+                        }
+                    });
 
                     if (!currentSlot) continue;
                     if (currentSlot.rate <= 0) continue;
@@ -20973,7 +20986,9 @@ ${globalPromptsSection}
                             const end = parseInt($('#hb-end-time').value);
                             const rate = parseInt($('#hb-rate').value);
                             const desc = $('#hb-desc').value.trim();
-                            if (start >= end) return UIManager.showToast("结束时间必须晚于开始时间");
+                            
+                            // 修改：允许 start > end (跨天)，只禁止 start == end
+                            if (start === end) return UIManager.showToast("开始时间和结束时间不能相同");
                             if (!desc) return UIManager.showToast("请填写状态描述");
 
                             const contact = await DBHelper.get('contacts', this.currentCharId);
