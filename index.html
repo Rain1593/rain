@@ -1422,13 +1422,17 @@
             z-index: 5; 
             animation: popIn 0.2s ease-out; 
             background: rgba(0, 0, 0, 0.85); /* 加深背景 */
-            border-radius: 12px; 
+            border-radius: 10px; /* 稍微减小圆角 */
             padding: 0; /* 移除内边距 */
             gap: 0; /* 移除间距，改用边框分割 */
             display: none; 
             border: 1px solid rgba(255, 255, 255, 0.15); /* 增加浅色细边框 */
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             overflow: hidden;
+            /* 核心修复：强制一行显示，宽度自适应内容 */
+            white-space: nowrap;
+            width: max-content;
+            flex-wrap: nowrap;
         }
         .message-row.sent .retract-button-wrapper { right: 0; }
         .message-row.received .retract-button-wrapper { left: 0; }
@@ -1439,13 +1443,15 @@
             color: white; 
             border: none; 
             border-radius: 0; 
-            padding: 10px 16px; /* 增加点击区域 */
-            font-size: 0.9rem; 
+            /* 修改：减小内边距和字体大小 */
+            padding: 8px 12px; 
+            font-size: 0.8rem; 
             cursor: pointer; 
             transition: background 0.2s; 
             display: flex; 
             align-items: center; 
             justify-content: center;
+            white-space: nowrap; /* 防止按钮内文字换行 */
         }
         .retract-btn:hover { background: rgba(255, 255, 255, 0.15); }
         /* 选项之间的浅色细线 */
@@ -3371,7 +3377,7 @@
         }
         
         /* --- 开关样式 (可复用) --- */
-        .switch { position: relative; display: inline-block; width: 52px; height: 30px; }
+        .switch { position: relative; display: inline-block; width: 52px; height: 30px; flex-shrink: 0; /* 关键：防止被挤压变形 */ }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 30px; }
         .slider:before { position: absolute; content: ""; height: 24px; width: 24px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
@@ -7617,6 +7623,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 0; /* 关键：配合Flex布局实现文字截断 */
+    margin-right: 10px; /* 增加右侧间距，避免文字紧贴按钮 */
 }
 
 .ios-list-title {
@@ -7625,18 +7633,23 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%; /* 确保占满容器宽度触发截断 */
 }
 
 .ios-list-subtitle {
     font-size: 12px;
     color: #8E8E93;
     margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .ios-list-arrow {
     color: #C7C7CC;
     font-size: 14px;
     margin-left: 8px;
+    flex-shrink: 0; /* 关键：防止箭头被挤压 */
 }
 
 /* 管理模式样式 */
@@ -20774,14 +20787,20 @@ ${globalPromptsSection}
                 const folderPrompts = prompts.filter(p => p.folderId === folderId).sort((a, b) => (a.order || 0) - (b.order || 0));
                 
                 const container = $('#prompts-in-folder-list');
+                
+                // 新增：HTML转义函数，防止标签代码破坏布局
+                const escapeHtml = (str) => str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
                 if (folderPrompts.length === 0) {
                     container.innerHTML = `<div style="padding:20px; text-align:center; color:#ccc;">此文件夹为空</div>`;
                 } else {
-                    // 修改：传入 true (显示开关) 和 p.isActive
+                    // 修改：使用 escapeHtml 处理内容预览
                     container.innerHTML = folderPrompts.map(p => {
                         const typeText = p.type === 'explicit' ? '显性' : '隐性';
                         const color = p.type === 'explicit' ? '#34C759' : '#5856D6';
-                        return this.createListItemHTML(p.id, p.name, `${typeText} | ${p.content.substring(0, 15)}...`, color, 'fa-file-alt', true, p.isActive);
+                        // 先截取，再转义
+                        const contentPreview = escapeHtml(p.content.substring(0, 15));
+                        return this.createListItemHTML(p.id, p.name, `${typeText} | ${contentPreview}...`, color, 'fa-file-alt', true, p.isActive);
                     }).join('');
                 }
 
@@ -21058,8 +21077,8 @@ ${globalPromptsSection}
                     // 媒体会话 API (在锁屏显示)
                     if ('mediaSession' in navigator) {
                         navigator.mediaSession.metadata = new MediaMetadata({
-                            title: '33聊天室',
-                            artist: '后台运行中...',
+                            title: '33Chat',
+                            artist: '见面是一千个春天预设的伏笔...',
                             artwork: [{ src: 'icon.png', sizes: '96x96', type: 'image/png' }]
                         });
                     }
