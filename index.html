@@ -1416,12 +1416,42 @@
         }
 
         .bubble-retracted { background: #e0e0e0; font-style: italic; color: #888; animation: retract 0.5s ease-in-out forwards; }
-        .retract-button-wrapper { position: absolute; bottom: calc(100% + 5px); z-index: 5; animation: popIn 0.2s ease-out; background: rgba(0, 0, 0, 0.7); border-radius: 15px; padding: 4px; gap: 4px; display: none; }
+        .retract-button-wrapper { 
+            position: absolute; 
+            bottom: calc(100% + 5px); 
+            z-index: 5; 
+            animation: popIn 0.2s ease-out; 
+            background: rgba(0, 0, 0, 0.85); /* 加深背景 */
+            border-radius: 12px; 
+            padding: 0; /* 移除内边距 */
+            gap: 0; /* 移除间距，改用边框分割 */
+            display: none; 
+            border: 1px solid rgba(255, 255, 255, 0.15); /* 增加浅色细边框 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
         .message-row.sent .retract-button-wrapper { right: 0; }
         .message-row.received .retract-button-wrapper { left: 0; }
         .retract-button-wrapper.show { display: flex; }
-        .retract-btn { background: transparent; color: white; border: none; border-radius: 12px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 5px; }
-        .retract-btn:hover { background: rgba(255, 255, 255, 0.2); }
+        
+        .retract-btn { 
+            background: transparent; 
+            color: white; 
+            border: none; 
+            border-radius: 0; 
+            padding: 10px 16px; /* 增加点击区域 */
+            font-size: 0.9rem; 
+            cursor: pointer; 
+            transition: background 0.2s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+        .retract-btn:hover { background: rgba(255, 255, 255, 0.15); }
+        /* 选项之间的浅色细线 */
+        .retract-btn:not(:last-child) {
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+        }
         @keyframes retract { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.8); opacity: 0; } }
         /* AI Typing Indicator Bubble */
         .bubble-typing { display: flex; gap: 5px; align-items: center; padding: 10px 15px; background: var(--text-color-white); border: 1px solid var(--theme-color-2); border-top-left-radius: 5px; }
@@ -16875,7 +16905,8 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                 const now = new Date();
                 const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
                 const dateStr = `${now.getMonth() + 1}/${now.getDate()}`;
-                const headerTimeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${timeStr}`; // 新增：带日期的完整时间
+                const weekDay = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][now.getDay()];
+                const headerTimeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${weekDay} ${timeStr}`; // 新增：带日期的完整时间
                 
                 // 2. 收集表情包
                 let emojiList = [];
@@ -20231,6 +20262,25 @@ ${globalPromptsSection}
                         if (!item) return;
                         const id = item.dataset.id;
 
+                        // 新增：处理开关点击
+                        if (e.target.closest('.switch')) {
+                            e.stopPropagation(); // 阻止冒泡，防止触发进入详情
+                            
+                            // 只有当点击事件真正来自input时才处理逻辑（点击label/span会自动触发input点击，所以只处理input的事件以避免重复）
+                            if (e.target.matches('input')) {
+                                const isActive = e.target.checked;
+                                
+                                if (list.id === 'prompts-global-list') {
+                                    const p = await DBHelper.get('globalPrompts', id);
+                                    if(p) { p.isActive = isActive; await DBHelper.put('globalPrompts', p); }
+                                } else if (list.id === 'prompts-in-folder-list') {
+                                    const p = await DBHelper.get('prompts', id);
+                                    if(p) { p.isActive = isActive; await DBHelper.put('prompts', p); }
+                                }
+                            }
+                            return;
+                        }
+
                         if (e.target.closest('.delete-indicator')) {
                             e.stopPropagation();
                             if (id === 'unclassified') return UIManager.showToast("未分类文件夹不可删除");
@@ -20309,7 +20359,8 @@ ${globalPromptsSection}
                 // 修复HTML标签显示问题
                 const escapeHtml = (str) => str ? str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
 
-                container.innerHTML = prompts.map(p => this.createListItemHTML(p.id, p.name, escapeHtml(p.content.substring(0, 20)) + '...', '#FF9500', 'fa-globe')).join('');
+                // 修改：传入 true (显示开关) 和 p.isActive
+                container.innerHTML = prompts.map(p => this.createListItemHTML(p.id, p.name, escapeHtml(p.content.substring(0, 20)) + '...', '#FF9500', 'fa-globe', true, p.isActive)).join('');
                 if (this.isGlobalEditing) this.enableEditStyle(container);
             },
 
@@ -20355,10 +20406,11 @@ ${globalPromptsSection}
                 if (folderPrompts.length === 0) {
                     container.innerHTML = `<div style="padding:20px; text-align:center; color:#ccc;">此文件夹为空</div>`;
                 } else {
+                    // 修改：传入 true (显示开关) 和 p.isActive
                     container.innerHTML = folderPrompts.map(p => {
                         const typeText = p.type === 'explicit' ? '显性' : '隐性';
                         const color = p.type === 'explicit' ? '#34C759' : '#5856D6';
-                        return this.createListItemHTML(p.id, p.name, `${typeText} | ${p.content.substring(0, 15)}...`, color, 'fa-file-alt');
+                        return this.createListItemHTML(p.id, p.name, `${typeText} | ${p.content.substring(0, 15)}...`, color, 'fa-file-alt', true, p.isActive);
                     }).join('');
                 }
 
@@ -20366,7 +20418,8 @@ ${globalPromptsSection}
                 this.exitAllEditModes(); 
             },
 
-            createListItemHTML(id, title, subtitle, iconColor, iconClass) {
+            // 修改：增加 showSwitch 和 isActive 参数
+            createListItemHTML(id, title, subtitle, iconColor, iconClass, showSwitch = false, isActive = true) {
                 return `
                     <div class="ios-list-item" data-id="${id}" draggable="false">
                         <div class="delete-indicator"><i class="fas fa-minus-circle"></i></div>
@@ -20377,6 +20430,12 @@ ${globalPromptsSection}
                             <div class="ios-list-title">${title}</div>
                             <div class="ios-list-subtitle">${subtitle}</div>
                         </div>
+                        ${showSwitch ? `
+                        <label class="switch" style="transform: scale(0.8); margin-right: 5px;">
+                            <input type="checkbox" class="item-toggle-switch" ${isActive ? 'checked' : ''}>
+                            <span class="slider"></span>
+                        </label>
+                        ` : ''}
                         <div class="sort-controls">
                             <button class="sort-btn-mini" data-dir="up">▲</button>
                             <button class="sort-btn-mini" data-dir="down">▼</button>
@@ -20810,7 +20869,8 @@ ${globalPromptsSection}
 
             confirmRemoveCharacter(charId) {
                 UIManager.showModal({
-                    customClass: 'ios-style vertical-actions',
+                    // 修改：移除了 'vertical-actions' 类，现在按钮会左右并排
+                    customClass: 'ios-style', 
                     title: '移除角色',
                     body: '<p style="margin-bottom:10px; text-align:center;">确定要移除该角色吗？<br>(日程设置将被清除)</p>',
                     actions: [
@@ -20879,7 +20939,8 @@ ${globalPromptsSection}
             async showEditSlotModal(existingSlot = null, index = -1) {
                 const isEditing = existingSlot !== null;
                 UIManager.showModal({
-                    customClass: 'ios-style vertical-actions',
+                    // 修改：移除了 'vertical-actions'，按钮将左右并排
+                    customClass: 'ios-style',
                     title: isEditing ? '编辑时间段' : '添加时间段',
                     body: `
                         <div class="form-group" style="display:flex; gap:10px; align-items:center;">
@@ -21867,7 +21928,10 @@ async showGroupMentionPopup(chatId) {
                         }
                     }
                     this.resetQuoteState();
+                    
+                    // 核心修复：先导航离开，然后清除当前聊天ID，防止后台任务误判
                     UIManager.navigateTo('messages');
+                    appState.currentChatId = null; 
                 });
                 $('#chat-manage-btn').addEventListener('click', () => {
                     const chatId = appState.currentChatId;
@@ -23233,21 +23297,22 @@ async handlePlayerSendMessage(prebuiltMessage = null) {
                 wrapper.className = 'retract-button-wrapper';
 
                 let buttonsHtml = '';
+                // 修改：移除了 <i class="..."></i> 图标
                 if (messageType === 'narrator') {
-                    buttonsHtml = `<button class="retract-btn" data-action="delete"><i class="fas fa-trash"></i> 删除</button><button class="retract-btn" data-action="favorite"><i class="fas fa-star"></i> 收藏</button>`;
+                    buttonsHtml = `<button class="retract-btn" data-action="delete">删除</button><button class="retract-btn" data-action="favorite">收藏</button>`;
                 } else if (messageType === 'pat_a_pat') {
-                    buttonsHtml = `<button class="retract-btn" data-action="delete"><i class="fas fa-trash"></i> 删除</button>`;
+                    buttonsHtml = `<button class="retract-btn" data-action="delete">删除</button>`;
                 } else if (messageType === 'sent') {
                     buttonsHtml = `
-                        <button class="retract-btn" data-action="delete"><i class="fas fa-trash"></i> 删除</button>
-                        <button class="retract-btn" data-action="retract"><i class="fas fa-undo"></i> 撤回</button>
-                        <button class="retract-btn" data-action="quote"><i class="fas fa-quote-left"></i> 引用</button>
+                        <button class="retract-btn" data-action="delete">删除</button>
+                        <button class="retract-btn" data-action="retract">撤回</button>
+                        <button class="retract-btn" data-action="quote">引用</button>
                     `;
                 } else { 
                     buttonsHtml = `
-                        <button class="retract-btn" data-action="delete"><i class="fas fa-trash"></i> 删除</button>
-                        <button class="retract-btn" data-action="quote"><i class="fas fa-quote-left"></i> 引用</button>
-                        <button class="retract-btn" data-action="favorite"><i class="fas fa-star"></i> 收藏</button>
+                        <button class="retract-btn" data-action="delete">删除</button>
+                        <button class="retract-btn" data-action="quote">引用</button>
+                        <button class="retract-btn" data-action="favorite">收藏</button>
                     `;
                 }
                 wrapper.innerHTML = buttonsHtml;
@@ -34117,6 +34182,9 @@ async showGiftDetailsModal(messageId) {
 
                 // 返回桌面
                 homeBar.addEventListener('click', () => {
+                    // 核心修复：返回桌面时清除当前聊天ID
+                    appState.currentChatId = null;
+
                     appContainer.classList.remove('app-active');
                     appContainer.classList.remove('on-music-page'); // 确保恢复 Home Bar 颜色
                     setTimeout(() => { appContainer.style.display = 'none'; }, 300);
