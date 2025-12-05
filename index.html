@@ -6368,6 +6368,154 @@
             padding: 0 20px;
             background: rgba(255, 255, 255, 0.95);
         }
+
+        /* --- 线下模式样式 --- */
+        #page-offline-mode {
+            background-color: #FCFCFC; /* 极简白灰 */
+            background-image: none;
+        }
+        #page-offline-mode .page-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            padding-bottom: 140px; /* 留出底部操作栏空间 */
+        }
+        
+        .offline-block {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.04);
+            position: relative;
+            font-family: "Songti SC", "SimSun", serif; /* 更有书卷气 */
+            line-height: 1.8;
+            font-size: 1rem;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        .offline-block.player {
+            border-left: 4px solid var(--accent-color);
+        }
+        .offline-block.ai {
+            border-left: 4px solid var(--text-color-light);
+        }
+        
+        /* Markdown 样式适配 */
+        .offline-block p { margin-bottom: 1em; }
+        .offline-block p:last-child { margin-bottom: 0; }
+        .offline-block strong { font-weight: 600; color: #000; }
+        .offline-block em { color: #666; }
+        .offline-block blockquote {
+            margin: 10px 0;
+            padding-left: 15px;
+            border-left: 3px solid #eee;
+            color: #888;
+        }
+        
+        .offline-summary {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+            font-family: sans-serif;
+        }
+        .offline-summary-tag {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 5px;
+            font-size: 0.7rem;
+        }
+
+        /* 隐藏摘要的辅助类 */
+        #page-offline-mode.hide-summary .offline-summary {
+            display: none;
+        }
+
+        .offline-bottom-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .offline-action-row {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .offline-action-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: white;
+            color: var(--text-color-medium);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .offline-action-btn.generate {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            flex-grow: 1; /* 生成按钮占大头 */
+            font-weight: bold;
+        }
+        .offline-action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .offline-action-btn:active { transform: scale(0.98); }
+
+        .offline-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            background: #f7f7f7;
+            padding: 8px;
+            border-radius: 12px;
+        }
+        #offline-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: none;
+            padding: 8px;
+            font-size: 1rem;
+            max-height: 120px;
+            font-family: inherit;
+        }
+        #offline-send-btn {
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            height: 36px;
+            flex-shrink: 0;
+        }
+        
+        /* 线下模式图标颜色 */
+        .icon-offline {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            color: white;
+        }
         
         /* --- 音乐APP样式 --- */
         #page-music {
@@ -8095,6 +8243,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 }
 </style>
 <style id="exclusive-bubble-style"></style>
+<style id="offline-custom-css"></style>
 </head>
 <body>
     <!-- 开屏动画 -->
@@ -8834,6 +8983,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                             <button class="feature-btn panel-btn" id="card-btn"><i class="fas fa-share-square"></i><span>卡片/转发</span></button>
                             <button class="feature-btn panel-btn" id="listen-together-btn"><i class="fas fa-headphones-alt icon-listen-together" style="-webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i><span>一起听歌</span></button>
                             <button class="feature-btn panel-btn" id="video-call-btn"><i class="fas fa-video"></i><span>视频通话</span></button>
+                            <button class="feature-btn panel-btn" id="offline-mode-btn"><i class="fas fa-coffee"></i><span>线下模式</span></button>
                         </div>
                     </div>
                     <!-- 表情包面板 (默认隐藏) -->
@@ -9300,6 +9450,28 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                             <button id="video-call-hangup-btn" class="video-call-control-btn hangup"><i class="fas fa-phone-slash"></i></button>
                             <button id="video-call-ai-reply-btn" class="video-call-control-btn" style="display: none;"><i class="fas fa-feather-alt"></i></button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 线下模式页面 (新) -->
+            <div id="page-offline-mode" class="page">
+                <div class="page-header">
+                    <div id="offline-exit-btn" class="header-icon"><i class="fas fa-times"></i></div>
+                    <h1 id="offline-title">线下模式</h1>
+                    <div id="offline-manage-btn" class="header-icon"><i class="fas fa-bars"></i></div>
+                </div>
+                <div class="page-content" id="offline-content">
+                    <!-- 线下模式的长文内容将在这里渲染 -->
+                </div>
+                <div class="offline-bottom-bar">
+                    <div class="offline-action-row">
+                        <button id="offline-generate-btn" class="offline-action-btn generate">生成回复</button>
+                        <button id="offline-reroll-btn" class="offline-action-btn reroll"><i class="fas fa-sync-alt"></i> 重Roll</button>
+                    </div>
+                    <div class="offline-input-wrapper">
+                        <textarea id="offline-input" placeholder="输入剧情/行动..." rows="1"></textarea>
+                        <button id="offline-send-btn">发送</button>
                     </div>
                 </div>
             </div>
@@ -9797,6 +9969,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             'photos': $('#page-photos'),
             'prompts-app': $('#page-prompts-app'), // 新增
             'heartbeat-app': $('#page-heartbeat-app'), // 新增：心跳App
+            'offline-mode': $('#page-offline-mode'), // 新增：线下模式
         };
 
         
@@ -10421,7 +10594,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             }
             
             // 修改：将设置相关的子页面加入列表，进入这些页面时隐藏底部导航栏
-            if (['chat', 'prompts', 'moments', 'tutorial', 'pomodoro', 'gifts', 'forwarded-history', 'video-call', 'video-call-history', 'video-call-log-detail', 'chat-settings', 'api-settings', 'theme-settings', 'bubble-settings', 'os-settings', 'desktop-settings', 'music', 'my-info'].includes(pageId)) {
+            if (['chat', 'prompts', 'moments', 'tutorial', 'pomodoro', 'gifts', 'forwarded-history', 'video-call', 'video-call-history', 'video-call-log-detail', 'chat-settings', 'api-settings', 'theme-settings', 'bubble-settings', 'os-settings', 'desktop-settings', 'music', 'my-info', 'offline-mode'].includes(pageId)) {
                 bottomNav.style.display = 'none';
             } else {
                 bottomNav.style.display = 'flex';
@@ -10548,6 +10721,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                         case 'transfer-receipt': chatInfo.lastMessageContent = '[已收款]'; break;
                         case 'red-packet': chatInfo.lastMessageContent = '[红包]'; break;
                         case 'moment_forward': chatInfo.lastMessageContent = '[转发动态]'; break;
+                        case 'offline_text': chatInfo.lastMessageContent = '[线下] 剧情更新'; break;
                     }
 
                     if (lastMessage.isRetracted) {
@@ -10967,7 +11141,8 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                     }
             
                     const chatSettings = await DBHelper.get('apiConfig', 'chatSettings') || {};
-                    if (!(['inner_voice', 'essay'].includes(msg.segmentType) || msg.isHidden)) {
+                    // 修改：在这里增加 'offline_text' 到过滤列表中
+                    if (!(['inner_voice', 'essay', 'offline_text'].includes(msg.segmentType) || msg.isHidden)) {
                         
                         if (msg.segmentType === 'pat_a_pat' && chatSettings.enablePatAPat === false) {
                             nextMessageTimestamp = msg.timestamp;
@@ -14112,6 +14287,38 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
                 return turns;
             },
 
+            // --- 新增：获取线下模式摘要上下文 ---
+            async getOfflineContext(chatId) {
+                // 1. 检查是否为群聊 (群聊无线下模式)
+                if (chatId.startsWith('group-')) return '';
+
+                // 2. 获取线下模式设置
+                const offlineSettings = await DBHelper.get('apiConfig', 'offlineSettings') || {};
+                
+                // 3. 检查开关：默认视为开启 (undefined视为true)，只有明确为false时才不携带
+                if (offlineSettings.includeChatHistory === false) return '';
+
+                // 4. 获取该角色的所有消息 (增加到1000条以防间隔太久找不到)
+                const messages = await DBHelper.getMessages(chatId, 1000); 
+                
+                // 5. 筛选出带有摘要的线下消息，取最近3条
+                // messages 数组默认为 [旧 -> 新]
+                const offlineSummaries = messages
+                    .filter(m => m.segmentType === 'offline_text' && m.cardData && m.cardData.summary)
+                    .slice(-3); // 取数组最后3个（即最新的3个）
+
+                if (offlineSummaries.length === 0) return '';
+
+                // 6. 格式化输出
+                const summaryText = offlineSummaries.map(m => {
+                    const date = new Date(m.timestamp);
+                    const timeStr = `${date.getMonth()+1}月${date.getDate()}日 ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+                    return `- [${timeStr}]: ${m.cardData.summary}`;
+                }).join('\n');
+
+                return `--- 以下是最近的线下剧情摘要（地点时间事件） ---\n${summaryText}\n---`;
+            },
+            
             apiConfig: {}, 
             isAwaitingResponse: false,
             abortController: null,
@@ -14677,10 +14884,13 @@ ${promptLines.join('\n\n')}
 
                 const globalPromptsSection = await this.getGlobalPromptsForContext('chat');
 
+                // 新增：获取线下模式摘要
+                const offlineContext = await this.getOfflineContext(chatId);
+
                 const promptParts = [
                     globalPromptsSection,
                     systemTime, 
-                    musicPromptSection, // 插入在这里
+                    musicPromptSection, 
                     taskPrompt, 
                     characterInfoPrompt, 
                     playerInfoPrompt, 
@@ -14688,6 +14898,7 @@ ${promptLines.join('\n\n')}
                     pendingRedPacketsPrompt, 
                     pomodoroPromptSection,
                     momentsPromptSection, 
+                    offlineContext, // 插入线下摘要
                     summaryPromptSection, 
                     customPromptsSection, 
                     historyPrompt, 
@@ -15137,12 +15348,16 @@ ${promptLines.join('\n\n')}
                 
                 const globalPromptsSection = await this.getGlobalPromptsForContext('chat');
 
+                // 新增：获取线下模式摘要
+                const offlineContext = await this.getOfflineContext(chatId);
+
                 const finalPrompt = [
                     globalPromptsSection,
                     situationPrompt,
                     taskPrompt,
                     characterInfoPrompt,
                     playerInfoPrompt, 
+                    offlineContext, // 插入线下摘要
                     historyPrompt,
                     AIHandler.activeReplyPromptTpl.replace('{EMOJI_LIST}', emojiListString).replace('{PLAYER_NAME}', myProfile.name).replace('{PAT_A_PAT_RULES}', patAPatRulesForPrompt)
                 ].join('\n\n');
@@ -17131,12 +17346,16 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                 const charInfo = `你的角色资料：\n角色名: ${contact.name}\n性别: ${contact.gender}\n背景: ${contact.background || '无'}`;
                 const playerInfo = `玩家资料：\n名字: ${myProfile.name}\n性别: ${myProfile.gender}\n背景: ${myProfile.background || '无'}`;
 
+                // 新增：获取线下模式摘要
+                const offlineContext = await this.getOfflineContext(contactId);
+
                 const finalPrompt = [
                     globalPrompts,
                     boundPrompts,
                     charInfo,
                     playerInfo,
                     circleInfo,
+                    offlineContext, // 插入线下摘要
                     historyPrompt,
                     prompt
                 ].join('\n\n');
@@ -21415,6 +21634,754 @@ ${globalPromptsSection}
             }
         };
 
+        const OfflineModeManager = {
+            currentTargetId: null,
+            
+            async init() {
+                // 应用保存的自定义样式和设置
+                await this.applyCustomCSS();
+
+                // 绑定入口按钮
+                const entryBtn = $('#offline-mode-btn');
+                if (entryBtn) {
+                    entryBtn.addEventListener('click', () => {
+                        const chatId = appState.currentChatId;
+                        if (!chatId) return;
+                        if (chatId.startsWith('group-')) {
+                            UIManager.showToast("群聊不支持线下模式");
+                            return;
+                        }
+                        this.enter(chatId);
+                    });
+                }
+
+                // 绑定退出按钮
+                $('#offline-exit-btn').addEventListener('click', () => this.confirmExit());
+                
+                // 绑定发送按钮
+                $('#offline-send-btn').addEventListener('click', () => this.handleSend());
+                
+                // 绑定生成回复按钮
+                $('#offline-generate-btn').addEventListener('click', () => this.handleGenerate());
+                
+                // 绑定重Roll按钮
+                $('#offline-reroll-btn').addEventListener('click', () => this.handleReroll());
+                
+                // 绑定管理按钮 (打开侧边栏)
+                $('#offline-manage-btn').addEventListener('click', () => this.showSettingsSidebar());
+
+                // 输入框自适应高度
+                $('#offline-input').addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+            },
+
+            async enter(chatId) {
+                this.currentTargetId = chatId;
+                const contact = await DBHelper.get('contacts', chatId);
+                if (!contact) return;
+
+                $('#offline-title').textContent = contact.remark || contact.name;
+                
+                // 切换页面
+                UIManager.navigateTo('offline-mode', 'chat');
+                
+                // 渲染历史记录
+                await this.renderHistory();
+            },
+
+            confirmExit() {
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "退出线下模式",
+                    body: "<p>确定要退出线下模式返回聊天界面吗？</p>",
+                    actions: [
+                        { text: "取消", class: "btn-secondary", handler: () => UIManager.hideModal() },
+                        { text: "确定", class: "btn-primary", handler: () => {
+                            UIManager.hideModal();
+                            UIManager.navigateTo('chat');
+                        }}
+                    ]
+                });
+            },
+
+            async renderHistory() {
+                const contentArea = $('#offline-content');
+                contentArea.innerHTML = '';
+                
+                const messages = await DBHelper.getMessages(this.currentTargetId, 500);
+                // 修改：移除 .reverse()，保持时间正序（旧->新），配合scrollToBottom显示
+                const offlineMessages = messages.filter(m => m.segmentType === 'offline_text');
+
+                if (offlineMessages.length === 0) {
+                    contentArea.innerHTML = `<div style="text-align:center; color:#ccc; margin-top:50px;">线下模式记录为空<br>开始编写你的剧情吧</div>`;
+                    return;
+                }
+
+                for (const msg of offlineMessages) {
+                    this.appendBlockToDOM(msg);
+                }
+                
+                this.scrollToBottom();
+            },
+
+            appendBlockToDOM(msg) {
+                const contentArea = $('#offline-content');
+                const block = document.createElement('div');
+                const isPlayer = msg.type === 'sent';
+                block.className = `offline-block ${isPlayer ? 'player' : 'ai'}`;
+                block.dataset.id = msg.messageId;
+                
+                let htmlContent = marked.parse(msg.content);
+                
+                let summaryHtml = '';
+                if (!isPlayer && msg.cardData && msg.cardData.summary) {
+                    summaryHtml = `
+                        <div class="offline-summary">
+                            <span class="offline-summary-tag">摘要</span>
+                            ${msg.cardData.summary}
+                        </div>
+                    `;
+                }
+
+                block.innerHTML = `
+                    <div class="block-content">${htmlContent}</div>
+                    ${summaryHtml}
+                `;
+                
+                contentArea.appendChild(block);
+            },
+            
+            scrollToBottom() {
+                const contentArea = $('#page-offline-mode .page-content');
+                setTimeout(() => {
+                    contentArea.scrollTop = contentArea.scrollHeight;
+                }, 100);
+            },
+
+            async handleSend() {
+                const input = $('#offline-input');
+                const content = input.value.trim();
+                if (!content) return;
+
+                const message = {
+                    messageId: Utils.generateId('off'),
+                    chatId: this.currentTargetId,
+                    senderId: 'myProfile',
+                    timestamp: Date.now(),
+                    type: 'sent',
+                    segmentType: 'offline_text',
+                    content: content,
+                    isUnread: false
+                };
+
+                await DBHelper.put('messages', message);
+                this.appendBlockToDOM(message);
+                this.scrollToBottom();
+                input.value = '';
+                input.style.height = 'auto';
+            },
+
+            async handleGenerate() {
+                if (AIHandler.isAwaitingResponse) return;
+                
+                const btn = $('#offline-generate-btn');
+                const originalText = btn.textContent;
+                btn.textContent = "生成中...";
+                btn.disabled = true;
+                AIHandler.isAwaitingResponse = true;
+                AIHandler.abortController = new AbortController();
+
+                try {
+                    const prompt = await this.buildOfflinePrompt();
+                    console.log("--- OFFLINE MODE PROMPT ---\n", prompt);
+                    const response = await AIHandler.getApiResponse(prompt, null, AIHandler.abortController.signal);
+                    await this.processAIResponse(response);
+                } catch (error) {
+                    if (error.name !== 'AbortError') UIManager.showToast("生成失败: " + error.message);
+                } finally {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    AIHandler.isAwaitingResponse = false;
+                    AIHandler.abortController = null;
+                }
+            },
+            
+            async handleReroll() {
+                const contentArea = $('#offline-content');
+                const lastBlock = contentArea.lastElementChild;
+                
+                if (!lastBlock || !lastBlock.classList.contains('ai')) {
+                    UIManager.showToast("最后一条不是AI回复，无法重Roll");
+                    return;
+                }
+                
+                const msgId = lastBlock.dataset.id;
+                
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "确认重Roll",
+                    body: "<p>这将删除AI的上一条回复并重新生成。确定吗？</p>",
+                    actions: [
+                        { text: "取消", class: "btn-secondary", handler: () => UIManager.hideModal() },
+                        { text: "确定", class: "btn-primary", handler: async () => {
+                            UIManager.hideModal();
+                            await DBHelper.delete('messages', msgId);
+                            lastBlock.remove();
+                            this.handleGenerate();
+                        }}
+                    ]
+                });
+            },
+            
+            async handleClearHistory() {
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "清空线下记录",
+                    body: "<p>确定要清空当前角色的所有线下模式记录吗？此操作不可恢复。</p>",
+                    actions: [
+                        { text: "取消", class: "btn-secondary", handler: () => UIManager.hideModal() },
+                        { text: "清空", class: "btn-danger", handler: async () => {
+                            const messages = await DBHelper.getAll('messages');
+                            const toDelete = messages.filter(m => m.chatId === this.currentTargetId && m.segmentType === 'offline_text');
+                            
+                            for (const msg of toDelete) {
+                                await DBHelper.delete('messages', msg.messageId);
+                            }
+                            
+                            UIManager.hideModal();
+                            UIManager.hideSidebar();
+                            this.renderHistory();
+                            UIManager.showToast("记录已清空");
+                        }}
+                    ]
+                });
+            },
+
+            // --- 设置侧边栏逻辑 ---
+            async showSettingsSidebar() {
+                UIManager.showSidebar({
+                    position: 'right',
+                    title: "线下模式管理",
+                    body: `
+                        <div class="settings-list" style="padding:0; margin:0 -10px;">
+                            <div class="setting-item" id="off-set-memory">
+                                <i class="fas fa-brain"></i>
+                                <span>记忆设置</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="off-set-time">
+                                <i class="fas fa-clock"></i>
+                                <span>时间设置</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="off-set-style">
+                                <i class="fas fa-paint-brush"></i>
+                                <span>美化设置</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="off-bind-prompts">
+                                <i class="fas fa-link"></i>
+                                <span>绑定线下提示词</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="off-clear-history">
+                                <i class="fas fa-trash-alt" style="color: #e74c3c;"></i>
+                                <span style="color: #e74c3c;">清空线下记录</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    `
+                });
+
+                $('#off-set-memory').onclick = () => this.showMemorySettings();
+                $('#off-set-time').onclick = () => this.showTimeSettings();
+                $('#off-set-style').onclick = () => this.showStyleSettings();
+                $('#off-bind-prompts').onclick = () => this.showBindPromptsModal();
+                $('#off-clear-history').onclick = () => this.handleClearHistory();
+            },
+
+            async getOfflineSettings() {
+                const config = await DBHelper.get('apiConfig', 'offlineSettings') || {};
+                return {
+                    rawTurns: config.rawTurns || 3, // 最新 A 条原始回复
+                    summaryTurns: config.summaryTurns || 10, // 前面 B 轮摘要
+                    includeChatHistory: config.includeChatHistory !== false, // 默认开启
+                    chatHistoryTurns: config.chatHistoryTurns || 15, // 默认聊天记录轮次 15
+                    realTime: config.realTime !== false, // 默认感知现实时间
+                    virtualTime: config.virtualTime || '',
+                    customCSS: config.customCSS || '',
+                    hideSummary: config.hideSummary || false, // 默认显示摘要
+                    globalPromptFolderIds: config.globalPromptFolderIds || [] // 线下通用绑定的文件夹ID
+                };
+            },
+
+            async saveOfflineSettings(newSettings) {
+                const current = await DBHelper.get('apiConfig', 'offlineSettings') || {};
+                await DBHelper.put('apiConfig', { ...current, ...newSettings, id: 'offlineSettings' });
+            },
+
+            async showMemorySettings() {
+                const settings = await this.getOfflineSettings();
+                UIManager.showModal({
+                    title: "记忆设置",
+                    body: `
+                        <div class="form-group">
+                            <label>携带最新原始回复轮数 (A)</label>
+                            <input type="number" id="off-raw-turns" value="${settings.rawTurns}" min="1" max="20">
+                            <p style="font-size:0.8rem; color:#999;">线下记录：最近的 A 轮对话将保留完整内容传给AI。</p>
+                        </div>
+                        <div class="form-group">
+                            <label>携带历史摘要轮数 (B)</label>
+                            <input type="number" id="off-summary-turns" value="${settings.summaryTurns}" min="0" max="50">
+                            <p style="font-size:0.8rem; color:#999;">线下记录：在原始回复之前的 B 轮对话，仅传送摘要给AI以节省Token。</p>
+                        </div>
+                        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                            <label style="margin:0;">携带聊天界面记录</label>
+                            <label class="switch">
+                                <input type="checkbox" id="off-chat-hist-toggle" ${settings.includeChatHistory ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group" id="chat-hist-turns-group" style="display:${settings.includeChatHistory ? 'block' : 'none'};">
+                            <label>聊天记录携带轮数</label>
+                            <input type="number" id="off-chat-hist-turns" value="${settings.chatHistoryTurns}" min="1" max="50">
+                            <p style="font-size:0.8rem; color:#999;">如果开启记忆互通，还会额外携带部分群聊记录。</p>
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            await this.saveOfflineSettings({
+                                rawTurns: parseInt($('#off-raw-turns').value) || 3,
+                                summaryTurns: parseInt($('#off-summary-turns').value) || 10,
+                                includeChatHistory: $('#off-chat-hist-toggle').checked,
+                                chatHistoryTurns: parseInt($('#off-chat-hist-turns').value) || 15
+                            });
+                            UIManager.hideModal();
+                            UIManager.showToast("记忆设置已保存");
+                        }}
+                    ]
+                });
+                
+                // 联动显示
+                setTimeout(() => {
+                    const toggle = $('#off-chat-hist-toggle');
+                    const group = $('#chat-hist-turns-group');
+                    if(toggle && group) {
+                        toggle.onchange = () => {
+                            group.style.display = toggle.checked ? 'block' : 'none';
+                        };
+                    }
+                }, 100);
+            },
+
+            async showTimeSettings() {
+                const settings = await this.getOfflineSettings();
+                UIManager.showModal({
+                    title: "时间设置",
+                    body: `
+                        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                            <label style="margin:0;">感知现实时间</label>
+                            <label class="switch">
+                                <input type="checkbox" id="off-time-toggle" ${settings.realTime ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group" id="off-virtual-time-group" style="display: ${settings.realTime ? 'none' : 'block'};">
+                            <label>虚拟时间描述</label>
+                            <input type="text" id="off-virtual-time" value="${settings.virtualTime}" placeholder="例如：星际历3055年 / 一个雨夜 / 上午10点">
+                            <p style="font-size:0.8rem; color:#999;">留空则不提示具体时间。</p>
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            await this.saveOfflineSettings({
+                                realTime: $('#off-time-toggle').checked,
+                                virtualTime: $('#off-virtual-time').value.trim()
+                            });
+                            UIManager.hideModal();
+                            UIManager.showToast("时间设置已保存");
+                        }}
+                    ]
+                });
+
+                setTimeout(() => {
+                    const toggle = $('#off-time-toggle');
+                    const group = $('#off-virtual-time-group');
+                    if(toggle && group) {
+                        toggle.onchange = () => {
+                            group.style.display = toggle.checked ? 'none' : 'block';
+                        };
+                    }
+                }, 100);
+            },
+
+            async showStyleSettings() {
+                const settings = await this.getOfflineSettings();
+                UIManager.showModal({
+                    title: "美化设置",
+                    customClass: 'modal-default-style',
+                    body: `
+                        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <label style="margin:0;">显示摘要</label>
+                            <label class="switch">
+                                <input type="checkbox" id="off-show-summary-toggle" ${!settings.hideSummary ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                             <label>自定义CSS美化</label>
+                             <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">你可以复制下方的示例代码到输入框中，实现字体加重、斜体等效果。</p>
+                             <textarea id="off-custom-css" rows="10" style="width:100%; border:1px solid #ccc; border-radius:8px; padding:10px; font-family:monospace;" placeholder="/* 输入CSS代码 */">${settings.customCSS}</textarea>
+                        </div>
+                        <div class="css-tutorial-code" style="background:#2d2d2d; color:#ccc; padding:10px; border-radius:8px; margin-top:10px; font-size:0.8rem; position:relative; max-height: 150px; overflow-y:auto;">
+                            <button class="copy-btn" style="top:5px; right:5px; padding:2px 8px; font-size:0.7rem;">复制示例</button>
+                            <code>
+/* 玩家发言块背景 */
+.offline-block.player {
+    background-color: #f0f8ff; 
+    border-left-color: #2196F3;
+}
+/* AI发言块背景 */
+.offline-block.ai {
+    background-color: #fff;
+    border-left-color: #9E9E9E;
+}
+/* 加粗文本样式 (Markdown **) */
+.offline-block strong {
+    color: #d32f2f; /* 红色重点 */
+    font-weight: 700;
+}
+/* 斜体文本样式 (Markdown *) */
+.offline-block em {
+    color: #666;
+    font-family: "KaiTi", serif; /* 楷体 */
+}
+/* 引用文本样式 (Markdown >) */
+.offline-block blockquote {
+    background-color: #f5f5f5;
+    border-left: 3px solid #d32f2f;
+    padding: 5px 10px;
+    margin: 5px 0;
+    color: #555;
+}
+</code>
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存并应用', class: 'btn-primary', handler: async () => {
+                            const css = $('#off-custom-css').value;
+                            const hideSummary = !$('#off-show-summary-toggle').checked;
+                            
+                            await this.saveOfflineSettings({ 
+                                customCSS: css,
+                                hideSummary: hideSummary 
+                            });
+                            await this.applyCustomCSS();
+                            UIManager.hideModal();
+                            UIManager.showToast("样式已应用");
+                        }}
+                    ]
+                });
+                
+                // 绑定复制按钮
+                setTimeout(() => {
+                    const copyBtn = modalContentWrapper.querySelector('.copy-btn');
+                    const codeBlock = modalContentWrapper.querySelector('code');
+                    if(copyBtn && codeBlock) {
+                        copyBtn.onclick = () => {
+                             navigator.clipboard.writeText(codeBlock.textContent.trim())
+                                .then(() => UIManager.showToast("示例代码已复制！"))
+                                .catch(() => UIManager.showToast("复制失败"));
+                        };
+                    }
+                }, 100);
+            },
+            
+            async showBindPromptsModal() {
+                const settings = await this.getOfflineSettings();
+                const boundFolderIds = settings.globalPromptFolderIds || [];
+                const allFolders = await DBHelper.getAll('promptFolders');
+
+                if (allFolders.length === 0) {
+                    return UIManager.showToast("还没有创建任何提示词文件夹");
+                }
+
+                const folderListHtml = allFolders.map(f => `
+                    <label class="folder-selection-item">
+                        <input type="checkbox" name="off-bind-folder" value="${f.id}" ${boundFolderIds.includes(f.id) ? 'checked' : ''}>
+                        <i class="fas fa-folder"></i>
+                        <span>${f.name}</span>
+                    </label>
+                `).join('');
+
+                UIManager.showModal({
+                    title: "绑定线下通用提示词",
+                    body: `
+                        <p style="font-size:0.8rem; color:#999; margin-bottom:10px;">选中的提示词文件夹将应用于所有角色的线下模式。</p>
+                        <div class="folder-selection-list" style="max-height: 50vh;">${folderListHtml}</div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const selectedIds = [...$$('input[name="off-bind-folder"]:checked')].map(cb => cb.value);
+                            await this.saveOfflineSettings({ globalPromptFolderIds: selectedIds });
+                            UIManager.hideModal();
+                            UIManager.showToast("绑定已更新");
+                        }}
+                    ]
+                });
+            },
+
+            async applyCustomCSS() {
+                const settings = await this.getOfflineSettings();
+                const styleTag = document.getElementById('offline-custom-css');
+                const page = document.getElementById('page-offline-mode');
+                
+                if (styleTag) {
+                    styleTag.textContent = settings.customCSS || '';
+                }
+                
+                // 处理摘要隐藏
+                if (page) {
+                    if (settings.hideSummary) {
+                        page.classList.add('hide-summary');
+                    } else {
+                        page.classList.remove('hide-summary');
+                    }
+                }
+            },
+
+            // --- 核心 Prompt 构建 ---
+            async buildOfflinePrompt() {
+                const contact = await DBHelper.get('contacts', this.currentTargetId);
+                const myProfile = await DBHelper.get('profile', 'myProfile');
+                const settings = await this.getOfflineSettings();
+                
+                // 1. 基础设定
+                let prompt = `你正在与玩家进行【线下模式】的长文对戏。\n`;
+                
+                // 2. 时间设定
+                let timeStr = "";
+                if (settings.realTime) {
+                    const now = new Date();
+                    timeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                } else {
+                    timeStr = settings.virtualTime || "不特定时间";
+                }
+                if (timeStr) prompt += `当前时间：${timeStr}\n`;
+
+                // 3. 角色信息 & 玩家信息
+                const charInfo = `角色名：${contact.name}\n性别：${contact.gender}\n设定：${contact.background || '无'}\n`;
+                const playerInfo = `玩家名：${myProfile.name}\n性别：${myProfile.gender}\n设定：${myProfile.background || '无'}\n`;
+                prompt += `\n--- 角色信息 ---\n${charInfo}\n--- 玩家信息 ---\n${playerInfo}`;
+
+                // 4. 绑定提示词 & 全局提示词
+                let boundPromptsStr = "";
+                const allFolders = await DBHelper.getAll('promptFolders');
+                const allPrompts = await DBHelper.getAll('prompts');
+                
+                // 4.1 角色专属绑定
+                if (contact.boundPromptFolderIds && contact.boundPromptFolderIds.length > 0) {
+                    const activeFolders = allFolders.filter(f => contact.boundPromptFolderIds.includes(f.id) && f.isActive);
+                    const activeFolderIds = activeFolders.map(f => f.id);
+                    const explicitPrompts = allPrompts.filter(p => activeFolderIds.includes(p.folderId) && p.isActive && p.type === 'explicit');
+                    if (explicitPrompts.length > 0) {
+                        boundPromptsStr += `\n--- 绑定的角色/文风设定 (专属) ---\n${explicitPrompts.map(p => p.content).join('\n\n')}\n`;
+                    }
+                }
+                
+                // 4.2 线下模式通用绑定 (新增)
+                if (settings.globalPromptFolderIds && settings.globalPromptFolderIds.length > 0) {
+                    const activeGlobalFolders = allFolders.filter(f => settings.globalPromptFolderIds.includes(f.id) && f.isActive);
+                    const activeGlobalFolderIds = activeGlobalFolders.map(f => f.id);
+                    const globalExplicitPrompts = allPrompts.filter(p => activeGlobalFolderIds.includes(p.folderId) && p.isActive && p.type === 'explicit');
+                    if (globalExplicitPrompts.length > 0) {
+                        boundPromptsStr += `\n--- 线下模式通用设定 ---\n${globalExplicitPrompts.map(p => p.content).join('\n\n')}\n`;
+                    }
+                }
+                
+                // 4.3 全局提示词 (System wide)
+                const globalPrompts = await AIHandler.getGlobalPromptsForContext('offline');
+                if (globalPrompts) boundPromptsStr += `\n${globalPrompts}`;
+                
+                prompt += boundPromptsStr;
+
+                // 5. 普通聊天界面记录 (可配置轮次 + 记忆互通)
+                if (settings.includeChatHistory) {
+                    const chatSettings = await DBHelper.get('apiConfig', 'chatSettings') || {};
+                    const turnsToLoad = settings.chatHistoryTurns || 15;
+                    let chatContext = "";
+                    
+                    // 5.1 获取主聊天记录
+                    const chatMsgs = await DBHelper.getMessages(this.currentTargetId, turnsToLoad * 5); 
+                    const allContacts = await DBHelper.getAll('contacts');
+                    const turns = AIHandler.buildTurnsFromHistory(chatMsgs, allContacts, myProfile);
+                    const recentTurns = turns.slice(-turnsToLoad);
+
+                    if (recentTurns.length > 0) {
+                        chatContext += `\n--- 线上聊天界面记录 (仅供参考，这是之前的对话) ---\n${recentTurns.map(t => JSON.stringify(t)).join('\n')}\n`;
+                    }
+
+                    // 5.2 记忆互通 (群聊记录)
+                    if (chatSettings.memoryInterconnection) {
+                        const allGroups = await DBHelper.getAll('groups');
+                        const allMetadata = await DBHelper.getAll('chatMetadata');
+                        
+                        // 找出该角色所在的其他群聊
+                        const memberInGroups = allGroups.filter(g => g.members.includes(this.currentTargetId));
+                        const groupTurnsToLoad = 3; // 群聊默认少一点
+
+                        if (memberInGroups.length > 0) {
+                             let groupContext = '--- 记忆互通：角色所在群聊的近期记录 ---\n';
+                             let hasGroupData = false;
+
+                             for (const group of memberInGroups) {
+                                 // 简单按活跃度排序太复杂，直接取
+                                 const groupMsgs = await DBHelper.getMessages(group.id, 20);
+                                 const gTurns = AIHandler.buildTurnsFromHistory(groupMsgs, allContacts, myProfile);
+                                 const recentGTurns = gTurns.slice(-groupTurnsToLoad);
+                                 
+                                 if (recentGTurns.length > 0) {
+                                     groupContext += `\n[群聊: ${group.name}]\n${recentGTurns.map(t => JSON.stringify(t)).join('\n')}`;
+                                     hasGroupData = true;
+                                 }
+                             }
+                             if (hasGroupData) chatContext += `\n${groupContext}\n`;
+                        }
+                    }
+                    
+                    prompt += chatContext;
+                }
+
+                // 6. 线下模式历史记录 (A + B) + 最新玩家行动分离
+                const messages = await DBHelper.getMessages(this.currentTargetId, 500);
+                // 获取所有线下消息，正序排列
+                const offlineMessages = messages.filter(m => m.segmentType === 'offline_text').reverse();
+                
+                // *** 核心修正：分离最新玩家行动 ***
+                let latestPlayerInput = "";
+                let historyMessages = [...offlineMessages];
+
+                // 如果最后一条是玩家发送的，将其提取为“最新行动”，不放入历史摘要
+                if (historyMessages.length > 0 && historyMessages[historyMessages.length - 1].type === 'sent') {
+                    const lastMsg = historyMessages.pop();
+                    latestPlayerInput = lastMsg.content;
+                }
+
+                const rawCount = settings.rawTurns || 3;
+                const summaryCount = settings.summaryTurns || 10;
+                
+                const total = historyMessages.length;
+                const rawStartIndex = Math.max(0, total - rawCount);
+                const rawMsgs = historyMessages.slice(rawStartIndex);
+                
+                const summaryEndIndex = rawStartIndex;
+                const summaryStartIndex = Math.max(0, summaryEndIndex - summaryCount);
+                const summaryMsgs = historyMessages.slice(summaryStartIndex, summaryEndIndex);
+
+                let historyText = "";
+
+                // 6.1 添加摘要历史
+                if (summaryMsgs.length > 0) {
+                    historyText += `\n--- 前情提要 (历史摘要) ---\n`;
+                    summaryMsgs.forEach(msg => {
+                        const isPlayer = msg.type === 'sent';
+                        const name = isPlayer ? myProfile.name : contact.name;
+                        
+                        if (!isPlayer && msg.cardData && msg.cardData.summary) {
+                            historyText += `[${name}]: ${msg.cardData.summary}\n`;
+                        } else {
+                            let content = msg.content.length > 50 ? msg.content.substring(0, 50) + "..." : msg.content;
+                            historyText += `[${name}]: ${content}\n`;
+                        }
+                    });
+                }
+
+                // 6.2 添加最新原始历史
+                if (rawMsgs.length > 0) {
+                    historyText += `\n--- 近期剧情 (原始记录) ---\n`;
+                    rawMsgs.forEach(msg => {
+                        const isPlayer = msg.type === 'sent';
+                        const name = isPlayer ? "玩家" : contact.name;
+                        historyText += `[${name}]: ${msg.content}\n\n`;
+                    });
+                } 
+                
+                if (!historyText) {
+                    historyText += `\n(暂无历史剧情，这是一个新的开始)\n`;
+                }
+
+                prompt += historyText;
+                
+                // 7. 插入玩家最新行动 (如果有)
+                if (latestPlayerInput) {
+                    prompt += `\n--- 玩家最新行动 ---\n${latestPlayerInput}\n`;
+                }
+
+                // 8. 最终指令
+                prompt += `
+--- 
+**回复规则 (严格遵守)**：
+1.  不需要将回复分割成短句，这是一个长文模式，请使用流畅、细腻的描写，支持Markdown格式。
+2.  **必须**对本轮回合（包括玩家的最新行动和你即将生成的回复）做出摘要。
+3.  **摘要输出要求**：
+    - 禁止升华与非具体事实的总结、不在摘要纪录内心思考。
+    - 摘要中纪录事实重点(剧情重点、资讯、玩家重点行动、关系突破、不可挽回、新物品简短介绍、物品取得或丢失)。
+    - 造成事实重点的对白本身(需标明谁说的)。
+    - 摘要中只使用姓名称呼人物(不用你我他或代称）。
+    - 单次摘要不超过150字。
+4.  **回复格式**：
+    <摘要>
+    时间 地点 参与事件角色名
+    (换行)
+    摘要内容
+    </摘要>
+    (此处开始正文回复)
+5.  严禁代入玩家行动。
+
+请开始回复：
+`;
+                return prompt;
+            },
+
+            async processAIResponse(rawText) {
+                const summaryRegex = /<摘要>([\s\S]*?)<\/摘要>/;
+                const match = rawText.match(summaryRegex);
+                
+                let summary = "";
+                let content = rawText;
+
+                if (match) {
+                    summary = match[1].trim();
+                    content = rawText.replace(match[0], "").trim();
+                }
+                
+                if (!content) content = rawText;
+
+                const message = {
+                    messageId: Utils.generateId('off'),
+                    chatId: this.currentTargetId,
+                    senderId: this.currentTargetId,
+                    timestamp: Date.now(),
+                    type: 'received',
+                    segmentType: 'offline_text',
+                    content: content,
+                    cardData: {
+                        summary: summary
+                    },
+                    isUnread: false
+                };
+
+                await DBHelper.put('messages', message);
+                this.appendBlockToDOM(message);
+                this.scrollToBottom();
+            }
+        };
 
         const EventManager = {
 
@@ -34840,6 +35807,9 @@ async showGiftDetailsModal(messageId) {
                 
                 // 新增：初始化心跳管理器，确保刷新后自动检查开关状态并启动调度器
                 HeartbeatAppManager.init(); 
+
+                // 新增：初始化线下模式管理器
+                OfflineModeManager.init();
                 
                 await UIManager.navigateTo('messages');
                 
