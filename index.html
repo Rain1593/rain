@@ -3135,11 +3135,41 @@
         .prompt-folder-content.collapsed {
             display: none; /* 修改：完全隐藏以避免布局干扰 */
         }
+
+        /* 新增：心跳App图标样式 */
+        .icon-heartbeat {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fcb045 100%); /* 温暖的橙粉色调 */
+            color: white;
+        }
+        .schedule-time-badge {
+            background-color: #007AFF;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .schedule-rate-badge {
+            background-color: #34C759;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: auto;
+        }
+        .schedule-desc {
+            font-size: 13px;
+            color: #8E8E93;
+            margin-top: 2px;
+        }
+
         /* 新增：提示词App图标样式 */
         .icon-prompts {
             background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
             color: white;
         }
+        
 .prompt-folder-header.collapsed .folder-toggle-icon {
     transform: rotate(0deg);
 }
@@ -7758,11 +7788,11 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 
         /* 灵动岛展开状态 (深色播放器风格) */
         .dynamic-island.expanded {
-            width: 360px; /* 类似参考图的宽度 */
-            height: 190px;
+            width: 335px; /* 减小宽度，从而增大两侧间距 */
+            height: 180px; /* 稍微减小高度适配视觉比例 */
             background: #000; /* 纯黑背景 */
-            border-radius: 45px;
-            padding: 25px;
+            border-radius: 32px; /* 减小圆角弧度，使其看起来更方圆 */
+            padding: 22px; /* 微调内边距 */
             flex-direction: column;
             cursor: default;
             align-items: stretch;
@@ -7998,6 +8028,14 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                     <img src="https://img.icons8.com/color/96/ios-photos.png" style="width:100%; height:100%; object-fit:cover;" alt="Photos">
                 </div>
                 <span class="app-name">相册</span>
+            </div>
+
+            <!-- 新增：心跳 App 图标 -->
+            <div class="app-item" id="open-heartbeat-app-btn">
+                <div class="app-icon icon-heartbeat">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <span class="app-name">心跳</span>
             </div>
             <!-- 这里可以继续添加更多占位APP以填满 4x6 -->
         </div>
@@ -9345,6 +9383,101 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                 </nav>
             </div>
 
+            <!-- 心跳 App 页面 (后台活跃管理) -->
+            <div id="page-heartbeat-app" class="page">
+                <div id="heartbeat-sub-view-container" style="flex-grow: 1; position: relative; overflow: hidden;">
+                    
+                    <!-- 1. 角色列表视图 (主页) -->
+                    <div id="heartbeat-view-list" class="prompts-view active" style="background-color: #F2F2F7;">
+                        <div class="prompts-nav-bar">
+                            <button class="prompts-nav-btn" id="heartbeat-exit-btn">退出</button>
+                            <div class="prompts-nav-title">活跃角色</div>
+                            <div class="prompts-nav-actions">
+                                <button class="prompts-nav-btn" id="heartbeat-add-char-btn"><i class="fas fa-plus"></i></button>
+                                <button class="prompts-nav-btn" id="heartbeat-manage-btn">管理</button>
+                            </div>
+                        </div>
+                        <div class="prompts-list-container">
+                            <p style="font-size: 12px; color: #8E8E93; margin: 10px 15px;">仅列表中的角色会进行后台判定。点击进入日程设置。</p>
+                            <div id="heartbeat-character-list" class="ios-list-section">
+                                <!-- JS 生成角色列表 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 设置视图 -->
+                    <div id="heartbeat-view-settings" class="prompts-view" style="background-color: #F2F2F7;">
+                        <div class="prompts-nav-bar">
+                            <button class="prompts-nav-btn" style="visibility:hidden;">占位</button>
+                            <div class="prompts-nav-title">设置</div>
+                            <div style="width: 30px;"></div>
+                        </div>
+                        <div class="prompts-list-container">
+                            <div class="ios-list-section" style="margin-top: 20px;">
+                                <div class="form-group" style="padding: 12px 15px; background: #fff; margin: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E5EA;">
+                                    <div style="display:flex; flex-direction:column;">
+                                        <span style="font-size: 1rem; font-weight: 500;">后台回复总开关</span>
+                                        <span style="font-size: 0.8rem; color: #8E8E93; margin-top: 2px;">保持浏览器运行，勿杀后台</span>
+                                    </div>
+                                    <label class="ios-switch">
+                                        <input type="checkbox" id="heartbeat-global-master-switch">
+                                        <span class="ios-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="form-group" style="padding: 12px 15px; background: #fff; margin: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E5EA;">
+                                    <div style="display:flex; flex-direction:column; max-width: 70%;">
+                                        <span style="font-size: 1rem; font-weight: 500;">活跃频率 (分钟)</span>
+                                        <span style="font-size: 0.8rem; color: #8E8E93; margin-top: 2px;">系统每隔多久进行一次掷骰子判定</span>
+                                    </div>
+                                    <input type="number" id="heartbeat-interval-input" value="15" min="5" style="width: 60px; text-align: center; border: 1px solid #E5E5EA; border-radius: 8px; padding: 5px;">
+                                </div>
+                                <div class="form-group" style="padding: 12px 15px; background: #fff; margin: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: none;">
+                                    <div style="display:flex; flex-direction:column; max-width: 70%;">
+                                        <span style="font-size: 1rem; font-weight: 500;">冷却时间 (分钟)</span>
+                                        <span style="font-size: 0.8rem; color: #8E8E93; margin-top: 2px;">角色发完消息后，多久内不再触发(防刷屏)</span>
+                                    </div>
+                                    <input type="number" id="heartbeat-cooldown-input" value="60" min="10" style="width: 60px; text-align: center; border: 1px solid #E5E5EA; border-radius: 8px; padding: 5px;">
+                                </div>
+                            </div>
+                            <p style="font-size: 12px; color: #8E8E93; margin: 10px 15px; text-align: center;">
+                                <strong>机制说明：</strong><br>
+                                系统每 [频率] 分钟唤醒一次，检查每个角色。<br>
+                                如果角色距离上一条消息的时间小于 [冷却]，则跳过。<br>
+                                如果超过冷却，则根据日程表设定的概率掷骰子决定是否回复。
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- 3. 日程编辑视图 (子页面) -->
+                    <div id="heartbeat-view-schedule" class="prompts-view" style="background-color: #F2F2F7; z-index: 20;">
+                        <div class="prompts-nav-bar">
+                            <button class="prompts-nav-btn" id="heartbeat-schedule-back-btn"><i class="fas fa-chevron-left"></i> 返回</button>
+                            <div class="prompts-nav-title" id="heartbeat-current-char-name">日程设置</div>
+                            <button class="prompts-nav-btn" id="heartbeat-add-slot-btn"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="prompts-list-container">
+                            <div class="ios-list-section" id="heartbeat-schedule-list">
+                                <!-- JS 生成时间段列表 -->
+                            </div>
+                            <p style="font-size: 12px; color: #8E8E93; margin: 10px 15px; text-align: center;">提示：未覆盖的时间段默认不触发主动回复。</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 底部导航栏 -->
+                <nav id="heartbeat-bottom-nav" style="height: 83px; padding-bottom: 20px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-around; align-items: flex-start; padding-top: 10px; flex-shrink: 0;">
+                    <div class="prompts-nav-tab active" data-target="heartbeat-view-list">
+                        <i class="fas fa-users"></i>
+                        <span>角色</span>
+                    </div>
+                    <div class="prompts-nav-tab" data-target="heartbeat-view-settings">
+                        <i class="fas fa-cog"></i>
+                        <span>设置</span>
+                    </div>
+                </nav>
+            </div>
+
         </main>
 
             <!-- 转发历史页面 (新) -->
@@ -9424,6 +9557,8 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 
     <input type="file" id="moments-bg-input" accept="image/*" style="display: none;">
     <input type="file" id="import-prompts-input" accept=".json" style="display: none;">
+    <!-- 后台保活音频 -->
+    <audio id="silent-audio" loop style="display: none;"></audio>
 
 <script>
     
@@ -9470,6 +9605,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             'my-info': $('#page-my-info-app'), // 新增
             'photos': $('#page-photos'),
             'prompts-app': $('#page-prompts-app'), // 新增
+            'heartbeat-app': $('#page-heartbeat-app'), // 新增：心跳App
         };
 
         
@@ -9593,7 +9729,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 
             async init() {
                 // 升级版本号以触发更新
-                this.DB_VERSION = 26; 
+                this.DB_VERSION = 27; 
 
                 return new Promise((resolve, reject) => {
                     if (this.db) {
@@ -9728,6 +9864,14 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                                 const assetStore = db.createObjectStore('photoAssets', { keyPath: 'id' });
                                 assetStore.createIndex('albumId', 'albumId', { unique: false });
                                 assetStore.createIndex('createdAt', 'createdAt', { unique: false });
+                            }
+                        }
+
+                        // --- 新增：静态资源表 (用于存音频等) ---
+                        if (event.oldVersion < 27) {
+                            console.log("数据库升级至版本 27: 创建 assets 表...");
+                            if (!db.objectStoreNames.contains('assets')) {
+                                db.createObjectStore('assets', { keyPath: 'id' });
                             }
                         }
 
@@ -13562,8 +13706,10 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
 15. **随笔 (概率出现)**: 你有一定概率会在【心声】之后，额外写一段「随笔|角色名|你的随笔内容」。这段随笔是角色在当前情境下，有感而发的一些思考或经历，可以与当前对话内容相关，也可以是独立的小故事或心情记录。字数请控制在50到250字之间。
 16. **严禁事项(1)**：绝不允许你代入玩家（“{PLAYER_NAME}”）的角色发言或为其生成心声。
 17. **严禁事项(2)**：你的回复内容中，不要使用括号 ()、星号 ** 或其他任何符号来描述角色的动作、表情或内心活动。
+18，如果当前最新回复是玩家消息，重点关注玩家消息；如果最新消息不是玩家发出来的，你可以结合人设对此做出具体反应（如延续前面的聊天、催促玩家、开启新的话题，且新话题的转折不要太过突兀）
+19. **关注消息时间**：聊天记录里的最新消息不一定是当前系统时间，你需要注意消息时间，如果间隔时间过长，你需要对此结合人设做出反应。
 ---
-现在，请根据以上信息，对玩家的最新消息进行回应。`,
+现在，请根据以上信息，结合聊天记录进行回应。`,
 
             videoCallPromptTpl: `\n---
 视频通话规则（非常重要！请严格遵守！）：
@@ -13633,6 +13779,48 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
 17. **严禁事项(2)**：你的回复内容中，不要使用括号 ()、星号 ** 或其他任何符号来描述角色的动作、表情或内心活动。
 ---
 现在，请根据以上信息，开始你的主动发言。`,
+
+            backgroundReplyPromptTpl: `
+---
+【后台主动消息生成指令】
+当前时间：{CURRENT_TIME}
+**你当前的状态/行程：{SCHEDULE_DESC}**
+
+任务：
+虽然你现在处于上述状态，且玩家的回复停止在上述聊天记录里，并没有给你发新消息，但你突然想给玩家发个消息。
+请结合你当前正在做的事（{SCHEDULE_DESC}）来决定发送的内容。
+
+**话题选择策略（请灵活选择）：**
+1. **新话题（高优先级）：** 当当前时间与上一条最新消息的时间间隔超过多个小时，可以开启一个新话题。分享你刚刚看到有趣的、好玩的、或者与你自己/玩家有关的事情。比如看到了好吃的、想到了玩家喜欢的某样东西、或者单纯想吐槽一下现在的状态。
+2. **延续话题（高优先级）：**  当当前时间与上一条最新消息的时间间隔不久时，观察【最近聊天记录】，如果上一段对话似乎意犹未尽，或者是戛然而止的，你可以尝试接上之前的话题，或者对之前的话题做一个收尾/补充。
+3. **朋友圈（特殊）：** 如果你绑定了朋友圈，且此刻觉得发一条动态比私聊更合适（比如看到风景、吃美食），可以使用朋友圈格式发布。
+
+**回复格式要求（严格遵守）：**
+1. **普通格式**：
+   - **普通文本消息**：请将你的普通回复拆分成多个通畅的短句，并使用格式：[角色名|消息内容]。例如：[陈奚楷|你好啊]。
+   - 表情包：<角色名|表情包名称>，**禁止在<>外面包裹[]**。你必须在< >中使用提供的表情包名称。没有合适的就不使用表情包，禁止虚构表情包名称，可用表情包名称：{EMOJI_LIST}
+   - 撤回消息：如果角色手滑/打错字/不小心说出真实想法（但不是心里话，还是普通聊天的口吻），请将该短句用英文大括号包裹，格式为：{角色名|已经发送然后立刻撤回的原始消息内容}。例如：例如：{孟祁年|装货，你以为老子不知道你什么心思吗}。不要发送一条正常消息再发送一条“撤回”的指令。
+   - 语音：[角色名|语音|时长|内容]语音时长最长不超过60s。例如：[三三|语音|13s|太好了！那我们下午三点在公司会议室详细讨论]。
+   - 引用: [角色名|引用|被引用人ID|被引用的消息内容|你的新消息内容]。不要滥用。例如: [陈奚楷|引用|楚寻|你哪里不会?|关于最后一题我还有点疑问。]。禁止引用转账消息
+   - 转账: [角色名|转账|被转账角色名|金额|备注]。金额格式为 "￥XX.XX"。例如: [孟祁年|转账|商时序|￥520.00|给你的惊喜]。
+   - 红包: [角色名|红包|红包名称|金额|红包个数]。私聊时红包个数必须为1。例如: [孟祁年|红包|请大家喝奶茶|￥88.88|4]。
+   - 拍一拍：<拍一拍>拍人角色名 (动作) 被拍角色名 (后缀)</拍一拍>
+   - 图片：[角色名|图片|图片描述]
+2. **朋友圈格式**（仅限绑定了朋友圈时使用）：
+   <朋友圈>
+   【角色名：动态内容|{CURRENT_DATE} {CURRENT_TIME}】
+   （已点赞：...）
+   </朋友圈>
+3. **心声**：
+   - 必填：【心声|角色名|你的心声】
+
+**严禁事项：**
+- 严禁代入玩家发言。
+- 严禁输出分析过程，直接输出结果。
+- 语气要自然、生活化，像真人一样，不要太僵硬。
+- 你的回复内容中，不要使用括号 ()、星号 ** 或其他任何符号来描述角色的动作、表情或内心活动。
+---
+现在，请生成你的回复：`,
 
             buildTurnsFromHistory(history, allContacts, myProfile) {
                 if (!history || history.length === 0) return [];
@@ -14275,7 +14463,15 @@ ${promptLines.join('\n\n')}
                 
                 let patAPatRulesForPrompt = '';
                 if (chatSettings.enablePatAPat !== false) {
-                    patAPatRulesForPrompt = `11. **拍一拍**: ... (省略以节省空间，保持原有逻辑) ...`;
+                    patAPatRulesForPrompt = `11. **拍一拍**: 当你想表达一些俏皮、提醒或想互动但无话可说的场景时，可以使用拍一拍。你必须使用被拍者的自定义动作和内容，使用此格式：<拍一拍>拍人角色名 (被拍人设定的动作) 被拍角色名 (被拍人设定的内容)</拍一拍>。
+例如，如果玩家的拍一拍内容是“被弹飞了”，则格式为：<拍一拍>33 拍了拍 {PLAYER_NAME} 被弹飞了</拍一拍>。
+绝对不能用拍人者的自定义动作和内容来回复，这是错误的。
+12. **修改拍一拍**: 当角色基于聊天语境想修改自己的拍一拍设置时，使用此格式：
+<修改拍一拍>
+修改人：角色名
+拍一拍动作：xxx（不超过5个字，例如:捏了捏）
+拍一拍内容：xxx（不超过20个字，例如:的脸，并说好软好软;或者:的头,被弹飞了）
+</修改拍一拍>`;
                 }
 
                 const formatPrompt = AIHandler.formatPromptTpl.replace('{EMOJI_LIST}', emojiListString).replace('{PLAYER_NAME}', myProfile.name).replace('{PAT_A_PAT_RULES}', patAPatRulesForPrompt);
@@ -14948,7 +15144,7 @@ ${promptLines.join('\n\n')}
                                     const isUrl = imageContent.startsWith('http');
                                     baseMessage.content = `[图片] ${imageContent}`;
                                     baseMessage.cardData = {
-                                        imageSrc: isUrl ? imageContent : 'https://pb.nichi.co/dilemma-team-flower',
+                                        imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/图片加载中.jpg',
                                         description: imageContent
                                     };
                                     break;
@@ -16073,7 +16269,7 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                                 const isUrl = imageContent.startsWith('http');
                                 baseMessage.content = `[图片] ${imageContent}`;
                                 baseMessage.cardData = {
-                                    imageSrc: isUrl ? imageContent : 'https://pb.nichi.co/dilemma-team-flower',
+                                    imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/图片加载中.jpg',
                                     description: imageContent
                                 };
                             }
@@ -16347,7 +16543,7 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                                     const isUrl = imageContent.startsWith('http');
                                     baseMessage.content = `[图片] ${imageContent}`;
                                     baseMessage.cardData = {
-                                        imageSrc: isUrl ? imageContent : 'https://pb.nichi.co/dilemma-team-flower',
+                                        imageSrc: isUrl ? imageContent : 'https://raw.githubusercontent.com/rain1593/rain/img/图片加载中.jpg',
                                         description: imageContent
                                     };
                                     break;
@@ -16645,6 +16841,120 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                     if (typingIndicator) typingIndicator.style.display = 'none';
                 }
             },
+
+            async triggerBackgroundReply(contactId, statusDesc) {
+                const contact = await DBHelper.get('contacts', contactId);
+                if (!contact) return;
+
+                console.log(`[Heartbeat] 正在为 ${contact.name} 生成后台回复... 状态: ${statusDesc}`);
+                
+                const myProfile = await EventManager.getPlayerProfileForContext(contactId);
+                const chatSettings = await DBHelper.get('apiConfig', 'chatSettings') || {};
+                
+                // 1. 时间信息
+                const now = new Date();
+                const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+                const dateStr = `${now.getMonth() + 1}/${now.getDate()}`;
+                
+                // 2. 收集表情包
+                let emojiList = [];
+                if (chatSettings.useBuiltinEmojis !== false) emojiList.push(...Object.values(BUILTIN_AI_EMOJIS));
+                const allAssets = await DBHelper.getAll('photoAssets');
+                
+                // 获取绑定相册
+                const allAlbums = await DBHelper.getAll('photoAlbums');
+                const universalAlbumIds = allAlbums.filter(a => !a.type || a.type === 'universal').map(a => a.id);
+                let boundAlbumIds = [...universalAlbumIds];
+                if (contact.boundAlbumIds) boundAlbumIds.push(...contact.boundAlbumIds);
+                
+                const activeAssets = allAssets.filter(a => boundAlbumIds.includes(a.albumId));
+                activeAssets.forEach(a => { if(a.name) emojiList.push(a.name); });
+                emojiList = [...new Set(emojiList)]; // 去重
+
+                // 3. 收集提示词 (全局 + 绑定)
+                const globalPrompts = await this.getGlobalPromptsForContext('chat');
+                
+                let boundPrompts = '';
+                if (contact.boundPromptFolderIds && contact.boundPromptFolderIds.length > 0) {
+                    const allFolders = await DBHelper.getAll('promptFolders');
+                    const allPrompts = await DBHelper.getAll('prompts');
+                    const activeBoundFolders = allFolders.filter(f => contact.boundPromptFolderIds.includes(f.id) && f.isActive);
+                    if (activeBoundFolders.length > 0) {
+                        const activeFolderIds = activeBoundFolders.map(f => f.id);
+                        const promptsText = allPrompts
+                            .filter(p => activeFolderIds.includes(p.folderId) && p.isActive && p.type === 'explicit') // 后台触发只用显性提示词
+                            .map(p => p.content)
+                            .join('\n\n');
+                        if (promptsText) boundPrompts = `--- 绑定的角色/文风设定 ---\n${promptsText}\n---`;
+                    }
+                }
+
+                // 4. 收集最近聊天记录 (为了"延续话题"功能)
+                const historyMsgs = await DBHelper.getMessages(contactId, 10); // 最近10条
+                const allContacts = await DBHelper.getAll('contacts');
+                const historyBlock = this.buildTurnsFromHistory(historyMsgs, allContacts, myProfile)
+                    .map(turn => `[${turn.time}] ${turn.role}: ${turn.content}`)
+                    .join('\n');
+                const historyPrompt = historyBlock ? `--- 最近聊天记录 (供参考) ---\n${historyBlock}\n---` : '';
+
+                // 5. 朋友圈信息
+                let circleInfo = '';
+                if (contact.boundCircleId) {
+                    circleInfo = `(提示：你绑定了朋友圈，你可以选择发送私聊，也可以选择发布一条朋友圈动态)`;
+                } else {
+                    circleInfo = `(提示：你未绑定朋友圈，请勿生成朋友圈格式，仅限私聊)`;
+                }
+
+                // 6. 组装 Prompt
+                let prompt = this.backgroundReplyPromptTpl
+                    .replace('{CURRENT_TIME}', timeStr)
+                    .replace('{CURRENT_DATE}', dateStr)
+                    .replace('{SCHEDULE_DESC}', statusDesc)
+                    .replace('{EMOJI_LIST}', emojiList.slice(0, 30).join('、'));
+
+                const charInfo = `你的角色资料：\n角色名: ${contact.name}\n性别: ${contact.gender}\n背景: ${contact.background || '无'}`;
+                const playerInfo = `玩家资料：\n名字: ${myProfile.name}\n性别: ${myProfile.gender}\n背景: ${myProfile.background || '无'}`;
+
+                const finalPrompt = [
+                    globalPrompts,
+                    boundPrompts,
+                    charInfo,
+                    playerInfo,
+                    circleInfo,
+                    historyPrompt,
+                    prompt
+                ].join('\n\n');
+                
+                // --- 新增：打印生成的 Prompt 到控制台 ---
+                console.log(`[Heartbeat] Generated Prompt for ${contact.name}:\n`, finalPrompt);
+                
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 45000); 
+
+                    const response = await this.getApiResponse(finalPrompt, null, controller.signal);
+                    clearTimeout(timeoutId);
+                    
+                    console.log(`[Heartbeat] ${contact.name} 生成内容:`, response);
+                    
+                    // 使用混合解析器处理 (它会自动识别私聊、朋友圈等格式并存入数据库)
+                    await this.parseAndDisplayMixedAIResponse(response, contactId);
+                    
+                    // 如果页面不可见，尝试发送系统通知
+                    if (document.hidden && Notification.permission === 'granted') {
+                        // 简单清理一下格式符号用于通知显示
+                        const cleanText = response.replace(/[\[<【].*?[\]>】]/g, '').trim() || '发来了一条新消息';
+                        new Notification(contact.remark || contact.name, {
+                            body: cleanText.substring(0, 40),
+                            icon: contact.avatar
+                        });
+                    }
+
+                } catch (error) {
+                    console.error(`[Heartbeat] ${contact.name} 后台回复失败:`, error);
+                }
+            },
+
 
             showError(message) {
                  UIManager.showModal({
@@ -20110,8 +20420,500 @@ ${globalPromptsSection}
                     item.classList.remove('editing');
                     item.setAttribute('draggable', 'false');
                 });
+            },
+        };
+
+        const HeartbeatAppManager = {
+            currentCharId: null,
+            isManageMode: false,
+            audioElement: null,
+            audioUrl: 'https://raw.githubusercontent.com/rain1593/rain/mp3/Silence.mp3',
+            schedulerInterval: null,
+
+            async init() {
+                this.audioElement = document.getElementById('silent-audio');
+                this.bindEvents();
+                await this.initAudio();
+                this.checkAndStartScheduler(); // 初始化时检查是否需要启动
+            },
+
+            bindEvents() {
+                // 底部导航切换
+                $('#heartbeat-bottom-nav').addEventListener('click', (e) => {
+                    const tab = e.target.closest('.prompts-nav-tab');
+                    if (!tab) return;
+
+                    $$('#heartbeat-bottom-nav .prompts-nav-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // 隐藏所有视图
+                    $$('#heartbeat-sub-view-container .prompts-view').forEach(v => {
+                        if (v.id !== 'heartbeat-view-schedule') v.classList.remove('active');
+                    });
+                    
+                    $('#heartbeat-view-schedule').classList.remove('active');
+                    
+                    $(`#${tab.dataset.target}`).classList.add('active');
+
+                    if (tab.dataset.target === 'heartbeat-view-list') {
+                        this.isManageMode = false;
+                        $('#heartbeat-manage-btn').textContent = '管理';
+                        this.renderCharacterList();
+                    } else if (tab.dataset.target === 'heartbeat-view-settings') {
+                        this.renderSettings();
+                    }
+                });
+
+                // 退出App按钮
+                $('#heartbeat-exit-btn').onclick = () => {
+                    const desktop = $('#ios-desktop');
+                    const appContainer = $('#app-container');
+                    appContainer.classList.remove('app-active');
+                    setTimeout(() => { appContainer.style.display = 'none'; }, 300);
+                    desktop.style.display = 'flex';
+                    void desktop.offsetWidth;
+                    desktop.classList.add('active');
+                };
+
+                // --- 角色列表页 ---
+                $('#heartbeat-add-char-btn').onclick = () => this.showAddCharacterModal();
+                $('#heartbeat-manage-btn').onclick = () => this.toggleManageMode();
+
+                $('#heartbeat-character-list').onclick = async (e) => {
+                    const item = e.target.closest('.ios-list-item');
+                    if (!item) return;
+                    const charId = item.dataset.id;
+
+                    if (e.target.closest('.delete-indicator')) {
+                        this.confirmRemoveCharacter(charId);
+                        return;
+                    }
+
+                    if (e.target.matches('.heartbeat-toggle')) {
+                        e.stopPropagation();
+                        const isActive = e.target.checked;
+                        await this.toggleCharacterActive(charId, isActive);
+                        return;
+                    }
+
+                    if (!this.isManageMode) {
+                        this.openScheduleEditor(charId);
+                    }
+                };
+
+                // --- 日程编辑页 ---
+                $('#heartbeat-schedule-back-btn').onclick = () => {
+                    $('#heartbeat-view-schedule').classList.remove('active');
+                    this.renderCharacterList();
+                };
+                $('#heartbeat-add-slot-btn').onclick = () => this.showEditSlotModal();
+                $('#heartbeat-schedule-list').onclick = (e) => {
+                    const item = e.target.closest('.ios-list-item');
+                    if (!item) return;
+                    const index = parseInt(item.dataset.index);
+                    
+                    if (e.target.closest('.delete-indicator')) {
+                         this.deleteScheduleSlot(index);
+                    } else {
+                         this.editScheduleSlot(index);
+                    }
+                };
+
+                // --- 设置页 ---
+                $('#heartbeat-global-master-switch').onchange = async (e) => {
+                    const enabled = e.target.checked;
+                    const config = await DBHelper.get('apiConfig', 'mainConfig') || { id: 'mainConfig' };
+                    if (!config.heartbeatGlobal) config.heartbeatGlobal = {};
+                    config.heartbeatGlobal.enabled = enabled;
+                    await DBHelper.put('apiConfig', config);
+                    
+                    this.toggleBackgroundMode(enabled); 
+                    UIManager.showToast(`后台回复已${enabled ? '开启 (音频保活中)' : '关闭'}`);
+                    
+                    if (enabled && Notification.permission === 'default') {
+                        Notification.requestPermission();
+                    }
+                };
+
+                const saveHbSettings = async () => {
+                    let interval = parseInt($('#heartbeat-interval-input').value);
+                    let cooldown = parseInt($('#heartbeat-cooldown-input').value);
+                    if (interval < 1) interval = 1;
+                    if (cooldown < 1) cooldown = 1;
+
+                    const config = await DBHelper.get('apiConfig', 'mainConfig') || { id: 'mainConfig' };
+                    if (!config.heartbeatGlobal) config.heartbeatGlobal = {};
+                    
+                    config.heartbeatGlobal.interval = interval;
+                    config.heartbeatGlobal.cooldown = cooldown;
+                    
+                    await DBHelper.put('apiConfig', config);
+                };
+
+                $('#heartbeat-interval-input').onchange = saveHbSettings;
+                $('#heartbeat-cooldown-input').onchange = saveHbSettings;
+            },
+
+            // --- 音频保活逻辑 ---
+            async initAudio() {
+                let blob = await DBHelper.get('assets', 'silence_mp3');
+                
+                if (!blob) {
+                    console.log("本地未找到静音音频，正在下载...");
+                    try {
+                        const response = await fetch(this.audioUrl);
+                        blob = await response.blob();
+                        // 存入数据库，ID为 'silence_mp3'
+                        await DBHelper.put('assets', { id: 'silence_mp3', content: blob });
+                        console.log("静音音频已缓存到数据库");
+                    } catch (e) {
+                        console.error("音频下载失败，将使用在线链接:", e);
+                        this.audioElement.src = this.audioUrl; // 降级方案
+                        return;
+                    }
+                }
+                
+                if (blob && blob.content) {
+                    // 注意：从DB取出的结构是 {id, content: Blob}
+                    const url = URL.createObjectURL(blob.content);
+                    this.audioElement.src = url;
+                }
+            },
+
+            async checkAndStartScheduler() {
+                const config = await DBHelper.get('apiConfig', 'mainConfig');
+                if (config && config.heartbeatGlobal && config.heartbeatGlobal.enabled) {
+                    this.toggleBackgroundMode(true);
+                }
+            },
+
+            toggleBackgroundMode(enabled) {
+                if (enabled) {
+                    // 播放音频（必须由用户点击事件触发调用此函数才有效）
+                    this.audioElement.play().catch(e => {
+                        console.warn("音频自动播放被阻止，请确保在设置页手动点击开关:", e);
+                        UIManager.showToast("请点击页面以激活后台保活");
+                    });
+                    this.startScheduler();
+                    
+                    // 媒体会话 API (在锁屏显示)
+                    if ('mediaSession' in navigator) {
+                        navigator.mediaSession.metadata = new MediaMetadata({
+                            title: '33聊天室',
+                            artist: '后台运行中...',
+                            artwork: [{ src: 'icon.png', sizes: '96x96', type: 'image/png' }]
+                        });
+                    }
+                } else {
+                    this.audioElement.pause();
+                    this.stopScheduler();
+                }
+            },
+
+            startScheduler() {
+                if (this.schedulerInterval) clearInterval(this.schedulerInterval);
+                console.log("[Heartbeat] 调度器已启动");
+                
+                // 每分钟检查一次
+                this.schedulerInterval = setInterval(() => this.runSchedulerTick(), 60 * 1000);
+            },
+
+            stopScheduler() {
+                if (this.schedulerInterval) clearInterval(this.schedulerInterval);
+                this.schedulerInterval = null;
+                console.log("[Heartbeat] 调度器已停止");
+            },
+
+            // --- 核心调度算法 ---
+            async runSchedulerTick() {
+                const config = await DBHelper.get('apiConfig', 'mainConfig');
+                if (!config || !config.heartbeatGlobal || !config.heartbeatGlobal.enabled) return;
+
+                const checkIntervalMinutes = config.heartbeatGlobal.interval || 15; 
+                const cooldownMinutes = config.heartbeatGlobal.cooldown || 60; // 获取用户设置的冷却时间
+                
+                const currentMinute = new Date().getMinutes();
+                // 简单取模判定是否到达检测周期
+                if (currentMinute % checkIntervalMinutes !== 0) {
+                     return; 
+                }
+
+                console.log("[Heartbeat] 开始一轮心跳检测...");
+                
+                const contacts = await DBHelper.getAll('contacts');
+                const currentHour = new Date().getHours();
+                const now = Date.now();
+
+                for (const char of contacts) {
+                    // 1. 检查角色开关
+                    if (!char.heartbeatSettings || !char.heartbeatSettings.enabled) continue;
+                    
+                    // 2. 检查冷却时间 (使用用户设置的值)
+                    // 获取该角色最后一条消息的时间（无论是发的还是收的）
+                    const lastMsgArr = await DBHelper.getMessages(char.id, 1);
+                    if (lastMsgArr && lastMsgArr.length > 0) {
+                        const diffMins = (now - lastMsgArr[0].timestamp) / 60000;
+                        if (diffMins < cooldownMinutes) {
+                            console.log(`[Heartbeat] ${char.name} 处于冷却中 (已过${diffMins.toFixed(0)}min / 需${cooldownMinutes}min)`);
+                            continue;
+                        }
+                    }
+
+                    // 3. 检查日程表
+                    const schedule = char.heartbeatSettings.schedule || [];
+                    const currentSlot = schedule.find(s => currentHour >= s.start && currentHour < s.end);
+
+                    if (!currentSlot) {
+                        // console.log(`[Heartbeat] ${char.name} 当前时间段无安排`);
+                        continue;
+                    }
+
+                    if (currentSlot.rate <= 0) continue;
+
+                    // 4. 概率判定
+                    const roll = Math.random() * 100;
+                    console.log(`[Heartbeat] ${char.name} 判定: Roll(${roll.toFixed(1)}) < Rate(${currentSlot.rate})?`);
+                    
+                    if (roll < currentSlot.rate) {
+                        // >>> 触发！<<<
+                        await AIHandler.triggerBackgroundReply(char.id, currentSlot.desc);
+                    }
+                }
+            },
+
+            // --- UI 渲染逻辑 (复用之前的，微调) ---
+            async renderSettings() {
+                const config = await DBHelper.get('apiConfig', 'mainConfig') || {};
+                const hbConfig = config.heartbeatGlobal || {};
+                
+                $('#heartbeat-global-master-switch').checked = hbConfig.enabled || false;
+                $('#heartbeat-interval-input').value = hbConfig.interval || 15;
+                $('#heartbeat-cooldown-input').value = hbConfig.cooldown || 60; // 默认60分钟冷却
+            },
+
+            async renderCharacterList() {
+                const list = $('#heartbeat-character-list');
+                list.innerHTML = '';
+                
+                const contacts = await DBHelper.getAll('contacts');
+                // 仅显示已添加且有效的
+                const addedContacts = contacts.filter(c => c.heartbeatSettings && c.id !== 'narrator-001');
+
+                if (addedContacts.length === 0) {
+                    list.innerHTML = `<div style="padding:20px; text-align:center; color:#ccc;">暂无活跃角色<br>点击右上角 + 号添加</div>`;
+                    return;
+                }
+
+                list.innerHTML = addedContacts.map(c => {
+                    const isEnabled = c.heartbeatSettings.enabled;
+                    const scheduleCount = c.heartbeatSettings.schedule ? c.heartbeatSettings.schedule.length : 0;
+                    
+                    return `
+                        <div class="ios-list-item ${this.isManageMode ? 'editing' : ''}" data-id="${c.id}" style="cursor: pointer;">
+                            <div class="delete-indicator"><i class="fas fa-minus-circle"></i></div>
+                            <img src="${c.avatar}" style="width: 36px; height: 36px; border-radius: 8px; margin-right: 12px; object-fit: cover;">
+                            <div class="ios-list-content">
+                                <div class="ios-list-title">${c.remark || c.name}</div>
+                                <div class="ios-list-subtitle">${scheduleCount} 个活跃时间段</div>
+                            </div>
+                            <label class="switch" style="margin-right: 10px; ${this.isManageMode ? 'display:none;' : ''}">
+                                <input type="checkbox" class="heartbeat-toggle" ${isEnabled ? 'checked' : ''}>
+                                <span class="slider"></span>
+                            </label>
+                            <i class="fas fa-chevron-right ios-list-arrow"></i>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            toggleManageMode() {
+                this.isManageMode = !this.isManageMode;
+                $('#heartbeat-manage-btn').textContent = this.isManageMode ? '完成' : '管理';
+                this.renderCharacterList();
+            },
+
+            async showAddCharacterModal() {
+                const contacts = await DBHelper.getAll('contacts');
+                const availableContacts = contacts.filter(c => !c.heartbeatSettings && c.id !== 'narrator-001');
+
+                if (availableContacts.length === 0) {
+                    return UIManager.showToast("没有可添加的角色");
+                }
+
+                const listHtml = availableContacts.map(c => `
+                    <label class="member-select-item">
+                        <input type="checkbox" name="add-heartbeat-char" value="${c.id}">
+                        <img src="${c.avatar}" class="contact-item-avatar" style="width:30px;height:30px;margin-right:10px;">
+                        <span>${c.remark || c.name}</span>
+                    </label>
+                `).join('');
+
+                UIManager.showModal({
+                    title: "添加活跃角色",
+                    body: `<div class="member-select-list" style="max-height: 40vh;">${listHtml}</div>`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '添加', class: 'btn-primary', handler: async () => {
+                            const selectedIds = [...$$('input[name="add-heartbeat-char"]:checked')].map(cb => cb.value);
+                            for (const id of selectedIds) {
+                                const contact = await DBHelper.get('contacts', id);
+                                if (contact) {
+                                    contact.heartbeatSettings = { enabled: true, schedule: [] };
+                                    await DBHelper.put('contacts', contact);
+                                }
+                            }
+                            UIManager.hideModal();
+                            this.renderCharacterList();
+                        }}
+                    ]
+                });
+            },
+
+            confirmRemoveCharacter(charId) {
+                UIManager.showModal({
+                    customClass: 'ios-style vertical-actions',
+                    title: '移除角色',
+                    body: '<p style="margin-bottom:10px; text-align:center;">确定要移除该角色吗？<br>(日程设置将被清除)</p>',
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '移除', class: 'btn-danger', handler: async () => {
+                            const contact = await DBHelper.get('contacts', charId);
+                            if (contact) {
+                                delete contact.heartbeatSettings;
+                                await DBHelper.put('contacts', contact);
+                            }
+                            UIManager.hideModal();
+                            this.renderCharacterList();
+                        }}
+                    ]
+                });
+            },
+
+            async toggleCharacterActive(charId, isActive) {
+                const contact = await DBHelper.get('contacts', charId);
+                if (!contact || !contact.heartbeatSettings) return;
+
+                contact.heartbeatSettings.enabled = isActive;
+                await DBHelper.put('contacts', contact);
+            },
+
+            // --- 日程编辑部分 (保持不变) ---
+            async openScheduleEditor(charId) {
+                this.currentCharId = charId;
+                const contact = await DBHelper.get('contacts', charId);
+                if (!contact) return;
+                $('#heartbeat-current-char-name').textContent = `${contact.remark || contact.name} 的日程`;
+                await this.renderScheduleList();
+                $('#heartbeat-view-schedule').classList.add('active');
+            },
+
+            async renderScheduleList() {
+                const list = $('#heartbeat-schedule-list');
+                list.innerHTML = '';
+                const contact = await DBHelper.get('contacts', this.currentCharId);
+                const schedule = (contact && contact.heartbeatSettings && contact.heartbeatSettings.schedule) ? contact.heartbeatSettings.schedule : [];
+                schedule.sort((a, b) => a.start - b.start);
+
+                if (schedule.length === 0) {
+                    list.innerHTML = `<div style="padding:20px; text-align:center; color:#ccc;">暂无日程安排，点击右上角 + 添加</div>`;
+                    return;
+                }
+
+                list.innerHTML = schedule.map((slot, index) => {
+                    const timeStr = `${String(slot.start).padStart(2,'0')}:00 - ${String(slot.end).padStart(2,'0')}:00`;
+                    return `
+                        <div class="ios-list-item editing" data-index="${index}">
+                            <div class="delete-indicator" style="display:block;"><i class="fas fa-minus-circle"></i></div>
+                            <div class="ios-list-content">
+                                <div class="ios-list-title">
+                                    <span class="schedule-time-badge">${timeStr}</span>
+                                    <span class="schedule-rate-badge">活跃度: ${slot.rate}%</span>
+                                </div>
+                                <div class="schedule-desc">状态: ${slot.desc || '无描述'}</div>
+                            </div>
+                            <i class="fas fa-chevron-right ios-list-arrow"></i>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            async showEditSlotModal(existingSlot = null, index = -1) {
+                const isEditing = existingSlot !== null;
+                UIManager.showModal({
+                    customClass: 'ios-style vertical-actions',
+                    title: isEditing ? '编辑时间段' : '添加时间段',
+                    body: `
+                        <div class="form-group" style="display:flex; gap:10px; align-items:center;">
+                            <label style="width:60px;">时段</label>
+                            <select id="hb-start-time" style="flex:1; padding:5px; border-radius:5px; border:1px solid #ccc;">
+                                ${Array.from({length: 24}, (_, i) => `<option value="${i}">${i}:00</option>`).join('')}
+                            </select>
+                            <span>至</span>
+                            <select id="hb-end-time" style="flex:1; padding:5px; border-radius:5px; border:1px solid #ccc;">
+                                ${Array.from({length: 24}, (_, i) => `<option value="${i+1}">${i+1}:00</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="display:flex; justify-content:space-between;">
+                                <span>回复概率 (活跃度)</span>
+                                <span id="hb-rate-val">20%</span>
+                            </label>
+                            <input type="range" id="hb-rate" min="0" max="100" value="20" style="width:100%;">
+                            <p style="font-size:0.7rem; color:#999;">0%为不回复，100%为极其活跃</p>
+                        </div>
+                        <div class="form-group">
+                            <label>当前状态/日程描述 (Prompt)</label>
+                            <textarea id="hb-desc" rows="3" placeholder="例如：正在睡觉 / 正在努力工作中，很忙 / 刚吃完饭，很闲" style="width:100%; border:1px solid #ccc; border-radius:8px; padding:8px;">${existingSlot ? existingSlot.desc : ''}</textarea>
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const start = parseInt($('#hb-start-time').value);
+                            const end = parseInt($('#hb-end-time').value);
+                            const rate = parseInt($('#hb-rate').value);
+                            const desc = $('#hb-desc').value.trim();
+                            if (start >= end) return UIManager.showToast("结束时间必须晚于开始时间");
+                            if (!desc) return UIManager.showToast("请填写状态描述");
+
+                            const contact = await DBHelper.get('contacts', this.currentCharId);
+                            if (!contact.heartbeatSettings.schedule) contact.heartbeatSettings.schedule = [];
+                            const newSlot = { start, end, rate, desc };
+                            if (isEditing) contact.heartbeatSettings.schedule[index] = newSlot;
+                            else contact.heartbeatSettings.schedule.push(newSlot);
+
+                            await DBHelper.put('contacts', contact);
+                            UIManager.hideModal();
+                            this.renderScheduleList();
+                        }}
+                    ]
+                });
+                const rateInput = $('#hb-rate');
+                const rateVal = $('#hb-rate-val');
+                rateInput.oninput = () => rateVal.textContent = `${rateInput.value}%`;
+                if (existingSlot) {
+                    $('#hb-start-time').value = existingSlot.start;
+                    $('#hb-end-time').value = existingSlot.end;
+                    $('#hb-rate').value = existingSlot.rate;
+                    rateVal.textContent = `${existingSlot.rate}%`;
+                    $('#hb-desc').value = existingSlot.desc;
+                }
+            },
+
+            async editScheduleSlot(index) {
+                const contact = await DBHelper.get('contacts', this.currentCharId);
+                const slot = contact.heartbeatSettings.schedule[index];
+                this.showEditSlotModal(slot, index);
+            },
+
+            async deleteScheduleSlot(index) {
+                const contact = await DBHelper.get('contacts', this.currentCharId);
+                contact.heartbeatSettings.schedule.splice(index, 1);
+                await DBHelper.put('contacts', contact);
+                this.renderScheduleList();
             }
         };
+
 
         const EventManager = {
 
@@ -33224,6 +34026,12 @@ async showGiftDetailsModal(messageId) {
                             $('#bottom-nav').style.display = 'none'; // 隐藏底部导航
                             PhotosManager.init();
                             PhotosManager.renderAlbumsList();
+                        } else if (pageId === 'heartbeat-app') { // 新增
+                            Object.values(pages).forEach(p => p.classList.remove('active'));
+                            $('#page-heartbeat-app').classList.add('active');
+                            $('#bottom-nav').style.display = 'none';
+                            HeartbeatAppManager.init();
+                            HeartbeatAppManager.renderCharacterList();    
                         } else if (pageId === 'prompts-app') { // 新增
                         Object.values(pages).forEach(p => p.classList.remove('active'));
                         $('#page-prompts-app').classList.add('active');
@@ -33249,6 +34057,10 @@ async showGiftDetailsModal(messageId) {
 
                 const photosBtn = $('#open-photos-btn');
                 if (photosBtn) photosBtn.addEventListener('click', () => openApp('photos'));
+
+                // 新增：心跳图标
+                const heartbeatBtn = $('#open-heartbeat-app-btn');
+                if (heartbeatBtn) heartbeatBtn.addEventListener('click', () => openApp('heartbeat-app'));
 
                 const myInfoBtn = $('#open-my-info-app-btn');
                 if (myInfoBtn) {
