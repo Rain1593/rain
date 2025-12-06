@@ -21979,14 +21979,19 @@ ${globalPromptsSection}
                 this.scrollToBottom();
             },
 
-            appendBlockToDOM(msg) {
+            async appendBlockToDOM(msg) {
                 const contentArea = $('#offline-content');
                 const block = document.createElement('div');
                 const isPlayer = msg.type === 'sent';
                 block.className = `offline-block ${isPlayer ? 'player' : 'ai'}`;
                 block.dataset.id = msg.messageId;
                 
-                let htmlContent = marked.parse(msg.content);
+                // 应用正则（仅用于显示，不影响AI Context unless configured otherwise）
+                // 注意：这里第二个参数传 false，表示仅应用 isActive 的规则，不考虑 applyToAi 过滤
+                // 意思是：只要规则启用了，UI上就显示替换后的效果
+                const processedContent = await this.processTextWithRegex(msg.content, false);
+                
+                let htmlContent = marked.parse(processedContent);
                 
                 let summaryHtml = '';
                 if (!isPlayer && msg.cardData && msg.cardData.summary) {
@@ -22201,6 +22206,180 @@ ${globalPromptsSection}
                 });
             },
 
+            // --- 正则处理核心逻辑 ---
+            async processTextWithRegex(text, forAiContext = false) {
+                if (!text) return text;
+                const settings = await this.getOfflineSettings();
+                const rules = settings.regexRules || [];
+                
+                let processedText = text;
+
+                for (const rule of rules) {
+                    if (!rule.isActive) continue; // 总开关未开启则跳过
+                    
+                    // 如果是为AI构建Prompt，且该规则不应用于AI，则跳过（发送原始文本）
+                    if (forAiContext && !rule.applyToAi) continue;
+
+                    try {
+                        const regex = new RegExp(rule.pattern, rule.flags || 'g');
+                        // 替换内容，支持 $1 $2 等正则引用
+                        processedText = processedText.replace(regex, rule.replacement);
+                    } catch (e) {
+                        console.warn(`正则规则 ${rule.pattern} 执行失败:`, e);
+                    }
+                }
+                return processedText;
+            },
+
+            // --- 正则设置 UI ---
+            async showRegexSettings() {
+                const settings = await this.getOfflineSettings();
+                const rules = settings.regexRules || [];
+
+                const renderRuleList = () => {
+                    if (rules.length === 0) return '<div style="text-align:center; color:#999; padding:20px;">暂无正则规则</div>';
+                    
+                    return rules.map((rule, index) => `
+                        <div class="ios-list-item" style="padding: 10px; flex-direction: column; align-items: stretch; background: white; margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <span style="font-family: monospace; background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; color: #333;">/${rule.pattern}/${rule.flags || 'g'}</span>
+                                <div style="display: flex; gap: 5px;">
+                                    <button class="sort-btn-mini" data-action="up" data-index="${index}" ${index === 0 ? 'disabled' : ''}>▲</button>
+                                    <button class="sort-btn-mini" data-action="down" data-index="${index}" ${index === rules.length - 1 ? 'disabled' : ''}>▼</button>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.8rem; color: #666;">替换为: <strong style="color: var(--accent-color);">${rule.replacement || '(空)'}</strong></span>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="action-btn" data-action="edit" data-index="${index}" style="font-size: 0.8rem;">编辑</button>
+                                    <button class="action-btn" data-action="delete" data-index="${index}" style="font-size: 0.8rem; color: #e74c3c;">删除</button>
+                                </div>
+                            </div>
+                            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #eee; display: flex; justify-content: space-between; align-items: center;">
+                                <label style="display: flex; align-items: center; gap: 5px; font-size: 0.8rem;">
+                                    <input type="checkbox" data-action="toggle-active" data-index="${index}" ${rule.isActive ? 'checked' : ''}> 启用
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px; font-size: 0.8rem;">
+                                    <input type="checkbox" data-action="toggle-ai" data-index="${index}" ${rule.applyToAi ? 'checked' : ''}> 对AI生效
+                                </label>
+                            </div>
+                        </div>
+                    `).join('');
+                };
+
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "正则管理",
+                    body: `
+                        <div id="regex-rules-list" style="max-height: 50vh; overflow-y: auto; background: #f9f9f9; padding: 10px; border-radius: 8px;">
+                            ${renderRuleList()}
+                        </div>
+                        <button id="add-regex-btn" class="modal-btn btn-primary" style="width: 100%; margin-top: 10px;">+ 新增规则</button>
+                    `,
+                    actions: [{ text: '关闭', class: 'btn-secondary', handler: () => UIManager.hideModal() }]
+                });
+
+                const listContainer = $('#regex-rules-list');
+                
+                // 绑定列表事件
+                listContainer.onclick = async (e) => {
+                    const target = e.target;
+                    const index = parseInt(target.dataset.index);
+                    if (isNaN(index)) return;
+
+                    const action = target.dataset.action;
+                    
+                    if (action === 'toggle-active') {
+                        rules[index].isActive = target.checked;
+                        await this.saveOfflineSettings({ regexRules: rules });
+                        // 不重新渲染列表，避免失去焦点
+                        // 但需要刷新页面内容以应用视觉变化
+                        this.renderHistory(); 
+                    } else if (action === 'toggle-ai') {
+                        rules[index].applyToAi = target.checked;
+                        await this.saveOfflineSettings({ regexRules: rules });
+                    } else if (action === 'delete') {
+                        rules.splice(index, 1);
+                        await this.saveOfflineSettings({ regexRules: rules });
+                        listContainer.innerHTML = renderRuleList();
+                        this.renderHistory();
+                    } else if (action === 'up' && index > 0) {
+                        [rules[index - 1], rules[index]] = [rules[index], rules[index - 1]];
+                        await this.saveOfflineSettings({ regexRules: rules });
+                        listContainer.innerHTML = renderRuleList();
+                    } else if (action === 'down' && index < rules.length - 1) {
+                        [rules[index + 1], rules[index]] = [rules[index], rules[index + 1]];
+                        await this.saveOfflineSettings({ regexRules: rules });
+                        listContainer.innerHTML = renderRuleList();
+                    } else if (action === 'edit') {
+                        this.showEditRegexModal(rules[index], index);
+                    }
+                };
+
+                $('#add-regex-btn').onclick = () => this.showEditRegexModal();
+            },
+
+            showEditRegexModal(rule = null, index = -1) {
+                const isEditing = rule !== null;
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: isEditing ? "编辑规则" : "新增规则",
+                    body: `
+                        <div class="form-group">
+                            <label>正则式 (Pattern)</label>
+                            <input type="text" id="regex-pattern" value="${rule ? rule.pattern : ''}" placeholder="例如: <thinking>[\\s\\S]*?<\\/thinking>">
+                        </div>
+                        <div class="form-group">
+                            <label>替换内容 (Replacement)</label>
+                            <input type="text" id="regex-replacement" value="${rule ? rule.replacement : ''}" placeholder="留空则删除，或输入替换文本">
+                        </div>
+                        <div class="form-group">
+                            <label>修饰符 (Flags)</label>
+                            <input type="text" id="regex-flags" value="${rule ? (rule.flags || 'g') : 'g'}" placeholder="g, i, m, s...">
+                        </div>
+                        <div style="font-size: 0.8rem; color: #888; background: #f0f0f0; padding: 10px; border-radius: 6px;">
+                            <p><strong>常用示例:</strong></p>
+                            <p>删除思维链: <code>&lt;thinking&gt;[\\s\\S]*?&lt;/thinking&gt;</code> (Flags: g)</p>
+                            <p>删除括号内容: <code>\\(.*?\\)</code> (Flags: g)</p>
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => {
+                            UIManager.hideModal();
+                            this.showRegexSettings(); // 返回列表
+                        }},
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const pattern = $('#regex-pattern').value;
+                            if (!pattern) return UIManager.showToast("正则式不能为空");
+                            
+                            const newRule = {
+                                id: rule ? rule.id : Utils.generateId('rule'),
+                                pattern: pattern,
+                                replacement: $('#regex-replacement').value || '',
+                                flags: $('#regex-flags').value || 'g',
+                                isActive: rule ? rule.isActive : true,
+                                applyToAi: rule ? rule.applyToAi : false
+                            };
+
+                            const settings = await this.getOfflineSettings();
+                            const rules = settings.regexRules || [];
+
+                            if (isEditing) {
+                                rules[index] = newRule;
+                            } else {
+                                rules.push(newRule);
+                            }
+
+                            await this.saveOfflineSettings({ regexRules: rules });
+                            
+                            UIManager.hideModal();
+                            this.showRegexSettings(); // 返回列表
+                            this.renderHistory(); // 刷新页面显示
+                        }}
+                    ]
+                });
+            },
+            
             // --- 设置侧边栏逻辑 ---
             async showSettingsSidebar() {
                 UIManager.showSidebar({
@@ -22233,6 +22412,11 @@ ${globalPromptsSection}
                                 <span>绑定线下提示词</span>
                                 <i class="fas fa-chevron-right"></i>
                             </div>
+                            <div class="setting-item" id="off-set-regex">
+                                <i class="fas fa-code"></i>
+                                <span>正则管理</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
                             <div class="setting-item" id="off-clear-history">
                                 <i class="fas fa-trash-alt" style="color: #e74c3c;"></i>
                                 <span style="color: #e74c3c;">清空线下记录</span>
@@ -22245,6 +22429,7 @@ ${globalPromptsSection}
                 $('#off-set-memory').onclick = () => this.showMemorySettings();
                 $('#off-set-time').onclick = () => this.showTimeSettings();
                 $('#off-set-style').onclick = () => this.showStyleSettings();
+                $('#off-set-regex').onclick = () => this.showRegexSettings(); // 新增绑定
                 $('#off-bind-persona').onclick = () => {
                     UIManager.hideSidebar();
                     EventManager.showPersonaBindingModal(this.currentTargetId, false);
@@ -22264,7 +22449,8 @@ ${globalPromptsSection}
                     virtualTime: config.virtualTime || '',
                     customCSS: config.customCSS || '',
                     hideSummary: config.hideSummary || false, // 默认显示摘要
-                    globalPromptFolderIds: config.globalPromptFolderIds || [] // 线下通用绑定的文件夹ID
+                    globalPromptFolderIds: config.globalPromptFolderIds || [], // 线下通用绑定的文件夹ID
+                    regexRules: config.regexRules || [] // 新增：正则规则数组
                 };
             },
 
@@ -22544,18 +22730,19 @@ ${globalPromptsSection}
                 for (let i = summaryStartIndex; i < total; i++) {
                     const msg = offlineMessages[i];
                     const isPlayer = msg.type === 'sent';
-                    // 如果是原始记录区，玩家显示为"玩家"，否则显示名字 (保持一致性也可都用名字，这里按原逻辑微调)
                     const name = isPlayer ? (i >= rawStartIndex ? "玩家" : myProfile.name) : contact.name;
 
                     // 逻辑分支：
                     if (i >= rawStartIndex) {
                         // --- 原始回复区 ---
-                        // 无论玩家还是AI，都显示完整内容
-                        historyText += `[${name}]: ${msg.content}\n\n`;
+                        // 应用正则处理：这里第二个参数传 true，表示这是发给AI的内容
+                        // 只有 applyToAi 为 true 的规则才会被应用
+                        const processedContent = await this.processTextWithRegex(msg.content, true);
+                        
+                        historyText += `[${name}]: ${processedContent}\n\n`;
                         hasContent = true;
                     } else {
                         // --- 摘要区 (超出范围的历史) ---
-                        // 仅当是AI消息且包含摘要时显示，玩家消息或无摘要消息被跳过(压缩)
                         if (!isPlayer && msg.cardData && msg.cardData.summary) {
                             historyText += `[${name}]: ${msg.cardData.summary}\n`;
                             hasContent = true;
@@ -22569,27 +22756,24 @@ ${globalPromptsSection}
 
                 prompt += historyText;
                 
-                // 7. 最终指令 (删除了"严禁代入玩家行动"的强提示，因为最后一条已经是玩家行动了)
+                // 7. 最终指令 (加强剧情推动逻辑)
                 prompt += `
 --- 
-**回复规则 (严格遵守)**：
-1.  不需要将回复分割成短句，这是一个长文模式，请使用流畅、细腻的描写，支持Markdown格式。
-2.  **必须**对本轮回合（包括玩家的最新行动和你即将生成的回复）做出摘要。
-3.  **摘要输出要求**：
-    - 禁止升华与非具体事实的总结、不在摘要纪录内心思考。
-    - 摘要中纪录事实重点(剧情重点、资讯、玩家重点行动、关系突破、不可挽回、新物品简短介绍、物品取得或丢失)。
-    - 造成事实重点的对白本身(需标明谁说的)。
-    - 摘要中只使用姓名称呼人物(不用你我他或代称）。
-    - 单次摘要不超过150字。
-4.  **回复格式**：
+**回复规则 (最高优先级 - 严格遵守)**：
+1.  **【禁止回档】**：检测【历史线下记录】的最后一条内容。你的回复必须且只能发生在**最后一条消息的时间点之后**。**绝对禁止**重复、改写或再次描述历史记录中已经发生过的事件（如刚见面、打招呼等）。如果历史记录显示你们已经聊了几句，就不要再假装刚见面。
+2.  **【剧情推进】**：你的任务是**顺着最新的一条消息往下写**。如果玩家有了新动作，必须立刻对该动作做出反应；如果玩家在等待，你必须推动时间线或发生新事件。
+3.  **【格式要求】**：这是一个长文模式，请使用流畅、细腻的描写。
+4.  **【摘要生成】**：必须对本轮回合（包括玩家的最新行动和你即将生成的回复）做出摘要。
+    - 摘要必须是**纯客观事实**，禁止升华与非具体事实的总结、不在摘要纪录内心思考，不纪录不重要的句子，不修饰摘要，摘要中纪录事实重点(剧情重点、资讯、玩家重点行动、关系突破、不可挽回、新物品简短介绍、物品取得或丢失)、造成事实重点的对白本身(需标明谁说的)，摘要中只使用姓名称呼人物(不用你我他或代称）**不超过150字**。
+    - 格式：
     <摘要>
-    时间 地点 参与事件角色名
+    时间 地点 参与角色
     (换行)
     摘要内容
     </摘要>
     (此处开始正文回复)
 
-请开始回复：
+请聚焦于**最新一条历史记录**，继续书写接下来的剧情：
 `;
                 return prompt;
             },
