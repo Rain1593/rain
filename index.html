@@ -22001,11 +22001,8 @@ ${globalPromptsSection}
                 // 意思是：只要规则启用了，UI上就显示替换后的效果
                 const processedContent = await this.processTextWithRegex(msg.content, false);
                 
-                // [新增] 自动将中文双引号内容包裹在 <q> 标签中，以便 CSS 高亮
-                // 替换逻辑：把 “文本” 替换为 <q>“文本”</q>
-                const contentWithQuotes = processedContent.replace(/“([^”\n]+)”/g, '<q>“$1”</q>');
-                
-                let htmlContent = marked.parse(contentWithQuotes);
+                // 修改：移除了硬编码的双引号替换，完全由用户自定义正则控制
+                let htmlContent = marked.parse(processedContent);
                 
                 let summaryHtml = '';
                 if (!isPlayer && msg.cardData && msg.cardData.summary) {
@@ -22145,12 +22142,19 @@ ${globalPromptsSection}
             },
 
             async handleGenerate() {
-                if (AIHandler.isAwaitingResponse) return;
-                
                 const btn = $('#offline-generate-btn');
-                const originalText = btn.textContent;
-                btn.textContent = "生成中...";
-                btn.disabled = true;
+
+                // 1. 暂停/停止逻辑：如果正在生成，则取消请求
+                if (AIHandler.isAwaitingResponse) {
+                    AIHandler.cancelAiRequest();
+                    btn.textContent = "生成回复"; // 立即恢复按钮文字
+                    return;
+                }
+                
+                // 2. 开始生成逻辑
+                btn.textContent = "停止生成"; // 按钮变为停止状态
+                // btn.disabled = true; // 移除禁用，允许用户点击以停止
+                
                 AIHandler.isAwaitingResponse = true;
                 AIHandler.abortController = new AbortController();
 
@@ -22160,9 +22164,19 @@ ${globalPromptsSection}
                     const response = await AIHandler.getApiResponse(prompt, null, AIHandler.abortController.signal);
                     await this.processAIResponse(response);
                 } catch (error) {
-                    if (error.name !== 'AbortError') UIManager.showToast("生成失败: " + error.message);
+                    if (error.name === 'AbortError') {
+                        UIManager.showToast("已停止生成");
+                    } else {
+                        // 修改：使用弹窗显示错误，防止Toast被忽略
+                        console.error("线下模式生成失败:", error);
+                        UIManager.showModal({
+                            title: "生成失败",
+                            body: `<p>${error.message}</p>`,
+                            actions: [{ text: '知道了', class: 'btn-primary', handler: () => UIManager.hideModal() }]
+                        });
+                    }
                 } finally {
-                    btn.textContent = originalText;
+                    btn.textContent = "生成回复"; // 恢复原始文字
                     btn.disabled = false;
                     AIHandler.isAwaitingResponse = false;
                     AIHandler.abortController = null;
@@ -22253,17 +22267,25 @@ ${globalPromptsSection}
                 const renderRuleList = () => {
                     if (rules.length === 0) return '<div style="text-align:center; color:#999; padding:20px;">暂无正则规则</div>';
                     
-                    return rules.map((rule, index) => `
+                    return rules.map((rule, index) => {
+                        // 修改：优先显示名称，如果没有名称则显示截断的正则式
+                        const displayName = rule.name ? rule.name : `/${rule.pattern}/`;
+                        const displayPattern = rule.pattern.length > 20 ? rule.pattern.substring(0, 20) + '...' : rule.pattern;
+
+                        return `
                         <div class="ios-list-item" style="padding: 10px; flex-direction: column; align-items: stretch; background: white; margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border-color);">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                <span style="font-family: monospace; background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; color: #333;">/${rule.pattern}/${rule.flags || 'g'}</span>
+                                <span style="font-weight: bold; font-size: 0.95rem; color: var(--text-color-dark);">${displayName}</span>
                                 <div style="display: flex; gap: 5px;">
                                     <button class="sort-btn-mini" data-action="up" data-index="${index}" ${index === 0 ? 'disabled' : ''}>▲</button>
                                     <button class="sort-btn-mini" data-action="down" data-index="${index}" ${index === rules.length - 1 ? 'disabled' : ''}>▼</button>
                                 </div>
                             </div>
+                            
+                            ${rule.name ? `<div style="font-family: monospace; font-size: 0.75rem; color: #999; margin-bottom: 5px;">正则: ${displayPattern}</div>` : ''}
+
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.8rem; color: #666;">替换为: <strong style="color: var(--accent-color);">${rule.replacement || '(空)'}</strong></span>
+                                <span style="font-size: 0.8rem; color: #666;">替换为: <strong style="color: var(--accent-color);">${rule.replacement ? (rule.replacement.length > 15 ? rule.replacement.substring(0,15)+'...' : rule.replacement) : '(空)'}</strong></span>
                                 <div style="display: flex; gap: 10px;">
                                     <button class="action-btn" data-action="edit" data-index="${index}" style="font-size: 0.8rem;">编辑</button>
                                     <button class="action-btn" data-action="delete" data-index="${index}" style="font-size: 0.8rem; color: #e74c3c;">删除</button>
@@ -22278,7 +22300,7 @@ ${globalPromptsSection}
                                 </label>
                             </div>
                         </div>
-                    `).join('');
+                    `}).join('');
                 };
 
                 UIManager.showModal({
@@ -22335,26 +22357,33 @@ ${globalPromptsSection}
 
             showEditRegexModal(rule = null, index = -1) {
                 const isEditing = rule !== null;
+                
+                // 核心修复：在 HTML 中不要使用 value="${...}"，因为正则中的双引号会截断 HTML 属性
+                // 我们先渲染空的 input，然后在 showModal 后通过 JS 赋值
                 UIManager.showModal({
                     customClass: 'ios-style',
                     title: isEditing ? "编辑规则" : "新增规则",
                     body: `
                         <div class="form-group">
+                            <label>规则名称 (选填)</label>
+                            <input type="text" id="regex-name" placeholder="例如: 思维链">
+                        </div>
+                        <div class="form-group">
                             <label>正则式 (Pattern)</label>
-                            <input type="text" id="regex-pattern" value="${rule ? rule.pattern : ''}" placeholder="例如: <thinking>[\\s\\S]*?<\\/thinking>">
+                            <input type="text" id="regex-pattern" placeholder="例如: <thinking>[\\s\\S]*?<\\/thinking>">
                         </div>
                         <div class="form-group">
                             <label>替换内容 (Replacement)</label>
-                            <input type="text" id="regex-replacement" value="${rule ? rule.replacement : ''}" placeholder="留空则删除，或输入替换文本">
+                            <input type="text" id="regex-replacement" placeholder="留空则删除，或输入替换文本">
                         </div>
                         <div class="form-group">
                             <label>修饰符 (Flags)</label>
-                            <input type="text" id="regex-flags" value="${rule ? (rule.flags || 'g') : 'g'}" placeholder="g, i, m, s...">
+                            <input type="text" id="regex-flags" placeholder="g, i, m, s...">
                         </div>
                         <div style="font-size: 0.8rem; color: #888; background: #f0f0f0; padding: 10px; border-radius: 6px;">
                             <p><strong>常用示例:</strong></p>
-                            <p>删除思维链: <code>&lt;thinking&gt;[\\s\\S]*?&lt;/thinking&gt;</code> (Flags: g)</p>
                             <p>删除括号内容: <code>\\(.*?\\)</code> (Flags: g)</p>
+                            <p>双引号高亮: <code>["“”]([^"“”]+)["“”]</code> <br>替换: <code>&lt;q&gt;“$1”&lt;/q&gt;</code></p>
                         </div>
                     `,
                     actions: [
@@ -22368,6 +22397,7 @@ ${globalPromptsSection}
                             
                             const newRule = {
                                 id: rule ? rule.id : Utils.generateId('rule'),
+                                name: $('#regex-name').value.trim(), // 保存名称
                                 pattern: pattern,
                                 replacement: $('#regex-replacement').value || '',
                                 flags: $('#regex-flags').value || 'g',
@@ -22392,6 +22422,16 @@ ${globalPromptsSection}
                         }}
                     ]
                 });
+
+                // 核心修复：在 DOM 渲染完成后，通过 JS 安全地赋值，避免 HTML 属性截断问题
+                if (rule) {
+                    $('#regex-name').value = rule.name || '';
+                    $('#regex-pattern').value = rule.pattern;
+                    $('#regex-replacement').value = rule.replacement;
+                    $('#regex-flags').value = rule.flags || 'g';
+                } else {
+                    $('#regex-flags').value = 'g';
+                }
             },
             
             // --- 设置侧边栏逻辑 ---
@@ -22662,7 +22702,8 @@ ${globalPromptsSection}
             // --- 核心 Prompt 构建 (修正版) ---
             async buildOfflinePrompt() {
                 const contact = await DBHelper.get('contacts', this.currentTargetId);
-                const myProfile = await DBHelper.get('profile', 'myProfile');
+                // 修改：使用 getPlayerProfileForContext 获取可能绑定的玩家人设
+                const myProfile = await EventManager.getPlayerProfileForContext(this.currentTargetId);
                 const settings = await this.getOfflineSettings();
                 
                 // 1. 基础设定
