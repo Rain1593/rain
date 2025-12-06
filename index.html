@@ -21991,7 +21991,11 @@ ${globalPromptsSection}
                 // 意思是：只要规则启用了，UI上就显示替换后的效果
                 const processedContent = await this.processTextWithRegex(msg.content, false);
                 
-                let htmlContent = marked.parse(processedContent);
+                // [新增] 自动将中文双引号内容包裹在 <q> 标签中，以便 CSS 高亮
+                // 替换逻辑：把 “文本” 替换为 <q>“文本”</q>
+                const contentWithQuotes = processedContent.replace(/“([^”\n]+)”/g, '<q>“$1”</q>');
+                
+                let htmlContent = marked.parse(contentWithQuotes);
                 
                 let summaryHtml = '';
                 if (!isPlayer && msg.cardData && msg.cardData.summary) {
