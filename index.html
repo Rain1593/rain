@@ -22713,7 +22713,8 @@ ${globalPromptsSection}
                 let timeStr = "";
                 if (settings.realTime) {
                     const now = new Date();
-                    timeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                    const weekDay = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'][now.getDay()];
+                    timeStr = `${now.getMonth() + 1}月${now.getDate()}日 ${weekDay} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
                 } else {
                     timeStr = settings.virtualTime || "不特定时间";
                 }
