@@ -22711,30 +22711,41 @@ ${globalPromptsSection}
 
                 // 6. 线下模式历史记录 (时间轴合并逻辑)
                 const messages = await DBHelper.getMessages(this.currentTargetId, 500);
-                // 获取所有线下消息，正序排列 (旧 -> 新)
-                const offlineMessages = messages.filter(m => m.segmentType === 'offline_text').reverse();
+                
+                // 核心修复：DBHelper.getMessages 返回的是 [旧 -> 新] 的顺序。
+                // 之前使用了 .reverse() 变成了 [新 -> 旧]，导致最新的消息排在数组前面(索引小)，
+                // 从而被错误的判断为“摘要区”，且拼接字符串时也是先拼最新的，导致时间线倒错。
+                // 现在移除 .reverse()，保持 [旧 -> 新] 的顺序。
+                const offlineMessages = messages.filter(m => m.segmentType === 'offline_text'); 
 
-                const rawCount = settings.rawTurns || 3; // 保留完整内容的条数
+                const rawCount = settings.rawTurns || 3; // 保留完整内容的条数 (最新的N条)
                 const summaryCount = settings.summaryTurns || 10; // 往前追溯摘要的条数
                 
                 const total = offlineMessages.length;
-                // 计算原始回复的起始索引
+                
+                // 计算原始回复的起始索引：例如总共10条，留3条，则从索引 7 (10-3) 开始是原始回复
                 const rawStartIndex = Math.max(0, total - rawCount);
-                // 计算摘要回复的起始索引 (在原始回复之前 summaryCount 条)
+                
+                // 计算摘要回复的起始索引：在原始回复之前 summaryCount 条
                 const summaryStartIndex = Math.max(0, rawStartIndex - summaryCount);
 
                 let historyText = "\n--- 历史线下记录 (按时间顺序) ---\n";
                 let hasContent = false;
 
-                // 从摘要起始点开始遍历到最后一条
+                // 从最旧的（摘要起始点）开始遍历到最新的
                 for (let i = summaryStartIndex; i < total; i++) {
                     const msg = offlineMessages[i];
                     const isPlayer = msg.type === 'sent';
-                    const name = isPlayer ? (i >= rawStartIndex ? "玩家" : myProfile.name) : contact.name;
+                    
+                    // 判断当前索引是否进入了“原始回复区” (最新的部分)
+                    const isRawZone = i >= rawStartIndex;
+
+                    // 在原始区使用“玩家”，在历史摘要区使用具体名字方便辨认（或者保持一致）
+                    const name = isPlayer ? (isRawZone ? "玩家" : myProfile.name) : contact.name;
 
                     // 逻辑分支：
-                    if (i >= rawStartIndex) {
-                        // --- 原始回复区 ---
+                    if (isRawZone) {
+                        // --- 原始回复区 (最新的消息) ---
                         // 应用正则处理：这里第二个参数传 true，表示这是发给AI的内容
                         // 只有 applyToAi 为 true 的规则才会被应用
                         const processedContent = await this.processTextWithRegex(msg.content, true);
@@ -22742,7 +22753,8 @@ ${globalPromptsSection}
                         historyText += `[${name}]: ${processedContent}\n\n`;
                         hasContent = true;
                     } else {
-                        // --- 摘要区 (超出范围的历史) ---
+                        // --- 摘要区 (较旧的历史) ---
+                        // 只有AI的消息才有摘要字段
                         if (!isPlayer && msg.cardData && msg.cardData.summary) {
                             historyText += `[${name}]: ${msg.cardData.summary}\n`;
                             hasContent = true;
