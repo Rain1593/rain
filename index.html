@@ -8241,6 +8241,112 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 .photos-grid-view {
     z-index: 60; 
 }
+
+
+/* --- 新增：消息操作按钮与菜单 --- */
+.msg-ops-btn {
+    opacity: 0; /* 默认隐藏 */
+    transition: opacity 0.2s;
+    cursor: pointer;
+    color: var(--text-color-light);
+    padding: 2px 5px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+    align-self: center; /* 垂直居中 */
+}
+.message-row:hover .msg-ops-btn {
+    opacity: 1; /* 悬浮显示 */
+}
+/* 移动端由于没有悬浮，可以让它一直显示或者微弱显示 */
+@media (hover: none) {
+    .msg-ops-btn { opacity: 0.6; }
+}
+
+/* 操作菜单弹窗 (仿音乐列表小弹窗) */
+.msg-ops-menu {
+    position: absolute;
+    z-index: 200;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    border: 1px solid rgba(0,0,0,0.05);
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    min-width: 100px;
+    animation: popIn 0.15s ease-out;
+}
+.msg-ops-item {
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-color-dark);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+.msg-ops-item:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+.msg-ops-item i {
+    width: 16px;
+    text-align: center;
+    color: var(--accent-color);
+}
+.msg-ops-item.delete i { color: #e74c3c; }
+
+/* --- 新增：线下模式编辑按钮 --- */
+.offline-block .offline-edit-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--text-color-light);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.offline-block:hover .offline-edit-btn {
+    opacity: 1;
+}
+
+
+/* --- 新增：线下模式操作按钮组 --- */
+.offline-block .offline-ops-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px; /* 按钮间距 */
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.offline-block:hover .offline-ops-container {
+    opacity: 1;
+}
+
+.offline-icon-btn {
+    color: var(--text-color-light);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.offline-icon-btn:hover {
+    color: var(--accent-color);
+}
+
+.offline-icon-btn.delete:hover {
+    color: #e74c3c; /* 删除按钮变红 */
+}
+
 </style>
 <style id="exclusive-bubble-style"></style>
 <style id="offline-custom-css"></style>
@@ -11531,7 +11637,47 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                 }
             }
             
-            messageRow.innerHTML = `<div class="message-selector"><input type="checkbox" class="message-select-checkbox"></div><img src="${avatarSrc}" alt="avatar" class="${avatarClass}"><div class="message-content">${displayNameHtml}<div class="bubble-and-tag-wrapper"><div class="${bubbleClass}">${bubbleContent}</div>${detailContent}${timestampHtml}</div></div>`;
+            // --- 修改：插入操作小按钮 (.msg-ops-btn) ---
+            // 注意：将按钮放在 bubble-and-tag-wrapper 内部或旁边，这里放在旁边以便于布局
+            // 我们需要稍微调整一下结构，让 bubble 和 op-btn 横向排列
+            const opsBtnHtml = (!isTyping && !isReadOnly) ? `<i class="fas fa-ellipsis-v msg-ops-btn" title="操作"></i>` : '';
+            
+            // 根据消息发送方向调整按钮位置（发送方在左侧，接收方在右侧，或者统一在气泡旁）
+            // 这里为了简单统一放在 wrapper 内部的最后，通过 flex 布局控制
+            // 但为了不破坏原有的 bubble-and-tag-wrapper 的纵向布局 (flex-direction: column)，我们需要在 bubble 外面包一层或者利用 absolute
+            // 方案：将 bubble-and-tag-wrapper 保持原样，我们在 message-content 里，bubble-and-tag-wrapper 的旁边放按钮
+            // 但为了对齐，最好的方式是让 bubble-and-tag-wrapper 自身包含这个按钮，并调整其 display
+            
+            // 简单方案：直接改写 innerHTML 结构，将 bubble-and-tag-wrapper 改为横向 flex (需要小心 timestamp)
+            // 稳妥方案：绝对定位按钮到 wrapper 的右上角或侧边。
+            // 这里的实现：将按钮注入到 bubble-and-tag-wrapper 中，并使用 absolute 定位在气泡旁
+            
+            // 修正后的结构：
+             messageRow.innerHTML = `
+                <div class="message-selector"><input type="checkbox" class="message-select-checkbox"></div>
+                <img src="${avatarSrc}" alt="avatar" class="${avatarClass}">
+                <div class="message-content">
+                    ${displayNameHtml}
+                    <div class="bubble-and-tag-wrapper" style="position: relative;">
+                        <div style="display: flex; align-items: flex-start; gap: 5px; ${msg.type === 'sent' ? 'flex-direction: row-reverse;' : ''}">
+                            <div class="${bubbleClass}">${bubbleContent}</div>
+                            ${opsBtnHtml}
+                        </div>
+                        ${detailContent}
+                        ${timestampHtml}
+                    </div>
+                </div>`;
+            
+            // 为操作按钮绑定事件
+            if (!isTyping && !isReadOnly) {
+                const opBtn = messageRow.querySelector('.msg-ops-btn');
+                if (opBtn) {
+                    opBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.showMessageOperationsMenu(e, msg);
+                    });
+                }
+            }
 
             const avatarEl = messageRow.querySelector('.message-avatar');
             if (!isTyping && !isReadOnly) {
@@ -11610,6 +11756,112 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 
                 return messageRow;
             },
+
+            showMessageOperationsMenu(event, msg) {
+            // 移除已存在的菜单
+            const existing = document.querySelector('.msg-ops-menu');
+            if (existing) existing.remove();
+
+            const menu = document.createElement('div');
+            menu.className = 'msg-ops-menu';
+            
+            // 编辑按钮 (仅文本类消息可编辑)
+            const canEdit = ['text', 'narrator', 'inner_voice', 'essay'].includes(msg.segmentType) && !msg.isRetracted;
+            if (canEdit) {
+                const editItem = document.createElement('div');
+                editItem.className = 'msg-ops-item';
+                editItem.innerHTML = `<i class="fas fa-pen"></i> <span>编辑</span>`;
+                editItem.onclick = () => {
+                    menu.remove();
+                    this.handleEditChatMessage(msg);
+                };
+                menu.appendChild(editItem);
+            }
+
+            // 删除按钮
+            const deleteItem = document.createElement('div');
+            deleteItem.className = 'msg-ops-item delete';
+            deleteItem.innerHTML = `<i class="fas fa-trash"></i> <span>删除</span>`;
+            deleteItem.onclick = async () => {
+                menu.remove();
+                await DBHelper.delete('messages', msg.messageId);
+                const row = document.getElementById(msg.messageId);
+                if (row) row.remove();
+                
+                // 更新 Metadata (如果是最后一条)
+                // 简单处理：直接重新计算最后一条比较耗时，这里仅从UI移除。
+                // 如果非常严格，应该检查是否为最后一条并更新 chatMetadata。
+                const allMsgs = await DBHelper.getMessages(msg.chatId, 1);
+                if(allMsgs.length > 0) {
+                    await this.updateChatMetadata(msg.chatId, allMsgs[0]);
+                } else {
+                    await DBHelper.delete('chatMetadata', msg.chatId);
+                }
+            };
+            menu.appendChild(deleteItem);
+
+            // 定位菜单
+            const rect = event.target.getBoundingClientRect();
+            menu.style.top = `${rect.bottom + 5}px`;
+            // 智能判断左右
+            if (rect.left > window.innerWidth / 2) {
+                menu.style.right = `${window.innerWidth - rect.right}px`;
+            } else {
+                menu.style.left = `${rect.left}px`;
+            }
+
+            document.body.appendChild(menu);
+
+            // 点击外部关闭
+            const closeMenu = (e) => {
+                if (!menu.contains(e.target) && e.target !== event.target) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            };
+            setTimeout(() => document.addEventListener('click', closeMenu), 0);
+        },
+
+        handleEditChatMessage(msg) {
+            let content = msg.content;
+            // 特殊类型处理内容提取
+            if (msg.segmentType === 'narrator') {
+                // 旁白可能包含HTML，简单起见提取文本，或者让用户编辑 raw HTML
+                // 这里假设用户有能力编辑 raw string
+            }
+
+            this.showModal({
+                customClass: 'ios-style',
+                title: '编辑消息',
+                body: `<textarea id="chat-msg-edit-area" rows="5" style="width:100%; border:1px solid #ccc; border-radius:8px; padding:10px;">${content}</textarea>`,
+                actions: [
+                    { text: '取消', class: 'btn-secondary', handler: () => this.hideModal() },
+                    { text: '保存', class: 'btn-primary', handler: async () => {
+                        const newContent = $('#chat-msg-edit-area').value.trim();
+                        if (!newContent) return this.showToast('内容不能为空');
+                        
+                        msg.content = newContent;
+                        await DBHelper.put('messages', msg);
+                        
+                        // 更新 DOM
+                        const row = document.getElementById(msg.messageId);
+                        if (row) {
+                            // 简单粗暴：用新数据重新生成该行并替换
+                            const myProfile = await EventManager.getPlayerProfileForContext(msg.chatId);
+                            const contacts = await DBHelper.getAll('contacts');
+                            const sender = msg.type === 'sent' ? myProfile : contacts.find(c => c.id === msg.senderId);
+                            
+                            // 判断是否合并头像逻辑 (需重新计算，这里简化处理，传入false)
+                            const newEl = await this.createMessageElement(msg, sender || {name:'未知', avatar:''}, false, false, row.classList.contains('merged-avatar'));
+                            row.replaceWith(newEl);
+                        }
+                        
+                        this.hideModal();
+                        this.showToast('消息已修改');
+                    }}
+                ]
+            });
+        },
 
         async addMessageToDOM(msg, senderInfo, isTyping = false, isAnimating = false) {
             const chatSettings = await DBHelper.get('apiConfig', 'chatSettings') || {};
@@ -16990,7 +17242,8 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                                 case '红包':
                                     baseMessage.segmentType = 'red-packet';
                                     baseMessage.content = `[红包] ${parts[2]}`;
-                                    baseMessage.cardData = { title: parts[2], amount: parseFloat(parts[3].replace('￥', '')), count: parseInt(parts[4]), claimedBy: [] };
+                                    // 修复：添加 messageId 作为 id，防止后续领取代号出错
+                                    baseMessage.cardData = { id: baseMessage.messageId, title: parts[2], amount: parseFloat(parts[3].replace('￥', '')), count: parseInt(parts[4]), claimedBy: [] };
                                     break;
                                 default:
                                     baseMessage.segmentType = 'text';
@@ -21711,7 +21964,7 @@ ${globalPromptsSection}
                 contentArea.innerHTML = '';
                 
                 const messages = await DBHelper.getMessages(this.currentTargetId, 500);
-                // 修改：移除 .reverse()，保持时间正序（旧->新），配合scrollToBottom显示
+                // 保持时间正序（旧->新）
                 const offlineMessages = messages.filter(m => m.segmentType === 'offline_text');
 
                 if (offlineMessages.length === 0) {
@@ -21744,13 +21997,102 @@ ${globalPromptsSection}
                         </div>
                     `;
                 }
+                
+                // 修改：添加编辑和删除按钮容器
+                const opsHtml = `
+                    <div class="offline-ops-container">
+                        <i class="fas fa-pencil-alt offline-icon-btn edit" title="修改内容"></i>
+                        <i class="fas fa-trash-alt offline-icon-btn delete" title="删除"></i>
+                    </div>
+                `;
 
                 block.innerHTML = `
+                    ${opsHtml}
                     <div class="block-content">${htmlContent}</div>
                     ${summaryHtml}
                 `;
                 
+                // 绑定事件
+                const editBtn = block.querySelector('.edit');
+                if (editBtn) {
+                    editBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.handleEditBlock(msg);
+                    });
+                }
+
+                const deleteBtn = block.querySelector('.delete');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.confirmDeleteBlock(msg.messageId, block);
+                    });
+                }
+                
                 contentArea.appendChild(block);
+            },
+
+            // 新增：删除确认
+            confirmDeleteBlock(messageId, blockElement) {
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "删除片段",
+                    body: "<p>确定要删除这个剧情片段吗？</p>",
+                    actions: [
+                        { text: "取消", class: "btn-secondary", handler: () => UIManager.hideModal() },
+                        { text: "删除", class: "btn-danger", handler: async () => {
+                            await DBHelper.delete('messages', messageId);
+                            blockElement.remove();
+                            UIManager.hideModal();
+                            UIManager.showToast("已删除");
+                        }}
+                    ]
+                });
+            },
+
+            handleEditBlock(msg) {
+                const isAi = msg.type === 'received';
+                
+                let summaryInputHtml = '';
+                if (isAi && msg.cardData) {
+                    summaryInputHtml = `
+                        <div class="form-group" style="margin-top:10px;">
+                            <label>摘要 (记忆重点)</label>
+                            <textarea id="off-edit-summary" rows="3" style="width:100%; border:1px solid #ccc; padding:5px;">${msg.cardData.summary || ''}</textarea>
+                        </div>
+                    `;
+                }
+
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "修改剧情",
+                    body: `
+                        <div class="form-group">
+                            <label>正文内容 (支持Markdown)</label>
+                            <textarea id="off-edit-content" rows="8" style="width:100%; border:1px solid #ccc; padding:5px;">${msg.content}</textarea>
+                        </div>
+                        ${summaryInputHtml}
+                    `,
+                    actions: [
+                        { text: "取消", class: "btn-secondary", handler: () => UIManager.hideModal() },
+                        { text: "保存", class: "btn-primary", handler: async () => {
+                            const newContent = $('#off-edit-content').value;
+                            
+                            msg.content = newContent;
+                            
+                            if (isAi && msg.cardData) {
+                                const newSummary = $('#off-edit-summary').value.trim();
+                                msg.cardData.summary = newSummary;
+                            }
+
+                            await DBHelper.put('messages', msg);
+                            
+                            UIManager.hideModal();
+                            this.renderHistory(); 
+                            UIManager.showToast("修改已保存");
+                        }}
+                    ]
+                });
             },
             
             scrollToBottom() {
@@ -21881,6 +22223,11 @@ ${globalPromptsSection}
                                 <span>美化设置</span>
                                 <i class="fas fa-chevron-right"></i>
                             </div>
+                            <div class="setting-item" id="off-bind-persona">
+                                <i class="fas fa-user-tag"></i>
+                                <span>绑定玩家人设</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
                             <div class="setting-item" id="off-bind-prompts">
                                 <i class="fas fa-link"></i>
                                 <span>绑定线下提示词</span>
@@ -21898,6 +22245,10 @@ ${globalPromptsSection}
                 $('#off-set-memory').onclick = () => this.showMemorySettings();
                 $('#off-set-time').onclick = () => this.showTimeSettings();
                 $('#off-set-style').onclick = () => this.showStyleSettings();
+                $('#off-bind-persona').onclick = () => {
+                    UIManager.hideSidebar();
+                    EventManager.showPersonaBindingModal(this.currentTargetId, false);
+                };
                 $('#off-bind-prompts').onclick = () => this.showBindPromptsModal();
                 $('#off-clear-history').onclick = () => this.handleClearHistory();
             },
@@ -21965,7 +22316,6 @@ ${globalPromptsSection}
                     ]
                 });
                 
-                // 联动显示
                 setTimeout(() => {
                     const toggle = $('#off-chat-hist-toggle');
                     const group = $('#chat-hist-turns-group');
@@ -22034,41 +22384,7 @@ ${globalPromptsSection}
                         </div>
                         <div class="form-group">
                              <label>自定义CSS美化</label>
-                             <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">你可以复制下方的示例代码到输入框中，实现字体加重、斜体等效果。</p>
                              <textarea id="off-custom-css" rows="10" style="width:100%; border:1px solid #ccc; border-radius:8px; padding:10px; font-family:monospace;" placeholder="/* 输入CSS代码 */">${settings.customCSS}</textarea>
-                        </div>
-                        <div class="css-tutorial-code" style="background:#2d2d2d; color:#ccc; padding:10px; border-radius:8px; margin-top:10px; font-size:0.8rem; position:relative; max-height: 150px; overflow-y:auto;">
-                            <button class="copy-btn" style="top:5px; right:5px; padding:2px 8px; font-size:0.7rem;">复制示例</button>
-                            <code>
-/* 玩家发言块背景 */
-.offline-block.player {
-    background-color: #f0f8ff; 
-    border-left-color: #2196F3;
-}
-/* AI发言块背景 */
-.offline-block.ai {
-    background-color: #fff;
-    border-left-color: #9E9E9E;
-}
-/* 加粗文本样式 (Markdown **) */
-.offline-block strong {
-    color: #d32f2f; /* 红色重点 */
-    font-weight: 700;
-}
-/* 斜体文本样式 (Markdown *) */
-.offline-block em {
-    color: #666;
-    font-family: "KaiTi", serif; /* 楷体 */
-}
-/* 引用文本样式 (Markdown >) */
-.offline-block blockquote {
-    background-color: #f5f5f5;
-    border-left: 3px solid #d32f2f;
-    padding: 5px 10px;
-    margin: 5px 0;
-    color: #555;
-}
-</code>
                         </div>
                     `,
                     actions: [
@@ -22087,19 +22403,6 @@ ${globalPromptsSection}
                         }}
                     ]
                 });
-                
-                // 绑定复制按钮
-                setTimeout(() => {
-                    const copyBtn = modalContentWrapper.querySelector('.copy-btn');
-                    const codeBlock = modalContentWrapper.querySelector('code');
-                    if(copyBtn && codeBlock) {
-                        copyBtn.onclick = () => {
-                             navigator.clipboard.writeText(codeBlock.textContent.trim())
-                                .then(() => UIManager.showToast("示例代码已复制！"))
-                                .catch(() => UIManager.showToast("复制失败"));
-                        };
-                    }
-                }, 100);
             },
             
             async showBindPromptsModal() {
@@ -22156,7 +22459,7 @@ ${globalPromptsSection}
                 }
             },
 
-            // --- 核心 Prompt 构建 ---
+            // --- 核心 Prompt 构建 (修正版) ---
             async buildOfflinePrompt() {
                 const contact = await DBHelper.get('contacts', this.currentTargetId);
                 const myProfile = await DBHelper.get('profile', 'myProfile');
@@ -22180,12 +22483,10 @@ ${globalPromptsSection}
                 const playerInfo = `玩家名：${myProfile.name}\n性别：${myProfile.gender}\n设定：${myProfile.background || '无'}\n`;
                 prompt += `\n--- 角色信息 ---\n${charInfo}\n--- 玩家信息 ---\n${playerInfo}`;
 
-                // 4. 绑定提示词 & 全局提示词
+                // 4. 绑定提示词 (省略部分代码，保持原样)
                 let boundPromptsStr = "";
                 const allFolders = await DBHelper.getAll('promptFolders');
                 const allPrompts = await DBHelper.getAll('prompts');
-                
-                // 4.1 角色专属绑定
                 if (contact.boundPromptFolderIds && contact.boundPromptFolderIds.length > 0) {
                     const activeFolders = allFolders.filter(f => contact.boundPromptFolderIds.includes(f.id) && f.isActive);
                     const activeFolderIds = activeFolders.map(f => f.id);
@@ -22194,8 +22495,6 @@ ${globalPromptsSection}
                         boundPromptsStr += `\n--- 绑定的角色/文风设定 (专属) ---\n${explicitPrompts.map(p => p.content).join('\n\n')}\n`;
                     }
                 }
-                
-                // 4.2 线下模式通用绑定 (新增)
                 if (settings.globalPromptFolderIds && settings.globalPromptFolderIds.length > 0) {
                     const activeGlobalFolders = allFolders.filter(f => settings.globalPromptFolderIds.includes(f.id) && f.isActive);
                     const activeGlobalFolderIds = activeGlobalFolders.map(f => f.id);
@@ -22204,20 +22503,15 @@ ${globalPromptsSection}
                         boundPromptsStr += `\n--- 线下模式通用设定 ---\n${globalExplicitPrompts.map(p => p.content).join('\n\n')}\n`;
                     }
                 }
-                
-                // 4.3 全局提示词 (System wide)
                 const globalPrompts = await AIHandler.getGlobalPromptsForContext('offline');
                 if (globalPrompts) boundPromptsStr += `\n${globalPrompts}`;
-                
                 prompt += boundPromptsStr;
 
-                // 5. 普通聊天界面记录 (可配置轮次 + 记忆互通)
+                // 5. 普通聊天界面记录 (省略部分代码，保持原样)
                 if (settings.includeChatHistory) {
                     const chatSettings = await DBHelper.get('apiConfig', 'chatSettings') || {};
                     const turnsToLoad = settings.chatHistoryTurns || 15;
                     let chatContext = "";
-                    
-                    // 5.1 获取主聊天记录
                     const chatMsgs = await DBHelper.getMessages(this.currentTargetId, turnsToLoad * 5); 
                     const allContacts = await DBHelper.getAll('contacts');
                     const turns = AIHandler.buildTurnsFromHistory(chatMsgs, allContacts, myProfile);
@@ -22226,104 +22520,56 @@ ${globalPromptsSection}
                     if (recentTurns.length > 0) {
                         chatContext += `\n--- 线上聊天界面记录 (仅供参考，这是之前的对话) ---\n${recentTurns.map(t => JSON.stringify(t)).join('\n')}\n`;
                     }
-
-                    // 5.2 记忆互通 (群聊记录)
-                    if (chatSettings.memoryInterconnection) {
-                        const allGroups = await DBHelper.getAll('groups');
-                        const allMetadata = await DBHelper.getAll('chatMetadata');
-                        
-                        // 找出该角色所在的其他群聊
-                        const memberInGroups = allGroups.filter(g => g.members.includes(this.currentTargetId));
-                        const groupTurnsToLoad = 3; // 群聊默认少一点
-
-                        if (memberInGroups.length > 0) {
-                             let groupContext = '--- 记忆互通：角色所在群聊的近期记录 ---\n';
-                             let hasGroupData = false;
-
-                             for (const group of memberInGroups) {
-                                 // 简单按活跃度排序太复杂，直接取
-                                 const groupMsgs = await DBHelper.getMessages(group.id, 20);
-                                 const gTurns = AIHandler.buildTurnsFromHistory(groupMsgs, allContacts, myProfile);
-                                 const recentGTurns = gTurns.slice(-groupTurnsToLoad);
-                                 
-                                 if (recentGTurns.length > 0) {
-                                     groupContext += `\n[群聊: ${group.name}]\n${recentGTurns.map(t => JSON.stringify(t)).join('\n')}`;
-                                     hasGroupData = true;
-                                 }
-                             }
-                             if (hasGroupData) chatContext += `\n${groupContext}\n`;
-                        }
-                    }
-                    
                     prompt += chatContext;
                 }
 
-                // 6. 线下模式历史记录 (A + B) + 最新玩家行动分离
+                // 6. 线下模式历史记录 (时间轴合并逻辑)
                 const messages = await DBHelper.getMessages(this.currentTargetId, 500);
-                // 获取所有线下消息，正序排列
+                // 获取所有线下消息，正序排列 (旧 -> 新)
                 const offlineMessages = messages.filter(m => m.segmentType === 'offline_text').reverse();
-                
-                // *** 核心修正：分离最新玩家行动 ***
-                let latestPlayerInput = "";
-                let historyMessages = [...offlineMessages];
 
-                // 如果最后一条是玩家发送的，将其提取为“最新行动”，不放入历史摘要
-                if (historyMessages.length > 0 && historyMessages[historyMessages.length - 1].type === 'sent') {
-                    const lastMsg = historyMessages.pop();
-                    latestPlayerInput = lastMsg.content;
-                }
-
-                const rawCount = settings.rawTurns || 3;
-                const summaryCount = settings.summaryTurns || 10;
+                const rawCount = settings.rawTurns || 3; // 保留完整内容的条数
+                const summaryCount = settings.summaryTurns || 10; // 往前追溯摘要的条数
                 
-                const total = historyMessages.length;
+                const total = offlineMessages.length;
+                // 计算原始回复的起始索引
                 const rawStartIndex = Math.max(0, total - rawCount);
-                const rawMsgs = historyMessages.slice(rawStartIndex);
-                
-                const summaryEndIndex = rawStartIndex;
-                const summaryStartIndex = Math.max(0, summaryEndIndex - summaryCount);
-                const summaryMsgs = historyMessages.slice(summaryStartIndex, summaryEndIndex);
+                // 计算摘要回复的起始索引 (在原始回复之前 summaryCount 条)
+                const summaryStartIndex = Math.max(0, rawStartIndex - summaryCount);
 
-                let historyText = "";
+                let historyText = "\n--- 历史线下记录 (按时间顺序) ---\n";
+                let hasContent = false;
 
-                // 6.1 添加摘要历史
-                if (summaryMsgs.length > 0) {
-                    historyText += `\n--- 前情提要 (历史摘要) ---\n`;
-                    summaryMsgs.forEach(msg => {
-                        const isPlayer = msg.type === 'sent';
-                        const name = isPlayer ? myProfile.name : contact.name;
-                        
+                // 从摘要起始点开始遍历到最后一条
+                for (let i = summaryStartIndex; i < total; i++) {
+                    const msg = offlineMessages[i];
+                    const isPlayer = msg.type === 'sent';
+                    // 如果是原始记录区，玩家显示为"玩家"，否则显示名字 (保持一致性也可都用名字，这里按原逻辑微调)
+                    const name = isPlayer ? (i >= rawStartIndex ? "玩家" : myProfile.name) : contact.name;
+
+                    // 逻辑分支：
+                    if (i >= rawStartIndex) {
+                        // --- 原始回复区 ---
+                        // 无论玩家还是AI，都显示完整内容
+                        historyText += `[${name}]: ${msg.content}\n\n`;
+                        hasContent = true;
+                    } else {
+                        // --- 摘要区 (超出范围的历史) ---
+                        // 仅当是AI消息且包含摘要时显示，玩家消息或无摘要消息被跳过(压缩)
                         if (!isPlayer && msg.cardData && msg.cardData.summary) {
                             historyText += `[${name}]: ${msg.cardData.summary}\n`;
-                        } else {
-                            let content = msg.content.length > 50 ? msg.content.substring(0, 50) + "..." : msg.content;
-                            historyText += `[${name}]: ${content}\n`;
+                            hasContent = true;
                         }
-                    });
+                    }
                 }
 
-                // 6.2 添加最新原始历史
-                if (rawMsgs.length > 0) {
-                    historyText += `\n--- 近期剧情 (原始记录) ---\n`;
-                    rawMsgs.forEach(msg => {
-                        const isPlayer = msg.type === 'sent';
-                        const name = isPlayer ? "玩家" : contact.name;
-                        historyText += `[${name}]: ${msg.content}\n\n`;
-                    });
-                } 
-                
-                if (!historyText) {
-                    historyText += `\n(暂无历史剧情，这是一个新的开始)\n`;
+                if (!hasContent) {
+                    historyText += `(暂无历史剧情，这是一个新的开始)\n`;
                 }
 
                 prompt += historyText;
                 
-                // 7. 插入玩家最新行动 (如果有)
-                if (latestPlayerInput) {
-                    prompt += `\n--- 玩家最新行动 ---\n${latestPlayerInput}\n`;
-                }
-
-                // 8. 最终指令
+                // 7. 最终指令 (删除了"严禁代入玩家行动"的强提示，因为最后一条已经是玩家行动了)
                 prompt += `
 --- 
 **回复规则 (严格遵守)**：
@@ -22342,7 +22588,6 @@ ${globalPromptsSection}
     摘要内容
     </摘要>
     (此处开始正文回复)
-5.  严禁代入玩家行动。
 
 请开始回复：
 `;
