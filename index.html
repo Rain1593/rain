@@ -6207,10 +6207,15 @@
             padding: 15px;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: max-content; /* 防止行高塌陷 */
             gap: 15px;
             overflow-y: auto;
-            height: 100%;
-            align-content: start; /* 新增：防止内容少时自动拉伸行高导致间距过大 */
+            /* 修改：移除 height: 100%，改用 flex 属性控制 */
+            flex-grow: 1; 
+            height: 0; 
+            min-height: 0;
+            align-content: start; 
+            background-color: #fff;
         }
         .album-card {
             display: flex;
@@ -6299,9 +6304,14 @@
             padding: 10px;
             display: grid;
             grid-template-columns: repeat(3, 1fr); /* 3列 */
+            grid-auto-rows: max-content; /* 确保行高由内容撑开，防止塌陷 */
             gap: 10px;
             overflow-y: auto;
             flex-grow: 1;
+            /* --- 核心修复开始 --- */
+            height: 0; /* 关键：强制高度为0，完全依赖flex-grow分配剩余空间 */
+            min-height: 0; /* 关键：允许flex子项收缩，防止被巨量内容撑大 */
+            /* --- 核心修复结束 --- */
             align-content: start;
         }
         .photo-item {
