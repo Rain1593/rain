@@ -24207,23 +24207,22 @@ ${globalPromptsSection}
             async showResidentManagementModal() {
                 const boardId = this.currentBoardId;
                 const allContacts = await DBHelper.getAll('contacts');
-                // 获取已入驻的角色
                 const registrations = await DBHelper.getAll('forumRegistrations');
                 const boardRegs = registrations.filter(r => r.boardId === boardId);
                 const residentContactIds = boardRegs.map(r => r.contactId);
 
-                // 1. 选择角色
                 const availableContacts = allContacts.filter(c => !residentContactIds.includes(c.id));
                 
                 const residentsHtml = boardRegs.map(reg => {
                     const c = allContacts.find(con => con.id === reg.contactId);
                     if (!c) return '';
+                    // 修复：移除 onclick，改为 class 和 data-id，使用事件委托
                     return `
                         <div class="member-list-modal-item">
                             <img src="${c.avatar}" style="width:30px;height:30px;border-radius:4px;margin-right:10px;">
                             <span style="flex-grow:1;">${c.name}</span>
-                            <button class="sort-btn-mini" onclick="InfinityManager.editResident('${reg.id}')">马甲设置</button>
-                            <i class="fas fa-trash-alt" style="color:#e74c3c; margin-left:10px; cursor:pointer;" onclick="InfinityManager.removeResident('${reg.id}')"></i>
+                            <button class="sort-btn-mini btn-edit-resident" data-id="${reg.id}">马甲设置</button>
+                            <i class="fas fa-trash-alt btn-remove-resident" data-id="${reg.id}" style="color:#e74c3c; margin-left:10px; cursor:pointer;" title="删除"></i>
                         </div>
                     `;
                 }).join('');
@@ -24242,18 +24241,32 @@ ${globalPromptsSection}
                 UIManager.showModal({
                     title: "角色入驻管理",
                     body: `
-                        <div class="member-list-modal-body" style="max-height: 200px;">${residentsHtml || '<p style="text-align:center; color:#ccc;">暂无入驻角色</p>'}</div>
+                        <div class="member-list-modal-body" id="resident-list-container" style="max-height: 200px;">${residentsHtml || '<p style="text-align:center; color:#ccc;">暂无入驻角色</p>'}</div>
                         ${addSelectHtml}
                     `,
                     actions: [{ text: '关闭', class: 'btn-secondary', handler: () => UIManager.hideModal() }]
                 });
+                
+                // 新增：绑定事件监听器
+                const listContainer = $('#resident-list-container');
+                if (listContainer) {
+                    listContainer.addEventListener('click', (e) => {
+                        const editBtn = e.target.closest('.btn-edit-resident');
+                        const removeBtn = e.target.closest('.btn-remove-resident');
+                        
+                        if (editBtn) {
+                            this.editResident(editBtn.dataset.id);
+                        } else if (removeBtn) {
+                            this.removeResident(removeBtn.dataset.id);
+                        }
+                    });
+                }
 
                 if (availableContacts.length > 0) {
                     $('#inf-confirm-add-resident').onclick = async () => {
                         const contactId = $('#inf-add-resident-select').value;
                         if (!contactId) return;
                         
-                        // 创建默认马甲 (大号)
                         const contact = allContacts.find(c => c.id === contactId);
                         const defaultSockpuppet = {
                             name: contact.name,
@@ -24271,7 +24284,7 @@ ${globalPromptsSection}
                         await DBHelper.put('forumRegistrations', newReg);
                         
                         UIManager.hideModal();
-                        this.showResidentManagementModal(); // 刷新
+                        this.showResidentManagementModal(); 
                     };
                 }
             },
@@ -24363,7 +24376,6 @@ ${globalPromptsSection}
                 list.innerHTML = '';
                 
                 const accounts = await DBHelper.getAll('forumAccounts');
-                // 确保有大号
                 const profile = await DBHelper.get('profile', 'myProfile');
                 const mainAccount = accounts.find(a => a.isMain);
                 
@@ -24386,14 +24398,105 @@ ${globalPromptsSection}
                 list.innerHTML = accounts.map(acc => `
                     <div class="ios-list-item ${this.currentPlayerAccountId === acc.id ? 'selected' : ''}" data-id="${acc.id}" style="cursor:pointer; background: ${this.currentPlayerAccountId === acc.id ? '#eef4ff' : 'white'};">
                         ${!acc.isMain ? '<div class="delete-indicator"><i class="fas fa-minus-circle"></i></div>' : ''}
-                        <img src="${acc.avatar}" style="width:40px; height:40px; border-radius:50%; margin-right:10px;">
+                        <img src="${acc.avatar}" style="width:40px; height:40px; border-radius:50%; margin-right:10px; object-fit:cover;">
                         <div class="ios-list-content">
                             <div class="ios-list-title">${acc.nickname} ${acc.isMain ? '<span style="font-size:0.7rem; color:var(--accent-color); border:1px solid var(--accent-color); padding:1px 4px; border-radius:4px;">大号</span>' : ''}</div>
                             <div class="ios-list-subtitle">${acc.bio}</div>
                         </div>
+                        <button class="sort-btn-mini btn-edit-account" data-id="${acc.id}" style="margin-right:10px;">编辑</button>
                         ${this.currentPlayerAccountId === acc.id ? '<i class="fas fa-check" style="color:var(--accent-color);"></i>' : ''}
                     </div>
                 `).join('');
+                
+                // 绑定编辑事件
+                list.querySelectorAll('.btn-edit-account').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.editAccount(btn.dataset.id);
+                    });
+                });
+            },
+            
+            async editAccount(accId) {
+                const account = await DBHelper.get('forumAccounts', accId);
+                if (!account) return;
+
+                const isMain = account.isMain;
+                
+                let bodyHtml = `
+                    <div class="form-group" style="text-align:center;">
+                        <div class="avatar-uploader" style="justify-content:center; flex-direction:column; gap:10px;">
+                            <img src="${account.avatar}" id="edit-acc-avatar-preview" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #eee;">
+                            <input type="file" id="edit-acc-avatar-input" accept="image/*" style="display:none;">
+                            <button class="modal-btn btn-secondary" onclick="document.getElementById('edit-acc-avatar-input').click()" style="padding: 5px 15px; font-size:0.8rem;">更换头像</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>昵称</label>
+                        <input type="text" id="edit-acc-nickname" value="${account.nickname}">
+                    </div>
+                    <div class="form-group">
+                        <label>个性签名</label>
+                        <input type="text" id="edit-acc-bio" value="${account.bio}">
+                    </div>
+                `;
+
+                if (isMain) {
+                    bodyHtml = `
+                        <button id="sync-main-profile-btn" class="modal-btn btn-primary" style="width:100%; margin-bottom:20px; background-color: var(--accent-color);">
+                            <i class="fas fa-sync-alt"></i> 同步当前“我的信息”人设
+                        </button>
+                        <hr style="border:0; border-top:1px dashed #ccc; margin-bottom:20px;">
+                        ${bodyHtml}
+                    `;
+                }
+
+                UIManager.showModal({
+                    title: isMain ? "编辑大号" : "编辑马甲",
+                    body: bodyHtml,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const newNickname = $('#edit-acc-nickname').value.trim();
+                            if (!newNickname) return UIManager.showToast("昵称不能为空");
+                            
+                            account.nickname = newNickname;
+                            account.bio = $('#edit-acc-bio').value.trim();
+                            account.avatar = $('#edit-acc-avatar-preview').src;
+                            
+                            await DBHelper.put('forumAccounts', account);
+                            UIManager.hideModal();
+                            this.renderUserPage();
+                        }}
+                    ]
+                });
+
+                // 头像上传预览
+                $('#edit-acc-avatar-input').onchange = async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        try {
+                            const base64 = await Utils.compressImage(file, 200, 200, 0.8);
+                            $('#edit-acc-avatar-preview').src = base64;
+                        } catch (err) {
+                            UIManager.showToast("图片处理失败");
+                        }
+                    }
+                };
+
+                // 大号同步功能
+                if (isMain) {
+                    $('#sync-main-profile-btn').onclick = async () => {
+                        const profile = await DBHelper.get('profile', 'myProfile');
+                        if (profile) {
+                            $('#edit-acc-nickname').value = profile.name;
+                            $('#edit-acc-avatar-preview').src = profile.avatar;
+                            // 个签如果为空，可以填入背景的一部分，这里简单置空或者保留原状，或者填入“已同步”
+                            // $('#edit-acc-bio').value = profile.background ? profile.background.substring(0, 20) : ''; 
+                            UIManager.showToast("已填入当前人设信息，请点击保存");
+                        }
+                    };
+                }
             },
             
             async switchAccount(accId) {
@@ -24513,35 +24616,32 @@ ${globalPromptsSection}
                 const board = await DBHelper.get('forumBoards', this.currentBoardId);
                 const regs = await Promise.all(selectedRegIds.map(id => DBHelper.get('forumRegistrations', id)));
                 
-                // 获取FAB图标元素以便更改状态
                 const fabIcon = $('#infinity-fab i');
-                if (fabIcon) {
-                    fabIcon.className = 'fas fa-spinner fa-spin'; // 切换为加载中
-                }
+                if (fabIcon) fabIcon.className = 'fas fa-spinner fa-spin';
 
-                // 构建 Prompt
                 let residentsInfo = "";
                 for (let reg of regs) {
                     const contact = await DBHelper.get('contacts', reg.contactId);
-                    
-                    // 获取最近聊天记录 (记忆互通)
-                    const myProfile = await EventManager.getPlayerProfileForContext(contact.id); // 简化
+                    const myProfile = await EventManager.getPlayerProfileForContext(contact.id); 
                     const allContacts = await DBHelper.getAll('contacts');
                     const historyMsgs = await DBHelper.getMessages(contact.id, 10);
                     const history = AIHandler.buildTurnsFromHistory(historyMsgs, allContacts, myProfile).slice(-3).map(t=>JSON.stringify(t)).join('\n');
-                    
                     const puppets = reg.sockpuppets.map(sp => `${sp.name}(${sp.isMain?'大号':'小号'}, 人设:${sp.bio})`).join('; ');
                     residentsInfo += `\n- 角色:${contact.name}, 设定:${contact.background}, 马甲:[${puppets}]。\n  最近聊天状态参考:\n${history}\n`;
                 }
                 
-                // 绑定提示词
                 let boundPrompts = "";
                 if (board.boundPromptFolderIds && board.boundPromptFolderIds.length > 0) {
                      const allPrompts = await DBHelper.getAll('prompts');
                      boundPrompts = allPrompts.filter(p => board.boundPromptFolderIds.includes(p.folderId) && p.isActive).map(p=>p.content).join('\n');
                 }
 
+                // 新增：获取全局提示词
+                const globalPrompts = await AIHandler.getGlobalPromptsForContext('forum');
+
                 const prompt = `
+${globalPrompts}
+
 你是一个论坛帖子生成器。当前论坛版块是“${board.name}”，世界观/背景是：“${board.description}”。
 你需要生成 ${count} 个帖子。
 
@@ -24578,7 +24678,6 @@ ${residentsInfo}
 
 ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
 `;
-                // --- 修复：添加打印语句 ---
                 console.log("--- INFINITY THREAD REFRESH PROMPT ---\n", prompt);
 
                 try {
@@ -24587,42 +24686,35 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                     const threadsData = JSON.parse(jsonStr);
                     
                     if (Array.isArray(threadsData)) {
-                        // 预先获取绑定的头像资源 (只获取列表，不转换URL)
                         let availableAssets = [];
                         if (board.boundAvatarAlbumId) {
                             availableAssets = await PhotosManager.getAssetsByAlbum(board.boundAvatarAlbumId);
                         }
                         const defaultGrayAvatar = "https://raw.githubusercontent.com/rain1593/rain/img/user_grey.png";
-                        // 新增：默认头像的特殊ID
                         const defaultAssetId = 'default_forum_avatar';
 
                         for (let tData of threadsData) {
                             let avatar = defaultGrayAvatar;
-                            // 修改：默认为特殊ID，如果后面随机到了相册或匹配到大号，再覆盖
                             let avatarAssetId = defaultAssetId; 
 
-                            // 1. 如果是NPC，且有绑定相册，随机选一个
                             if (availableAssets.length > 0) {
                                 const randomAsset = availableAssets[Math.floor(Math.random() * availableAssets.length)];
                                 if (randomAsset.type === 'url') {
-                                    avatar = randomAsset.content; // 网络图片直接存URL
-                                    avatarAssetId = null; // 网络图片不需要AssetId
+                                    avatar = randomAsset.content; 
+                                    avatarAssetId = null; 
                                 } else {
-                                    avatarAssetId = randomAsset.id; // 本地图片只存ID，显示时异步加载
-                                    avatar = defaultGrayAvatar; // 先显示默认，避免broken image
+                                    avatarAssetId = randomAsset.id; 
+                                    avatar = defaultGrayAvatar; 
                                 }
                             }
 
-                            // 2. 尝试匹配入驻角色的真实头像 (优先级最高)
                             if (tData.authorId !== 'npc') {
                                 const reg = regs.find(r => r.contactId === tData.authorId);
                                 if (reg && reg.sockpuppets[tData.identityIndex]) {
                                     const contact = await DBHelper.get('contacts', reg.contactId);
-                                    // 大号用真实头像，小号如果绑定了相册用随机头像(上面已生成)，没绑定用默认
-                                    // 这里逻辑：如果是大号，强制使用角色头像覆盖
                                     if (contact && reg.sockpuppets[tData.identityIndex].isMain) {
                                         avatar = contact.avatar;
-                                        avatarAssetId = null; // 清除AssetID引用，因为直接存了Base64在avatar里
+                                        avatarAssetId = null; 
                                     }
                                     tData.authorName = reg.sockpuppets[tData.identityIndex].name;
                                 }
@@ -24633,7 +24725,7 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                                 boardId: this.currentBoardId,
                                 authorName: tData.authorName,
                                 authorAvatar: avatar,
-                                authorAvatarAssetId: avatarAssetId, // 保存资源ID (可能是 specific_id 或 default_forum_avatar)
+                                authorAvatarAssetId: avatarAssetId,
                                 authorId: tData.authorId,
                                 identityIndex: tData.identityIndex,
                                 isPlayer: false,
@@ -24652,10 +24744,7 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                     console.error(e);
                     UIManager.showToast("生成失败，请检查API配置");
                 } finally {
-                    // 恢复图标状态
-                    if (fabIcon) {
-                        fabIcon.className = 'fas fa-plus';
-                    }
+                    if (fabIcon) fabIcon.className = 'fas fa-plus';
                 }
             },
 
@@ -24927,14 +25016,14 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                     body: `
                         <div class="form-group">
                             <label>生成评论数量</label>
-                            <input type="number" id="inf-comment-gen-count" value="3" min="1" max="8" style="text-align:center;">
+                            <input type="number" id="inf-comment-gen-count" value="8" min="1" max="20" style="text-align:center;">
                         </div>
                         <p style="font-size:0.8rem; color:#888; text-align:center;">AI将根据帖子内容和现有评论，生成路人或入驻角色的新回复。</p>
                     `,
                     actions: [
                         { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
                         { text: '生成', class: 'btn-primary', handler: async () => {
-                            const count = parseInt($('#inf-comment-gen-count').value) || 3;
+                            const count = parseInt($('#inf-comment-gen-count').value) || 8;
                             UIManager.hideModal();
                             this.executeCommentGeneration(threadId, count);
                         }}
@@ -25052,12 +25141,16 @@ ${commentsText.substring(0, 2000)} (截取部分)
                 const board = await DBHelper.get('forumBoards', thread.boardId);
                 const account = await DBHelper.get('forumAccounts', this.currentPlayerAccountId);
                 
-                // 获取已有评论作为上下文
                 const existingComments = (thread.comments || []).slice(-10).map(c => 
                     `${c.authorName}: ${c.content}`
                 ).join('\n');
 
+                // 新增：获取全局提示词
+                const globalPrompts = await AIHandler.getGlobalPromptsForContext('forum');
+
                 const prompt = `
+${globalPrompts}
+
 你是一个拟真的论坛评论区生成器。
 **当前帖子信息：**
 - 版块：${board.name} (世界观: ${board.description})
@@ -25076,6 +25169,7 @@ ${existingComments || "(暂无评论)"}
 4. **推进讨论**：评论应尽量围绕话题展开，或者引发新的争议点。
 5. **禁忌**：**绝对禁止**生成玩家当前使用的账号“${account.nickname}”的评论。
 
+
 **返回格式：**
 严格返回 JSON 数组，每个对象包含：
 - "nickname": 昵称
@@ -25090,6 +25184,7 @@ ${existingComments || "(暂无评论)"}
   {"nickname": "理中客", "content": "有一说一，这件事需要辩证看待...", "replyTo": null}
 ]
 `;
+
                 
                 // --- 修复：添加打印语句 ---
                 console.log("--- INFINITY COMMENT GENERATION PROMPT ---\n", prompt);
@@ -25149,7 +25244,8 @@ ${existingComments || "(暂无评论)"}
                     }
                 } catch (e) {
                     console.error(e);
-                    UIManager.showToast("生成评论失败");
+                    // 修改：显示具体错误原因
+                    UIManager.showToast(`生成评论失败: ${e.message}`);
                 } finally {
                     btn.className = 'fas fa-sync-alt';
                 }
