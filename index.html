@@ -8357,6 +8357,564 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
     color: #e74c3c; /* 删除按钮变红 */
 }
 
+/* --- 无垠 (论坛) 样式 --- */
+        .infinity-fab {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.2s;
+        }
+        .infinity-fab:active { transform: scale(0.9); }
+        
+        .infinity-board-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .infinity-board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .infinity-board-name { font-weight: bold; font-size: 1.1rem; color: #333; }
+        .infinity-board-desc { font-size: 0.85rem; color: #888; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        /* 帖子流样式 (新版布局) */
+        .thread-item {
+            background: white;
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column; /* 改为纵向布局 */
+            gap: 8px;
+            cursor: pointer;
+        }
+        /* 顶部行：头像、名字、时间 */
+        .thread-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .thread-author-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .thread-avatar {
+            width: 32px; 
+            height: 32px; 
+            border-radius: 50%; 
+            object-fit: cover;
+            border: 1px solid #eee;
+        }
+        .thread-nickname {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+        .thread-time {
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+        /* 内容区 */
+        .thread-content-row {
+            padding-left: 0; /* 对齐左侧 */
+        }
+        .thread-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+        .thread-summary {
+            font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.5;
+        }
+        /* 底部数据行 */
+        .thread-meta {
+            font-size: 0.75rem;
+            color: #aaa;
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end; /* 居右 */
+        }
+        .thread-meta i {
+             margin-right: 4px;
+        }
+        /* 红色热度图标 */
+        .thread-meta .fa-fire, .thread-detail-op .fa-fire {
+            color: #e74c3c !important;
+        }
+        
+        /* 评论区样式修正 */
+        .thread-comment-footer {
+            margin-top: 6px;
+            display: flex;
+            gap: 15px;
+            font-size: 0.75rem;
+            color: #aaa;
+            justify-content: flex-end; /* 评论操作居右 */
+        }
+        
+        /* 帖子详情样式 */
+        .thread-detail-op {
+            padding: 20px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+        .thread-op-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .thread-op-avatar {
+            width: 48px; height: 48px; border-radius: 50%; margin-right: 12px;
+        }
+        .thread-op-info .name { font-weight: bold; font-size: 1rem; }
+        .thread-op-info .meta { font-size: 0.8rem; color: #999; }
+        .thread-op-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+        }
+        .thread-comments-area {
+            background: #f9f9f9;
+        }
+        .thread-comment {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+        .thread-comment-avatar { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;}
+        .thread-comment-body { flex-grow: 1; }
+        .thread-comment-header { font-size: 0.85rem; color: #666; margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .thread-comment-content { font-size: 0.95rem; color: #333; line-height: 1.5; }
+
+        /* --- 无垠 (论坛) 样式优化 --- */
+        /* 隐藏底部导航栏的辅助类 */
+        #page-infinity-app.hide-bottom-nav #infinity-bottom-nav {
+            display: none !important;
+        }
+        
+        /* 帖子详情容器调整，底部留出输入框高度 */
+        #infinity-thread-content {
+            padding-bottom: 80px !important; 
+            background-color: #F7F8FA;
+        }
+
+        /* 美化后的输入区域 */
+        .infinity-input-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: white;
+            padding: 10px 15px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 100;
+        }
+        .infinity-input-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            background: #f0f2f5;
+            border-radius: 20px;
+            padding: 8px 15px;
+        }
+        .infinity-input-row textarea {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 0.95rem;
+            max-height: 80px;
+            padding: 4px 0;
+            line-height: 1.5;
+        }
+        .infinity-send-btn {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            align-self: flex-end; /* 按钮沉底 */
+            margin-bottom: 2px;
+            transition: opacity 0.2s;
+        }
+        .infinity-send-btn:active {
+            opacity: 0.8;
+        }
+        .infinity-identity-tag {
+            font-size: 0.75rem;
+            color: #999;
+            margin-left: 5px;
+            margin-bottom: 2px;
+        }
+
+        /* 新版评论列表样式 */
+        .thread-comment-refined {
+            display: flex;
+            gap: 12px;
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .thread-comment-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .thread-comment-main {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .thread-comment-user-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .thread-comment-nickname {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #666;
+        }
+        .thread-comment-floor {
+            font-size: 0.7rem;
+            color: #ccc;
+        }
+        .thread-comment-content {
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.6;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .thread-reply-target {
+            color: var(--text-color-medium);
+            font-size: 0.9rem;
+            margin-right: 4px;
+        }
+        .thread-comment-footer {
+            margin-top: 6px;
+            display: flex;
+            gap: 15px;
+            font-size: 0.75rem;
+            color: #aaa;
+        }
+        .thread-comment-action {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* --- 无垠 (论坛) 样式优化 v2 --- */
+
+/* 1. 帖子列表卡片重构 */
+.thread-item {
+    background: white;
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    flex-direction: column; /* 改为纵向布局 */
+    gap: 10px;
+    cursor: pointer;
+}
+
+.thread-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.thread-author-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.thread-avatar {
+    width: 32px; /* 稍微缩小一点 */
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.thread-nickname {
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: bold;
+}
+
+.thread-time {
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+.thread-content-area {
+    padding-left: 0; /* 不再缩进 */
+}
+
+.thread-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.thread-summary {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.thread-meta {
+    display: flex;
+    justify-content: flex-end; /* 居右 */
+    gap: 15px;
+    font-size: 0.8rem;
+    color: #999;
+}
+.thread-meta span i {
+    margin-right: 4px;
+}
+
+/* 2. 评论区样式优化 */
+.thread-comment-refined {
+    display: flex;
+    gap: 12px;
+    padding: 15px;
+    background: white;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.thread-comment-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.thread-comment-main {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.thread-comment-user-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.thread-comment-nickname {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #555;
+}
+
+.thread-comment-floor {
+    font-size: 0.7rem;
+    color: #ccc;
+}
+
+/* 修复：帖子详情主楼内容支持换行 */
+.thread-op-content {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #333;
+    white-space: pre-wrap; /* 关键：保留空白符和换行符 */
+    word-break: break-word;
+}
+
+/* 修复：评论区内容支持换行 */
+.thread-comment-content {
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: pre-wrap; /* 关键：保留空白符和换行符 */
+    margin-bottom: 8px;
+}
+
+.thread-reply-target {
+    color: var(--text-color-medium);
+    font-size: 0.9rem;
+    margin-right: 4px;
+    background: #f5f5f5;
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+
+/* 评论底部操作栏居右 */
+.thread-comment-footer {
+    display: flex;
+    justify-content: space-between; /* 时间在左，操作在右 */
+    align-items: center;
+    font-size: 0.75rem;
+    color: #aaa;
+}
+
+.thread-comment-actions {
+    display: flex;
+    gap: 20px;
+}
+
+.thread-comment-action {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+}
+
+.thread-comment-action.liked {
+    color: #ff4d4f;
+}
+
+/* 隐藏底部导航栏的辅助类 */
+#page-infinity-app.hide-bottom-nav #infinity-bottom-nav {
+    display: none !important;
+}
+
+/* 帖子详情容器调整 */
+#infinity-thread-content {
+    padding-bottom: 80px !important; 
+    background-color: #F7F8FA;
+}
+
+/* 输入区域样式 */
+.infinity-input-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 10px 15px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 100;
+}
+
+/* 回复提示条 */
+.infinity-reply-tips {
+    font-size: 0.75rem;
+    color: var(--accent-color);
+    background: #f0f8ff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    display: none; /* 默认隐藏 */
+    align-items: center;
+    justify-content: space-between;
+}
+.infinity-reply-tips.visible {
+    display: flex;
+}
+
+.infinity-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    background: #f0f2f5;
+    border-radius: 20px;
+    padding: 8px 15px;
+}
+
+.infinity-input-row textarea {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    font-size: 0.95rem;
+    max-height: 80px;
+    padding: 4px 0;
+    line-height: 1.5;
+}
+
+.infinity-send-btn {
+    background: transparent;
+    color: var(--accent-color);
+    border: none;
+    padding: 6px 0;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+    align-self: flex-end;
+    margin-bottom: 2px;
+}
+.infinity-send-btn:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.infinity-identity-tag {
+    font-size: 0.75rem;
+    color: #999;
+    margin-left: 5px;
+    margin-bottom: 2px;
+}
+
+/* 论坛输入框回复提示状态 */
+        .infinity-input-row.replying {
+            border: 1px solid var(--accent-color);
+            background: #fff;
+        }
+        #infinity-reply-input::placeholder {
+            color: #aaa;
+        }
+        /* 评论点赞激活状态 */
+        .thread-comment-action.liked {
+            color: #e74c3c;
+        }
 </style>
 <style id="exclusive-bubble-style"></style>
 <style id="offline-custom-css"></style>
@@ -8394,10 +8952,10 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             </div>
 
             <div class="app-item" id="open-forum-btn">
-                <div class="app-icon icon-forum">
-                    <i class="fas fa-globe"></i>
+                <div class="app-icon icon-forum" style="background: linear-gradient(135deg, #2b5876 0%, #4e4376 100%);">
+                    <i class="fas fa-infinity"></i>
                 </div>
-                <span class="app-name">论坛</span>
+                <span class="app-name">无垠</span>
             </div>
 
             <div class="app-item" id="open-settings-btn">
@@ -9957,6 +10515,94 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                 </nav>
             </div>
 
+            <!-- 无垠 (论坛) App 页面 -->
+            <div id="page-infinity-app" class="page">
+                <div id="infinity-sub-view-container" style="flex-grow: 1; position: relative; overflow: hidden;">
+                    
+                    <!-- 1. 论坛版块列表 (首页) -->
+                    <div id="infinity-view-home" class="prompts-view active" style="background-color: #F2F2F7;">
+                        <div class="prompts-nav-bar">
+                            <button class="prompts-nav-btn" id="infinity-exit-btn">退出</button>
+                            <div class="prompts-nav-title">无垠</div>
+                            <button class="prompts-nav-btn" id="infinity-add-board-btn"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <div class="prompts-list-container" id="infinity-board-list">
+                            <!-- JS 生成版块列表 -->
+                        </div>
+                    </div>
+
+                    <!-- 2. 版块帖子列表 (Feed) -->
+                    <div id="infinity-view-board" class="prompts-view" style="background-color: #F2F2F7; z-index: 20;">
+                        <div class="prompts-nav-bar">
+                            <button class="prompts-nav-btn" id="infinity-board-back-btn"><i class="fas fa-chevron-left"></i> 返回</button>
+                            <div class="prompts-nav-title" id="infinity-current-board-title">版块名称</div>
+                            <button class="prompts-nav-btn" id="infinity-board-manage-btn">管理</button>
+                        </div>
+                        <div class="prompts-list-container" id="infinity-thread-list" style="padding: 0;">
+                            <!-- JS 生成帖子流 -->
+                        </div>
+                        <!-- 悬浮球 -->
+                        <div id="infinity-fab" class="infinity-fab"><i class="fas fa-plus"></i></div>
+                    </div>
+
+                    <!-- 3. 帖子详情 -->
+                    <div id="infinity-view-thread" class="prompts-view" style="background-color: #fff; z-index: 30;">
+                        <div class="prompts-nav-bar">
+                            <button class="prompts-nav-btn" id="infinity-thread-back-btn"><i class="fas fa-chevron-left"></i> 返回</button>
+                            <div class="prompts-nav-title">帖子详情</div>
+                            <div style="width: 30px;"></div>
+                        </div>
+                        <div class="prompts-list-container" id="infinity-thread-content" style="padding-bottom: 60px;">
+                            <!-- JS 生成详情 -->
+                        </div>
+                        <div class="chat-input-area" style="position: absolute; bottom: 0; width: 100%;">
+                            <div class="input-top-row">
+                                <span id="infinity-current-reply-identity" style="font-size: 0.8rem; color: #888; margin-right: 5px; white-space: nowrap;"></span>
+                                <textarea id="infinity-reply-input" placeholder="发表评论..." rows="1"></textarea>
+                                <button id="infinity-reply-btn" style="background: var(--accent-color); color: white; border: none; width: 40px; height: 40px; border-radius: 50%;"><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 用户/我的 -->
+                    <div id="infinity-view-user" class="prompts-view" style="background-color: #F2F2F7;">
+                        <div class="prompts-nav-bar">
+                            <button class="prompts-nav-btn" style="visibility:hidden;">占位</button>
+                            <div class="prompts-nav-title">我的</div>
+                            <button class="prompts-nav-btn" id="infinity-add-account-btn"><i class="fas fa-user-plus"></i></button>
+                        </div>
+                        <div class="prompts-list-container">
+                            <div class="ios-list-section" style="margin-top: 20px;">
+                                <div class="form-group" style="padding: 12px 15px; background: #fff; margin: 0; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E5E5EA;">
+                                    <div style="display:flex; flex-direction:column; width: 70%;">
+                                        <span style="font-size: 1rem; font-weight: 500;">角色感知帖子数</span>
+                                        <span style="font-size: 0.8rem; color: #8E8E93; margin-top: 2px;">聊天时AI能记得自己最近发的几条帖子(0为关闭)</span>
+                                    </div>
+                                    <input type="number" id="infinity-perception-count" value="0" min="0" max="10" style="width: 50px; text-align: center; border: 1px solid #E5E5EA; border-radius: 8px; padding: 5px;">
+                                </div>
+                            </div>
+                            <p style="font-size: 13px; color: #8E8E93; margin: 15px 15px 5px;">切换当前身份</p>
+                            <div id="infinity-account-list" class="ios-list-section">
+                                <!-- JS 生成账号列表 -->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 底部导航栏 -->
+                <nav id="infinity-bottom-nav" style="height: 83px; padding-bottom: 20px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-around; align-items: flex-start; padding-top: 10px; flex-shrink: 0;">
+                    <div class="prompts-nav-tab active" data-target="infinity-view-home">
+                        <i class="fas fa-comments"></i>
+                        <span>论坛</span>
+                    </div>
+                    <div class="prompts-nav-tab" data-target="infinity-view-user">
+                        <i class="fas fa-user"></i>
+                        <span>我的</span>
+                    </div>
+                </nav>
+            </div>
+
         </main>
 
             <!-- 转发历史页面 (新) -->
@@ -10086,6 +10732,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             'prompts-app': $('#page-prompts-app'), // 新增
             'heartbeat-app': $('#page-heartbeat-app'), // 新增：心跳App
             'offline-mode': $('#page-offline-mode'), // 新增：线下模式
+            'infinity-app': $('#page-infinity-app'),
         };
 
         
@@ -10209,7 +10856,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 
             async init() {
                 // 升级版本号以触发更新
-                this.DB_VERSION = 27; 
+                this.DB_VERSION = 28; 
 
                 return new Promise((resolve, reject) => {
                     if (this.db) {
@@ -10352,6 +10999,40 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                             console.log("数据库升级至版本 27: 创建 assets 表...");
                             if (!db.objectStoreNames.contains('assets')) {
                                 db.createObjectStore('assets', { keyPath: 'id' });
+                            }
+                        }
+
+                        // --- 新增：无垠论坛相关表 ---
+                        if (event.oldVersion < 28) {
+                            console.log("数据库升级至版本 28: 创建 Infinity Forum 表...");
+                            
+                            // 论坛版块
+                            if (!db.objectStoreNames.contains('forumBoards')) {
+                                db.createObjectStore('forumBoards', { keyPath: 'id' });
+                            }
+                            
+                            // 论坛帖子
+                            if (!db.objectStoreNames.contains('forumThreads')) {
+                                const threadStore = db.createObjectStore('forumThreads', { keyPath: 'id' });
+                                threadStore.createIndex('boardId', 'boardId', { unique: false });
+                                threadStore.createIndex('timestamp', 'timestamp', { unique: false });
+                            }
+                            
+                            // 论坛注册/入驻记录 (角色 -> 版块 -> 马甲)
+                            if (!db.objectStoreNames.contains('forumRegistrations')) {
+                                const regStore = db.createObjectStore('forumRegistrations', { keyPath: 'id' }); // id = boardId_contactId
+                                regStore.createIndex('boardId', 'boardId', { unique: false });
+                            }
+
+                            // 玩家论坛账号
+                            if (!db.objectStoreNames.contains('forumAccounts')) {
+                                const accountStore = db.createObjectStore('forumAccounts', { keyPath: 'id' });
+                                accountStore.createIndex('isMain', 'isMain', { unique: false });
+                            }
+                            
+                            // 论坛全局设置 (简单kv)
+                            if (!db.objectStoreNames.contains('forumSettings')) {
+                                db.createObjectStore('forumSettings', { keyPath: 'id' });
                             }
                         }
 
@@ -14278,7 +14959,8 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
                 ruleTexts.push(
                     `**修改群名**: 你可以根据剧情发展，主动修改群名。格式为：<系统>角色名 修改群名为"新群名"</系统>。例如：<系统>商时序 修改群名为"F4"</系统>。注意：此行为必须符合你的角色设定，不能随意或无理由地修改。`,
                     `**修改群昵称**: 你可以修改角色在本群的昵称，格式为 [角色名|修改群昵称|你的新昵称] 或 <角色名|修改群昵称|你的新昵称>，昵称不能超过10个字。例如：[孟祁年|修改群昵称|F4-老大]。`,
-                    `**群友回复顺序不固定，可以交叉回复，例如群友A、群友B、群友B、群友A、群友C这样的交叉顺序。不一定要一个人全部说完了才轮到下一个人。群友之间也可以有互动对话，例如使用@提及其他群友。**`
+                    `**群友回复顺序不固定，可以交叉回复，例如群友A、群友B、群友B、群友A、群友C这样的交叉顺序。不一定要一个人全部说完了才轮到下一个人。群友之间也可以有互动对话，例如使用@提及其他群友。**`,
+                    `**私聊回应 (重要)**：请关注【记忆互通】中的私聊记录。如果玩家在群聊期间私聊了群内的某个角色（或该角色需要对玩家之前的私聊进行回应），请控制该角色在回复中穿插私聊回复。**格式必须使用 <私聊>[角色名|消息内容]</私聊>。** 例如：在群聊正常对话的同时，追加一行 <私聊>[孟祁年|干嘛]</私聊><私聊>[孟祁年|你在群里聊天，这里不回我消息是吧]</私聊>。`
                 );
 
                 const formattedRules = ruleTexts.map((text, index) => `${index + 1}.  ${text}`).join('\n');
@@ -15149,6 +15831,52 @@ ${promptLines.join('\n\n')}
                 // 新增：获取线下模式摘要
                 const offlineContext = await this.getOfflineContext(chatId);
 
+                // --- 新增：论坛感知上下文 (升级版) ---
+                let forumContext = '';
+                const forumSettings = await DBHelper.get('forumSettings', 'config') || { perceptionCount: 0 };
+                const perceptionCount = parseInt(forumSettings.perceptionCount);
+
+                if (perceptionCount > 0 && !isGroup) { 
+                    const registrations = await DBHelper.getAll('forumRegistrations');
+                    const charRegs = registrations.filter(r => r.contactId === chatId);
+                    
+                    if (charRegs.length > 0) {
+                        const allThreads = await DBHelper.getAll('forumThreads');
+                        // 筛选该角色发的贴 (按时间倒序)
+                        const charThreads = allThreads
+                            .filter(t => t.authorId === chatId)
+                            .sort((a, b) => b.timestamp - a.timestamp)
+                            .slice(0, perceptionCount);
+
+                        if (charThreads.length > 0) {
+                            const summaryPromises = charThreads.map(async t => {
+                                const board = await DBHelper.get('forumBoards', t.boardId);
+                                const boardName = board?.name || '未知版块';
+                                const timeStr = Utils.formatTimestampSmartly(t.timestamp);
+                                
+                                // 决定使用原内容还是AI总结
+                                let contentDisplay = "";
+                                if (t.useSummaryForPerception && t.summary) {
+                                    contentDisplay = `\n  【帖子与评论总结】: ${t.summary}`;
+                                } else {
+                                    // 没开总结，使用截断的内容和最新评论
+                                    const rawContent = t.content.length > 50 ? t.content.substring(0, 50) + '...' : t.content;
+                                    const recentComments = (t.comments || []).slice(-3).map(c => `${c.authorName}: ${c.content}`).join('; ');
+                                    const commentsDisplay = recentComments ? `\n  【最新评论】: ${recentComments}` : `\n  【评论】: 暂无`;
+                                    contentDisplay = `\n  【内容】: ${rawContent}${commentsDisplay}`;
+                                }
+                                
+                                return `- [${timeStr}] 在版块"${boardName}"使用马甲"${t.authorName}"发布了帖子: 《${t.title}》${contentDisplay}`;
+                            });
+
+                            const summaries = await Promise.all(summaryPromises);
+                            
+                            forumContext = `\n--- 你的论坛(无垠)近期动态 (请知悉，你刚发过这些帖子) ---\n${summaries.join('\n')}\n---\n`;
+                        }
+                    }
+                }
+                // --- 结束论坛感知 ---
+
                 const promptParts = [
                     globalPromptsSection,
                     systemTime, 
@@ -15161,6 +15889,7 @@ ${promptLines.join('\n\n')}
                     pomodoroPromptSection,
                     momentsPromptSection, 
                     offlineContext, // 插入线下摘要
+                    forumContext,
                     summaryPromptSection, 
                     customPromptsSection, 
                     historyPrompt, 
@@ -17581,12 +18310,39 @@ async handleAutoSummaryRequest(chatId, manualTurnCount = null) {
                 }
 
                 // 4. 收集最近聊天记录 (为了"延续话题"功能)
-                const historyMsgs = await DBHelper.getMessages(contactId, 10); // 最近10条
                 const allContacts = await DBHelper.getAll('contacts');
-                const historyBlock = this.buildTurnsFromHistory(historyMsgs, allContacts, myProfile)
+                const allGroups = await DBHelper.getAll('groups');
+                
+                // 4.1 私聊记录
+                const historyMsgs = await DBHelper.getMessages(contactId, 10); // 最近10条
+                let historyBlock = this.buildTurnsFromHistory(historyMsgs, allContacts, myProfile)
                     .map(turn => `[${turn.time}] ${turn.role}: ${turn.content}`)
                     .join('\n');
-                const historyPrompt = historyBlock ? `--- 最近聊天记录 (供参考) ---\n${historyBlock}\n---` : '';
+                
+                // 4.2 群聊记录 (新增：角色所在的群聊最近记录)
+                const groupsWithMember = allGroups.filter(g => g.members.includes(contactId));
+                let groupHistoryBlock = '';
+                
+                for (const group of groupsWithMember) {
+                    // 获取该群最近 5 条消息
+                    const groupMsgs = await DBHelper.getMessages(group.id, 5);
+                    if (groupMsgs && groupMsgs.length > 0) {
+                        const groupTurns = this.buildTurnsFromHistory(groupMsgs, allContacts, myProfile)
+                            .map(turn => `[${turn.time}] ${turn.role}: ${turn.content}`)
+                            .join('\n');
+                        if (groupTurns) {
+                            groupHistoryBlock += `\n**群聊【${group.name}】的记录：**\n${groupTurns}\n`;
+                        }
+                    }
+                }
+
+                let historyPrompt = '';
+                if (historyBlock) {
+                    historyPrompt += `--- 最近私聊记录 (供参考) ---\n${historyBlock}\n---\n`;
+                }
+                if (groupHistoryBlock) {
+                    historyPrompt += `--- 角色所在的群聊近期动态 (供参考，角色可能在群里活跃) ---\n${groupHistoryBlock}\n---\n`;
+                }
 
                 // 5. 朋友圈信息
                 let circleInfo = '';
@@ -19354,19 +20110,27 @@ ${globalPromptsSection}
 
             showAddSongModal() {
                 UIManager.showModal({
-                    customClass: 'ios-style',
+                    customClass: 'ios-style vertical-actions', // 改为竖向排列，因为按钮变多了
                     title: '添加歌曲',
                     body: `
-                        <p>请选择添加方式</p>
+                        <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">提示：本地导入支持长按或框选多文件</p>
                     `,
                     actions: [
                         { text: '本地音频', class: 'btn-secondary', handler: () => {
-                            document.getElementById('music-file-input').click();
+                            // 触发 input 点击
+                            const input = document.getElementById('music-file-input');
+                            // 确保清空value，否则选同样文件不触发change
+                            input.value = ''; 
+                            input.click();
                             UIManager.hideModal();
                         }},
                         { text: '网络链接', class: 'btn-secondary', handler: () => {
                             UIManager.hideModal();
                             this.showUrlSongInputModal();
+                        }},
+                        { text: '批量导入', class: 'btn-primary', handler: () => {
+                            UIManager.hideModal();
+                            this.showBatchImportModal();
                         }},
                         { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() }
                     ]
@@ -19397,6 +20161,118 @@ ${globalPromptsSection}
                         }}
                     ]
                 });
+            },
+
+            // --- 新增：批量文本导入弹窗 ---
+            showBatchImportModal() {
+                UIManager.showModal({
+                    title: "批量导入歌曲",
+                    body: `
+                        <p style="font-size:0.8rem; color:#888; margin-bottom:5px; text-align:left;">
+                            请按以下格式粘贴内容 (每行一首)：<br>
+                            <strong>歌名 | 歌手 | MP3直链</strong><br>
+                            <br>
+                            例如：<br>
+                            起风了 | 买辣椒也用券 | https://example.com/1.mp3<br>
+                            晴天 | 周杰伦 | https://example.com/2.mp3
+                        </p>
+                        <textarea id="batch-import-textarea" rows="10" style="width:100%; border:1px solid #ccc; border-radius:8px; padding:10px; font-size:0.85rem; white-space:nowrap; overflow-x:auto;" placeholder="在此粘贴..."></textarea>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '开始解析并导入', class: 'btn-primary', handler: () => {
+                            const text = $('#batch-import-textarea').value;
+                            this.handleBatchTextImport(text);
+                        }}
+                    ]
+                });
+            },
+
+            async handleBatchTextImport(text) {
+                if (!text.trim()) return UIManager.showToast("内容不能为空");
+                
+                const lines = text.split('\n');
+                let successCount = 0;
+                let failCount = 0;
+
+                UIManager.showModal({
+                    isPersistent: true,
+                    title: "正在导入",
+                    body: `<div style="text-align:center;"><div class="loader-spinner"></div><p>正在处理...</p></div>`,
+                    actions: []
+                });
+
+                const songsToAdd = [];
+
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    
+                    // 支持多种分隔符：中文竖线，英文竖线，或者逗号
+                    let parts = line.split('|');
+                    if (parts.length < 2) parts = line.split('｜'); // 尝试中文竖线
+                    
+                    // 格式宽松处理
+                    // 1. 歌名 | 歌手 | URL
+                    // 2. 歌名 | URL (歌手默认为未知)
+                    let name, artist, url;
+
+                    if (parts.length >= 3) {
+                        name = parts[0].trim();
+                        artist = parts[1].trim();
+                        url = parts[2].trim();
+                    } else if (parts.length === 2) {
+                        // 简单的判断哪一个是URL
+                        if (parts[1].startsWith('http')) {
+                            name = parts[0].trim();
+                            url = parts[1].trim();
+                            artist = '未知歌手';
+                        } else {
+                            // 可能是 歌名 | 歌手，但这没有URL，无法导入
+                            failCount++;
+                            continue;
+                        }
+                    } else {
+                        failCount++;
+                        continue;
+                    }
+
+                    if (name && url && url.startsWith('http')) {
+                        songsToAdd.push({
+                            id: Utils.generateId('song'),
+                            playlistId: this.currentViewPlaylistId,
+                            createdAt: Date.now() + successCount, // 稍微错开时间
+                            sourceType: 'url',
+                            name: name,
+                            artist: artist,
+                            url: url,
+                            cover: null,
+                            lrc: ''
+                        });
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+                }
+
+                if (songsToAdd.length > 0) {
+                    await DBHelper.batchPut('musicSongs', songsToAdd);
+                    
+                    // 更新歌单计数
+                    const playlist = await DBHelper.get('musicPlaylists', this.currentViewPlaylistId);
+                    if (playlist) {
+                        playlist.songCount = (playlist.songCount || 0) + songsToAdd.length;
+                        await DBHelper.put('musicPlaylists', playlist);
+                    }
+                    
+                    this.loadPlaylists();
+                    this.openPlaylistDetail(this.currentViewPlaylistId);
+                    
+                    UIManager.hideModal();
+                    UIManager.showToast(`成功导入 ${successCount} 首，失败 ${failCount} 行`);
+                } else {
+                    UIManager.hideModal();
+                    UIManager.showToast("未识别到有效的歌曲链接格式");
+                }
             },
 
             // 新增：解析 MP3 ID3 标签的辅助函数
@@ -22264,13 +23140,36 @@ ${globalPromptsSection}
                 const settings = await this.getOfflineSettings();
                 const rules = settings.regexRules || [];
 
+                // 新增：HTML转义函数，防止正则中的 < > 破坏页面结构
+                const escapeHtml = (str) => {
+                    if (!str) return '';
+                    return str
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#039;");
+                };
+
                 const renderRuleList = () => {
                     if (rules.length === 0) return '<div style="text-align:center; color:#999; padding:20px;">暂无正则规则</div>';
                     
                     return rules.map((rule, index) => {
-                        // 修改：优先显示名称，如果没有名称则显示截断的正则式
-                        const displayName = rule.name ? rule.name : `/${rule.pattern}/`;
-                        const displayPattern = rule.pattern.length > 20 ? rule.pattern.substring(0, 20) + '...' : rule.pattern;
+                        // 使用 escapeHtml 处理所有用户输入内容
+                        const displayName = rule.name ? escapeHtml(rule.name) : `/${escapeHtml(rule.pattern)}/`;
+                        
+                        // 显示正则时截断并转义
+                        let displayPattern = escapeHtml(rule.pattern);
+                        if (displayPattern.length > 25) {
+                            displayPattern = displayPattern.substring(0, 25) + '...';
+                        }
+
+                        // 显示替换内容时截断并转义
+                        let displayReplacement = escapeHtml(rule.replacement || '');
+                        if (displayReplacement.length > 15) {
+                            displayReplacement = displayReplacement.substring(0, 15) + '...';
+                        }
+                        if (!displayReplacement) displayReplacement = '(空)';
 
                         return `
                         <div class="ios-list-item" style="padding: 10px; flex-direction: column; align-items: stretch; background: white; margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border-color);">
@@ -22282,10 +23181,10 @@ ${globalPromptsSection}
                                 </div>
                             </div>
                             
-                            ${rule.name ? `<div style="font-family: monospace; font-size: 0.75rem; color: #999; margin-bottom: 5px;">正则: ${displayPattern}</div>` : ''}
+                            <div style="font-family: monospace; font-size: 0.75rem; color: #999; margin-bottom: 5px;">正则: ${displayPattern}</div>
 
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 0.8rem; color: #666;">替换为: <strong style="color: var(--accent-color);">${rule.replacement ? (rule.replacement.length > 15 ? rule.replacement.substring(0,15)+'...' : rule.replacement) : '(空)'}</strong></span>
+                                <span style="font-size: 0.8rem; color: #666;">替换为: <strong style="color: var(--accent-color);">${displayReplacement}</strong></span>
                                 <div style="display: flex; gap: 10px;">
                                     <button class="action-btn" data-action="edit" data-index="${index}" style="font-size: 0.8rem;">编辑</button>
                                     <button class="action-btn" data-action="delete" data-index="${index}" style="font-size: 0.8rem; color: #e74c3c;">删除</button>
@@ -22328,8 +23227,6 @@ ${globalPromptsSection}
                     if (action === 'toggle-active') {
                         rules[index].isActive = target.checked;
                         await this.saveOfflineSettings({ regexRules: rules });
-                        // 不重新渲染列表，避免失去焦点
-                        // 但需要刷新页面内容以应用视觉变化
                         this.renderHistory(); 
                     } else if (action === 'toggle-ai') {
                         rules[index].applyToAi = target.checked;
@@ -22354,7 +23251,7 @@ ${globalPromptsSection}
 
                 $('#add-regex-btn').onclick = () => this.showEditRegexModal();
             },
-
+            
             showEditRegexModal(rule = null, index = -1) {
                 const isEditing = rule !== null;
                 
@@ -22878,6 +23775,1385 @@ ${globalPromptsSection}
                 this.appendBlockToDOM(message);
                 this.scrollToBottom();
             }
+        };
+
+        const InfinityManager = {
+            currentBoardId: null,
+            currentThreadId: null,
+            currentPlayerAccountId: null,
+
+            async init() {
+                this.bindEvents();
+                // 初始化默认设置
+                const settings = await DBHelper.get('forumSettings', 'config') || { id: 'config', perceptionCount: 0 };
+                $('#infinity-perception-count').value = settings.perceptionCount;
+                
+                // 新增：检查并缓存默认论坛头像
+                this.ensureDefaultAvatarCached();
+            },
+
+            async ensureDefaultAvatarCached() {
+                const defaultId = 'default_forum_avatar';
+                // 检查 photoAssets 表中是否存在该ID
+                const existing = await DBHelper.get('photoAssets', defaultId);
+                
+                if (!existing) {
+                    console.log("正在缓存论坛默认头像...");
+                    try {
+                        const url = "https://raw.githubusercontent.com/rain1593/rain/img/user_grey.png";
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        
+                        // 存入 photoAssets，作为一个特殊的系统资源
+                        await DBHelper.put('photoAssets', {
+                            id: defaultId,
+                            albumId: 'system_default', // 标记为系统默认
+                            type: 'blob',
+                            name: '默认灰色头像',
+                            content: blob,
+                            createdAt: Date.now()
+                        });
+                        console.log("论坛默认头像缓存成功");
+                    } catch (e) {
+                        console.error("缓存默认头像失败，将使用在线链接回退:", e);
+                    }
+                }
+            },
+
+            bindEvents() {
+                // 底部导航
+                $('#infinity-bottom-nav').addEventListener('click', (e) => {
+                    const tab = e.target.closest('.prompts-nav-tab');
+                    if (!tab) return;
+                    
+                    $$('#infinity-bottom-nav .prompts-nav-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    $('#infinity-view-home').classList.remove('active');
+                    $('#infinity-view-user').classList.remove('active');
+                    // 保持详情页或版块页不被误关，逻辑上只在 Home 和 User 间切换
+                    // 如果点击 Home，应该回到 Home（不是 Board）
+                    // 简化逻辑：只在 Home 和 User 两个顶级视图切换
+                    if (tab.dataset.target === 'infinity-view-home') {
+                        $('#infinity-view-board').classList.remove('active');
+                        $('#infinity-view-thread').classList.remove('active');
+                        $('#infinity-view-home').classList.add('active');
+                        this.renderBoardList();
+                    } else {
+                         $('#infinity-view-board').classList.remove('active');
+                        $('#infinity-view-thread').classList.remove('active');
+                        $('#infinity-view-home').classList.remove('active');
+                        $('#infinity-view-user').classList.add('active');
+                        this.renderUserPage();
+                    }
+                });
+
+                // 退出
+                $('#infinity-exit-btn').onclick = () => {
+                    const desktop = $('#ios-desktop');
+                    const appContainer = $('#app-container');
+                    appContainer.classList.remove('app-active');
+                    setTimeout(() => { appContainer.style.display = 'none'; }, 300);
+                    desktop.style.display = 'flex';
+                    void desktop.offsetWidth;
+                    desktop.classList.add('active');
+                };
+
+                // 版块操作
+                $('#infinity-add-board-btn').onclick = () => this.showAddBoardModal();
+                $('#infinity-board-list').onclick = (e) => {
+                    const card = e.target.closest('.infinity-board-card');
+                    if (card) this.openBoard(card.dataset.id);
+                };
+
+                // 版块内操作
+                $('#infinity-board-back-btn').onclick = () => {
+                    $('#infinity-view-board').classList.remove('active');
+                    $('#infinity-view-home').classList.add('active');
+                    this.renderBoardList();
+                };
+                $('#infinity-board-manage-btn').onclick = () => this.showBoardManagementSidebar();
+                
+                // 悬浮球 (发帖/刷新)
+                $('#infinity-fab').onclick = () => {
+                    UIManager.showBottomSheet({
+                        title: '操作',
+                        items: [
+                            { value: 'post', text: '发布新帖' },
+                            { value: 'refresh', text: '刷新帖子流 (AI生成)' }
+                        ],
+                        onSelect: (value) => {
+                            if (value === 'post') this.showPostThreadModal();
+                            else if (value === 'refresh') this.showRefreshConfigModal();
+                        }
+                    });
+                };
+                
+                // 帖子列表点击
+                $('#infinity-thread-list').onclick = (e) => {
+                    const item = e.target.closest('.thread-item');
+                    if (item) this.openThread(item.dataset.id);
+                };
+
+                // 帖子详情页操作
+                $('#infinity-thread-back-btn').onclick = () => {
+                    $('#infinity-view-thread').classList.remove('active');
+                    $('#infinity-view-board').classList.add('active');
+                    this.renderThreadList(this.currentBoardId);
+                };
+                
+                // 帖子回复
+                $('#infinity-reply-btn').onclick = () => this.handleReply();
+
+                // 用户页操作
+                $('#infinity-add-account-btn').onclick = () => this.showAddAccountModal();
+                $('#infinity-account-list').onclick = (e) => {
+                    const item = e.target.closest('.ios-list-item');
+                    if(item) this.switchAccount(item.dataset.id);
+                    if(e.target.closest('.delete-indicator')) {
+                        e.stopPropagation();
+                        this.deleteAccount(item.dataset.id);
+                    }
+                };
+                $('#infinity-perception-count').onchange = async (e) => {
+                    const val = parseInt(e.target.value);
+                    const settings = { id: 'config', perceptionCount: val };
+                    await DBHelper.put('forumSettings', settings);
+                };
+            },
+
+            async renderBoardList() {
+                const list = $('#infinity-board-list');
+                list.innerHTML = '';
+                const boards = await DBHelper.getAll('forumBoards');
+                
+                if (boards.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:40px; color:#aaa;">暂无版块，点击右上角新建</div>`;
+                    return;
+                }
+
+                list.innerHTML = boards.map(b => `
+                    <div class="infinity-board-card" data-id="${b.id}">
+                        <div class="infinity-board-header">
+                            <span class="infinity-board-name">${b.name}</span>
+                            <i class="fas fa-chevron-right" style="color:#ccc;"></i>
+                        </div>
+                        <div class="infinity-board-desc">${b.description || '暂无简介'}</div>
+                    </div>
+                `).join('');
+            },
+
+            showAddBoardModal() {
+                UIManager.showModal({
+                    title: "新建版块",
+                    body: `
+                        <div class="form-group">
+                            <label>版块名称</label>
+                            <input type="text" id="inf-board-name" placeholder="例如：废土生存指南">
+                        </div>
+                        <div class="form-group">
+                            <label>世界观/背景 (用于AI生成帖子)</label>
+                            <textarea id="inf-board-desc" rows="5" placeholder="描述这个版块的主题、规则或世界观设定..."></textarea>
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '创建', class: 'btn-primary', handler: async () => {
+                            const name = $('#inf-board-name').value.trim();
+                            const desc = $('#inf-board-desc').value.trim();
+                            if(!name) return UIManager.showToast("名称不能为空");
+                            
+                            const newBoard = {
+                                id: Utils.generateId('board'),
+                                name,
+                                description: desc,
+                                createdAt: Date.now(),
+                                boundPromptFolderIds: []
+                            };
+                            await DBHelper.put('forumBoards', newBoard);
+                            UIManager.hideModal();
+                            this.renderBoardList();
+                        }}
+                    ]
+                });
+            },
+
+            async openBoard(boardId) {
+                this.currentBoardId = boardId;
+                const board = await DBHelper.get('forumBoards', boardId);
+                $('#infinity-current-board-title').textContent = board.name;
+                
+                $('#infinity-view-home').classList.remove('active');
+                $('#infinity-view-board').classList.add('active');
+                this.renderThreadList(boardId);
+            },
+
+            async renderThreadList(boardId) {
+                const list = $('#infinity-thread-list');
+                list.innerHTML = '';
+                const threads = (await DBHelper.getAll('forumThreads')).filter(t => t.boardId === boardId);
+                threads.sort((a,b) => b.timestamp - a.timestamp); // 最新在前
+
+                if(threads.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:40px; color:#aaa;">暂无帖子<br>点击右下角按钮发帖或刷新</div>`;
+                    return;
+                }
+
+                list.innerHTML = threads.map(t => {
+                    const commentsCount = t.comments ? t.comments.length : 0;
+                    return `
+                        <div class="thread-item" data-id="${t.id}">
+                            <div class="thread-header-row">
+                                <div class="thread-author-info">
+                                    <img src="${t.authorAvatar}" data-asset-id="${t.authorAvatarAssetId || ''}" class="thread-avatar lazy-avatar">
+                                    <span class="thread-nickname">${t.authorName}</span>
+                                </div>
+                                <span class="thread-time">${Utils.formatTimestampSmartly(t.timestamp)}</span>
+                            </div>
+                            <div class="thread-content-row">
+                                <div class="thread-title">${t.title}</div>
+                                <div class="thread-summary">${t.content}</div>
+                            </div>
+                            <div class="thread-meta">
+                                <span><i class="fas fa-fire"></i> ${t.likes || 0}</span>
+                                <span><i class="far fa-comment"></i> ${commentsCount}</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // 渲染后加载本地头像
+                this.loadLazyAvatars(list);
+            },
+
+            async showBoardManagementSidebar() {
+                const board = await DBHelper.get('forumBoards', this.currentBoardId);
+                UIManager.showSidebar({
+                    position: 'right',
+                    title: "版块管理",
+                    body: `
+                        <div class="settings-list" style="padding:0; margin:0 -10px;">
+                            <div class="setting-item" id="inf-edit-board">
+                                <i class="fas fa-edit"></i>
+                                <span>修改版块信息</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="inf-resident-manage">
+                                <i class="fas fa-users-cog"></i>
+                                <span>角色入驻管理</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="inf-bind-prompts">
+                                <i class="fas fa-link"></i>
+                                <span>绑定提示词</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <!-- 新增：绑定头像相册 -->
+                            <div class="setting-item" id="inf-bind-avatars">
+                                <i class="fas fa-images"></i>
+                                <span>绑定NPC头像库</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="inf-clear-threads">
+                                <i class="fas fa-eraser" style="color:#FF9500;"></i>
+                                <span style="color:#FF9500;">清空所有帖子</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="inf-delete-board">
+                                <i class="fas fa-trash-alt" style="color:#e74c3c;"></i>
+                                <span style="color:#e74c3c;">删除版块</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    `
+                });
+
+                // 新增：清空帖子
+                $('#inf-clear-threads').onclick = () => {
+                    UIManager.showModal({
+                        title: '确认清空',
+                        body: '<p>确定要清空此版块内的所有帖子吗？此操作无法恢复。</p>',
+                        actions: [
+                            { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                            { text: '清空', class: 'btn-danger', handler: async () => {
+                                const allThreads = await DBHelper.getAll('forumThreads');
+                                const threadsToDelete = allThreads.filter(t => t.boardId === this.currentBoardId);
+                                for(let t of threadsToDelete) await DBHelper.delete('forumThreads', t.id);
+                                
+                                UIManager.hideModal();
+                                UIManager.hideSidebar();
+                                $('#infinity-board-back-btn').click(); // 返回上一级并刷新
+                                UIManager.showToast("帖子已清空");
+                            }}
+                        ]
+                    });
+                };
+
+                $('#inf-delete-board').onclick = () => {
+                    UIManager.showModal({
+                        title: '确认删除',
+                        body: '<p>确定要删除此版块吗？所有帖子都将丢失。</p>',
+                        actions: [
+                            { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                            { text: '删除', class: 'btn-danger', handler: async () => {
+                                await DBHelper.delete('forumBoards', this.currentBoardId);
+                                // 清理相关数据
+                                const threads = (await DBHelper.getAll('forumThreads')).filter(t => t.boardId === this.currentBoardId);
+                                for(let t of threads) await DBHelper.delete('forumThreads', t.id);
+                                
+                                UIManager.hideModal();
+                                UIManager.hideSidebar();
+                                $('#infinity-board-back-btn').click();
+                            }}
+                        ]
+                    });
+                };
+                
+                $('#inf-resident-manage').onclick = () => this.showResidentManagementModal();
+
+                $('#inf-bind-prompts').onclick = () => this.showBoardPromptBinding(board);
+
+                // 新增：绑定头像事件
+                $('#inf-bind-avatars').onclick = () => this.showBoardAvatarBinding(board);
+
+                $('#inf-edit-board').onclick = () => {
+                     UIManager.showModal({
+                        title: "修改版块",
+                        body: `
+                            <div class="form-group"><label>名称</label><input type="text" id="edit-board-name" value="${board.name}"></div>
+                            <div class="form-group"><label>世界观</label><textarea id="edit-board-desc" rows="5">${board.description}</textarea></div>
+                        `,
+                        actions: [
+                            { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                            { text: '保存', class: 'btn-primary', handler: async () => {
+                                board.name = $('#edit-board-name').value;
+                                board.description = $('#edit-board-desc').value;
+                                await DBHelper.put('forumBoards', board);
+                                $('#infinity-current-board-title').textContent = board.name;
+                                UIManager.hideModal();
+                                UIManager.hideSidebar();
+                            }}
+                        ]
+                    });
+                };
+            },
+
+            async showBoardPromptBinding(board) {
+                const allFolders = await DBHelper.getAll('promptFolders');
+                const boundIds = board.boundPromptFolderIds || [];
+                
+                const listHtml = allFolders.map(f => `
+                    <label class="folder-selection-item">
+                        <input type="checkbox" name="board-bind-folder" value="${f.id}" ${boundIds.includes(f.id) ? 'checked' : ''}>
+                        <i class="fas fa-folder"></i>
+                        <span>${f.name}</span>
+                    </label>
+                `).join('');
+
+                UIManager.showModal({
+                    title: "绑定提示词",
+                    body: `<div class="folder-selection-list">${listHtml}</div>`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const selectedIds = [...$$('input[name="board-bind-folder"]:checked')].map(cb => cb.value);
+                            board.boundPromptFolderIds = selectedIds;
+                            await DBHelper.put('forumBoards', board);
+                            UIManager.hideModal();
+                            UIManager.showToast("绑定已更新");
+                        }}
+                    ]
+                });
+            },
+
+            async showBoardAvatarBinding(board) {
+                const allAlbums = await DBHelper.getAll('photoAlbums');
+                const boundId = board.boundAvatarAlbumId || '';
+
+                if (allAlbums.length === 0) {
+                    return UIManager.showToast("还没有创建任何相册");
+                }
+
+                // 排除表情包类型的相册，只显示头像类型的相册，或者全部显示由用户决定。这里显示全部方便。
+                const listHtml = `
+                    <label class="folder-selection-item">
+                        <input type="radio" name="board-avatar-album" value="" ${!boundId ? 'checked' : ''}>
+                        <span>不绑定 (默认灰色头像)</span>
+                    </label>
+                    ` + allAlbums.map(a => `
+                    <label class="folder-selection-item">
+                        <input type="radio" name="board-avatar-album" value="${a.id}" ${boundId === a.id ? 'checked' : ''}>
+                        <i class="fas fa-images"></i>
+                        <span>${a.name} (${a.type === 'exclusive' ? '专属' : '通用'})</span>
+                    </label>
+                `).join('');
+
+                UIManager.showModal({
+                    title: "绑定NPC头像库",
+                    body: `<div class="folder-selection-list">${listHtml}</div><p style="font-size:0.8rem; color:#888; margin-top:10px;">绑定后，该版块生成的NPC/马甲将随机使用相册内的图片作为头像。</p>`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const selected = $('input[name="board-avatar-album"]:checked');
+                            board.boundAvatarAlbumId = selected ? selected.value : null;
+                            await DBHelper.put('forumBoards', board);
+                            UIManager.hideModal();
+                            UIManager.showToast("头像库绑定已更新");
+                        }}
+                    ]
+                });
+            },
+            
+            async showResidentManagementModal() {
+                const boardId = this.currentBoardId;
+                const allContacts = await DBHelper.getAll('contacts');
+                // 获取已入驻的角色
+                const registrations = await DBHelper.getAll('forumRegistrations');
+                const boardRegs = registrations.filter(r => r.boardId === boardId);
+                const residentContactIds = boardRegs.map(r => r.contactId);
+
+                // 1. 选择角色
+                const availableContacts = allContacts.filter(c => !residentContactIds.includes(c.id));
+                
+                const residentsHtml = boardRegs.map(reg => {
+                    const c = allContacts.find(con => con.id === reg.contactId);
+                    if (!c) return '';
+                    return `
+                        <div class="member-list-modal-item">
+                            <img src="${c.avatar}" style="width:30px;height:30px;border-radius:4px;margin-right:10px;">
+                            <span style="flex-grow:1;">${c.name}</span>
+                            <button class="sort-btn-mini" onclick="InfinityManager.editResident('${reg.id}')">马甲设置</button>
+                            <i class="fas fa-trash-alt" style="color:#e74c3c; margin-left:10px; cursor:pointer;" onclick="InfinityManager.removeResident('${reg.id}')"></i>
+                        </div>
+                    `;
+                }).join('');
+
+                const addSelectHtml = availableContacts.length > 0 ? `
+                    <div class="form-group" style="margin-top:15px; padding-top:15px; border-top:1px dashed #eee;">
+                        <label>添加入驻角色</label>
+                        <select id="inf-add-resident-select" style="width:100%; padding:8px;">
+                            <option value="">选择角色...</option>
+                            ${availableContacts.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+                        </select>
+                        <button class="modal-btn btn-primary" style="width:100%; margin-top:10px;" id="inf-confirm-add-resident">入驻</button>
+                    </div>
+                ` : '<p style="color:#999; text-align:center; margin-top:10px;">所有好友均已入驻</p>';
+
+                UIManager.showModal({
+                    title: "角色入驻管理",
+                    body: `
+                        <div class="member-list-modal-body" style="max-height: 200px;">${residentsHtml || '<p style="text-align:center; color:#ccc;">暂无入驻角色</p>'}</div>
+                        ${addSelectHtml}
+                    `,
+                    actions: [{ text: '关闭', class: 'btn-secondary', handler: () => UIManager.hideModal() }]
+                });
+
+                if (availableContacts.length > 0) {
+                    $('#inf-confirm-add-resident').onclick = async () => {
+                        const contactId = $('#inf-add-resident-select').value;
+                        if (!contactId) return;
+                        
+                        // 创建默认马甲 (大号)
+                        const contact = allContacts.find(c => c.id === contactId);
+                        const defaultSockpuppet = {
+                            name: contact.name,
+                            avatar: contact.avatar,
+                            bio: `我是${contact.name}`,
+                            isMain: true
+                        };
+
+                        const newReg = {
+                            id: `${boardId}_${contactId}`,
+                            boardId,
+                            contactId,
+                            sockpuppets: [defaultSockpuppet]
+                        };
+                        await DBHelper.put('forumRegistrations', newReg);
+                        
+                        UIManager.hideModal();
+                        this.showResidentManagementModal(); // 刷新
+                    };
+                }
+            },
+
+            async removeResident(regId) {
+                await DBHelper.delete('forumRegistrations', regId);
+                UIManager.hideModal();
+                this.showResidentManagementModal();
+            },
+
+            async editResident(regId) {
+                const reg = await DBHelper.get('forumRegistrations', regId);
+                const contact = await DBHelper.get('contacts', reg.contactId);
+                
+                // 渲染马甲列表
+                const renderSockpuppets = () => {
+                    return reg.sockpuppets.map((sp, idx) => `
+                        <div style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #eee;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                <strong style="color:${sp.isMain ? 'var(--accent-color)' : '#333'}">${sp.isMain ? '大号' : `小号 ${idx}`}</strong>
+                                ${!sp.isMain ? `<button class="sort-btn-mini" style="color:#e74c3c;" onclick="document.getElementById('btn-del-sp-${idx}').click()">删除</button><button id="btn-del-sp-${idx}" style="display:none;" data-idx="${idx}" class="del-sp-btn"></button>` : ''}
+                            </div>
+                            <div class="form-group" style="margin-bottom:5px;">
+                                <input type="text" class="sp-name" data-idx="${idx}" value="${sp.name}" placeholder="昵称" style="width:100%; border:none; border-bottom:1px solid #ddd; background:transparent;">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <input type="text" class="sp-bio" data-idx="${idx}" value="${sp.bio}" placeholder="人设/签名" style="width:100%; border:none; border-bottom:1px solid #ddd; background:transparent;">
+                            </div>
+                             <!-- 简单处理：头像暂时沿用角色头像或随机颜色，暂不提供独立上传 -->
+                        </div>
+                    `).join('');
+                };
+
+                const updateModal = () => {
+                    UIManager.showModal({
+                        title: `设置马甲 (${contact.name})`,
+                        body: `
+                            <div id="sp-list-container" style="max-height:50vh; overflow-y:auto;">${renderSockpuppets()}</div>
+                            ${reg.sockpuppets.length < 4 ? `<button class="modal-btn btn-secondary" style="width:100%; margin-top:10px;" id="add-sp-btn">+ 添加小号</button>` : ''}
+                        `,
+                        actions: [
+                            { text: '取消', class: 'btn-secondary', handler: () => { UIManager.hideModal(); this.showResidentManagementModal(); } },
+                            { text: '保存', class: 'btn-primary', handler: async () => {
+                                // 收集数据
+                                const names = $$('.sp-name');
+                                const bios = $$('.sp-bio');
+                                names.forEach(input => {
+                                    const idx = parseInt(input.dataset.idx);
+                                    reg.sockpuppets[idx].name = input.value.trim();
+                                });
+                                bios.forEach(input => {
+                                    const idx = parseInt(input.dataset.idx);
+                                    reg.sockpuppets[idx].bio = input.value.trim();
+                                });
+                                await DBHelper.put('forumRegistrations', reg);
+                                UIManager.hideModal();
+                                this.showResidentManagementModal();
+                            }}
+                        ]
+                    });
+                    
+                    // 绑定删除
+                    $$('.del-sp-btn').forEach(btn => {
+                        btn.onclick = () => {
+                            const idx = parseInt(btn.dataset.idx);
+                            reg.sockpuppets.splice(idx, 1);
+                            updateModal();
+                        };
+                    });
+
+                    const addBtn = $('#add-sp-btn');
+                    if (addBtn) addBtn.onclick = () => {
+                        reg.sockpuppets.push({
+                            name: `小号${reg.sockpuppets.length}`,
+                            avatar: Utils.createAvatarDataUrl(Utils.getRandomColor()),
+                            bio: '神秘的路人',
+                            isMain: false
+                        });
+                        updateModal();
+                    };
+                };
+                
+                updateModal();
+            },
+
+            // --- 账号管理 ---
+            async renderUserPage() {
+                const list = $('#infinity-account-list');
+                list.innerHTML = '';
+                
+                const accounts = await DBHelper.getAll('forumAccounts');
+                // 确保有大号
+                const profile = await DBHelper.get('profile', 'myProfile');
+                const mainAccount = accounts.find(a => a.isMain);
+                
+                if (!mainAccount) {
+                    const newMain = {
+                        id: 'main_player',
+                        isPlayer: true,
+                        isMain: true,
+                        nickname: profile.name,
+                        avatar: profile.avatar,
+                        bio: '这是我的大号'
+                    };
+                    await DBHelper.put('forumAccounts', newMain);
+                    accounts.unshift(newMain);
+                    this.currentPlayerAccountId = newMain.id;
+                } else if (!this.currentPlayerAccountId) {
+                    this.currentPlayerAccountId = mainAccount.id;
+                }
+                
+                list.innerHTML = accounts.map(acc => `
+                    <div class="ios-list-item ${this.currentPlayerAccountId === acc.id ? 'selected' : ''}" data-id="${acc.id}" style="cursor:pointer; background: ${this.currentPlayerAccountId === acc.id ? '#eef4ff' : 'white'};">
+                        ${!acc.isMain ? '<div class="delete-indicator"><i class="fas fa-minus-circle"></i></div>' : ''}
+                        <img src="${acc.avatar}" style="width:40px; height:40px; border-radius:50%; margin-right:10px;">
+                        <div class="ios-list-content">
+                            <div class="ios-list-title">${acc.nickname} ${acc.isMain ? '<span style="font-size:0.7rem; color:var(--accent-color); border:1px solid var(--accent-color); padding:1px 4px; border-radius:4px;">大号</span>' : ''}</div>
+                            <div class="ios-list-subtitle">${acc.bio}</div>
+                        </div>
+                        ${this.currentPlayerAccountId === acc.id ? '<i class="fas fa-check" style="color:var(--accent-color);"></i>' : ''}
+                    </div>
+                `).join('');
+            },
+            
+            async switchAccount(accId) {
+                this.currentPlayerAccountId = accId;
+                this.renderUserPage();
+            },
+
+            async showAddAccountModal() {
+                 UIManager.showModal({
+                    title: "添加马甲账号",
+                    body: `
+                        <div class="form-group"><label>昵称</label><input type="text" id="acc-nickname"></div>
+                        <div class="form-group"><label>个签</label><input type="text" id="acc-bio" placeholder="随便写点什么"></div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '添加', class: 'btn-primary', handler: async () => {
+                            const nickname = $('#acc-nickname').value.trim();
+                            if (!nickname) return;
+                            const newAcc = {
+                                id: Utils.generateId('user'),
+                                isPlayer: true,
+                                isMain: false,
+                                nickname: nickname,
+                                avatar: Utils.createAvatarDataUrl(Utils.getRandomColor()),
+                                bio: $('#acc-bio').value.trim()
+                            };
+                            await DBHelper.put('forumAccounts', newAcc);
+                            UIManager.hideModal();
+                            this.renderUserPage();
+                        }}
+                    ]
+                 });
+            },
+
+            async deleteAccount(accId) {
+                await DBHelper.delete('forumAccounts', accId);
+                if (this.currentPlayerAccountId === accId) {
+                    this.currentPlayerAccountId = 'main_player'; // 这里的逻辑假设 main_player 始终存在
+                }
+                this.renderUserPage();
+            },
+            
+            // --- 发帖 & 刷新 ---
+            async showPostThreadModal() {
+                const account = await DBHelper.get('forumAccounts', this.currentPlayerAccountId);
+                UIManager.showModal({
+                    title: `发布新帖 (${account.nickname})`,
+                    body: `
+                        <div class="form-group"><input type="text" id="new-thread-title" placeholder="标题" style="font-weight:bold;"></div>
+                        <div class="form-group"><textarea id="new-thread-content" rows="6" placeholder="分享你的想法..."></textarea></div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '发布', class: 'btn-primary', handler: async () => {
+                            const title = $('#new-thread-title').value.trim();
+                            const content = $('#new-thread-content').value.trim();
+                            if(!title || !content) return UIManager.showToast("标题和内容不能为空");
+                            
+                            const thread = {
+                                id: Utils.generateId('thread'),
+                                boardId: this.currentBoardId,
+                                authorName: account.nickname,
+                                authorAvatar: account.avatar,
+                                authorId: account.id,
+                                isPlayer: true,
+                                title, content,
+                                timestamp: Date.now(),
+                                likes: 0,
+                                comments: []
+                            };
+                            await DBHelper.put('forumThreads', thread);
+                            UIManager.hideModal();
+                            this.renderThreadList(this.currentBoardId);
+                        }}
+                    ]
+                });
+            },
+
+            async showRefreshConfigModal() {
+                // 获取入驻角色
+                const regs = (await DBHelper.getAll('forumRegistrations')).filter(r => r.boardId === this.currentBoardId);
+                const allContacts = await DBHelper.getAll('contacts');
+                
+                const residentsHtml = regs.map(r => {
+                    const c = allContacts.find(co => co.id === r.contactId);
+                    if(!c) return '';
+                    return `<label class="member-select-item"><input type="checkbox" name="refresh-resident" value="${r.id}" checked> ${c.name}</label>`;
+                }).join('');
+
+                UIManager.showModal({
+                    title: "AI 生成帖子",
+                    body: `
+                        <div class="form-group">
+                            <label>生成数量 (至少1)</label>
+                            <input type="number" id="refresh-count" value="3" min="1" max="10">
+                        </div>
+                        <div class="form-group">
+                            <label>参与发帖的角色 (入驻角色)</label>
+                            <div class="member-select-list" style="max-height:150px;">${residentsHtml || '暂无入驻角色，将生成路人贴'}</div>
+                        </div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '生成', class: 'btn-primary', handler: () => {
+                            const count = parseInt($('#refresh-count').value) || 1;
+                            const selectedRegIds = [...$$('input[name="refresh-resident"]:checked')].map(cb => cb.value);
+                            UIManager.hideModal();
+                            this.executeRefresh(count, selectedRegIds);
+                        }}
+                    ]
+                });
+            },
+
+            async executeRefresh(count, selectedRegIds) {
+                UIManager.showToast("正在生成帖子，请稍候...");
+                const board = await DBHelper.get('forumBoards', this.currentBoardId);
+                const regs = await Promise.all(selectedRegIds.map(id => DBHelper.get('forumRegistrations', id)));
+                
+                // 获取FAB图标元素以便更改状态
+                const fabIcon = $('#infinity-fab i');
+                if (fabIcon) {
+                    fabIcon.className = 'fas fa-spinner fa-spin'; // 切换为加载中
+                }
+
+                // 构建 Prompt
+                let residentsInfo = "";
+                for (let reg of regs) {
+                    const contact = await DBHelper.get('contacts', reg.contactId);
+                    
+                    // 获取最近聊天记录 (记忆互通)
+                    const myProfile = await EventManager.getPlayerProfileForContext(contact.id); // 简化
+                    const allContacts = await DBHelper.getAll('contacts');
+                    const historyMsgs = await DBHelper.getMessages(contact.id, 10);
+                    const history = AIHandler.buildTurnsFromHistory(historyMsgs, allContacts, myProfile).slice(-3).map(t=>JSON.stringify(t)).join('\n');
+                    
+                    const puppets = reg.sockpuppets.map(sp => `${sp.name}(${sp.isMain?'大号':'小号'}, 人设:${sp.bio})`).join('; ');
+                    residentsInfo += `\n- 角色:${contact.name}, 设定:${contact.background}, 马甲:[${puppets}]。\n  最近聊天状态参考:\n${history}\n`;
+                }
+                
+                // 绑定提示词
+                let boundPrompts = "";
+                if (board.boundPromptFolderIds && board.boundPromptFolderIds.length > 0) {
+                     const allPrompts = await DBHelper.getAll('prompts');
+                     boundPrompts = allPrompts.filter(p => board.boundPromptFolderIds.includes(p.folderId) && p.isActive).map(p=>p.content).join('\n');
+                }
+
+                const prompt = `
+你是一个论坛帖子生成器。当前论坛版块是“${board.name}”，世界观/背景是：“${board.description}”。
+你需要生成 ${count} 个帖子。
+
+**已入驻角色信息（可选使用）：**
+${residentsInfo}
+
+**生成规则：**
+1. 请从入驻角色中随机选择几位发帖（可以使用他们的大号或小号），也可以生成一些符合世界观的“路人”发帖。
+2. 帖子内容要符合版块世界观和角色当下状态（参考最近聊天记录）。
+3. 如果是入驻角色发帖，"authorId" 必须填入该角色的 contactId (即信息中的角色ID，如 "char-xxxx")，"identityIndex" 填入马甲在列表中的索引(0是第一个/大号, 1是第二个等)。如果是路人，authorId 填 "npc"。
+4. 必须返回严格的 JSON 数组格式。
+
+**JSON 格式示例：**
+[
+  {
+    "title": "帖子标题",
+    "content": "帖子正文内容...",
+    "authorName": "马甲昵称",
+    "authorId": "char-12345", 
+    "identityIndex": 0,
+    "likes": 5,
+    "commentsCount": 2
+  },
+  {
+    "title": "另一个路人贴",
+    "content": "...",
+    "authorName": "路人甲",
+    "authorId": "npc",
+    "identityIndex": -1,
+    "likes": 12,
+    "commentsCount": 0
+  }
+]
+
+${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
+`;
+                // --- 修复：添加打印语句 ---
+                console.log("--- INFINITY THREAD REFRESH PROMPT ---\n", prompt);
+
+                try {
+                    const response = await AIHandler.getApiResponse(prompt, null, new AbortController().signal);
+                    const jsonStr = response.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const threadsData = JSON.parse(jsonStr);
+                    
+                    if (Array.isArray(threadsData)) {
+                        // 预先获取绑定的头像资源 (只获取列表，不转换URL)
+                        let availableAssets = [];
+                        if (board.boundAvatarAlbumId) {
+                            availableAssets = await PhotosManager.getAssetsByAlbum(board.boundAvatarAlbumId);
+                        }
+                        const defaultGrayAvatar = "https://raw.githubusercontent.com/rain1593/rain/img/user_grey.png";
+                        // 新增：默认头像的特殊ID
+                        const defaultAssetId = 'default_forum_avatar';
+
+                        for (let tData of threadsData) {
+                            let avatar = defaultGrayAvatar;
+                            // 修改：默认为特殊ID，如果后面随机到了相册或匹配到大号，再覆盖
+                            let avatarAssetId = defaultAssetId; 
+
+                            // 1. 如果是NPC，且有绑定相册，随机选一个
+                            if (availableAssets.length > 0) {
+                                const randomAsset = availableAssets[Math.floor(Math.random() * availableAssets.length)];
+                                if (randomAsset.type === 'url') {
+                                    avatar = randomAsset.content; // 网络图片直接存URL
+                                    avatarAssetId = null; // 网络图片不需要AssetId
+                                } else {
+                                    avatarAssetId = randomAsset.id; // 本地图片只存ID，显示时异步加载
+                                    avatar = defaultGrayAvatar; // 先显示默认，避免broken image
+                                }
+                            }
+
+                            // 2. 尝试匹配入驻角色的真实头像 (优先级最高)
+                            if (tData.authorId !== 'npc') {
+                                const reg = regs.find(r => r.contactId === tData.authorId);
+                                if (reg && reg.sockpuppets[tData.identityIndex]) {
+                                    const contact = await DBHelper.get('contacts', reg.contactId);
+                                    // 大号用真实头像，小号如果绑定了相册用随机头像(上面已生成)，没绑定用默认
+                                    // 这里逻辑：如果是大号，强制使用角色头像覆盖
+                                    if (contact && reg.sockpuppets[tData.identityIndex].isMain) {
+                                        avatar = contact.avatar;
+                                        avatarAssetId = null; // 清除AssetID引用，因为直接存了Base64在avatar里
+                                    }
+                                    tData.authorName = reg.sockpuppets[tData.identityIndex].name;
+                                }
+                            }
+                            
+                            const newThread = {
+                                id: Utils.generateId('thread'),
+                                boardId: this.currentBoardId,
+                                authorName: tData.authorName,
+                                authorAvatar: avatar,
+                                authorAvatarAssetId: avatarAssetId, // 保存资源ID (可能是 specific_id 或 default_forum_avatar)
+                                authorId: tData.authorId,
+                                identityIndex: tData.identityIndex,
+                                isPlayer: false,
+                                title: tData.title,
+                                content: tData.content,
+                                timestamp: Date.now(),
+                                likes: tData.likes || 0,
+                                comments: [] 
+                            };
+                            await DBHelper.put('forumThreads', newThread);
+                        }
+                        this.renderThreadList(this.currentBoardId);
+                        UIManager.showToast(`已生成 ${threadsData.length} 个新帖`);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    UIManager.showToast("生成失败，请检查API配置");
+                } finally {
+                    // 恢复图标状态
+                    if (fabIcon) {
+                        fabIcon.className = 'fas fa-plus';
+                    }
+                }
+            },
+
+            
+            // --- 详情 & 回复 ---
+            async openThread(threadId) {
+                this.currentThreadId = threadId;
+                this.currentReplyTarget = null; // 新增：进入新帖子时重置回复对象，防止串台
+                const thread = await DBHelper.get('forumThreads', threadId);
+                if (!thread) return;
+
+                if (!this.currentPlayerAccountId) {
+                    const accounts = await DBHelper.getAll('forumAccounts');
+                    const mainAccount = accounts.find(a => a.isMain);
+                    if (mainAccount) {
+                        this.currentPlayerAccountId = mainAccount.id;
+                    } else {
+                        const profile = await DBHelper.get('profile', 'myProfile');
+                        const newMain = {
+                            id: 'main_player', isPlayer: true, isMain: true,
+                            nickname: profile.name, avatar: profile.avatar, bio: '这是我的大号'
+                        };
+                        await DBHelper.put('forumAccounts', newMain);
+                        this.currentPlayerAccountId = newMain.id;
+                    }
+                }
+                const currentAccount = await DBHelper.get('forumAccounts', this.currentPlayerAccountId);
+
+                $('#infinity-view-board').classList.remove('active');
+                $('#infinity-view-thread').classList.add('active');
+                
+                $('#page-infinity-app').classList.add('hide-bottom-nav');
+
+                const navBar = $('#infinity-view-thread .prompts-nav-bar');
+                navBar.innerHTML = `
+                    <button class="prompts-nav-btn" id="infinity-thread-back-btn"><i class="fas fa-chevron-left"></i> 返回</button>
+                    <div class="prompts-nav-title">帖子详情</div>
+                    <div class="prompts-nav-actions">
+                         <button class="prompts-nav-btn" id="infinity-thread-refresh-btn" title="AI生成新评论"><i class="fas fa-sync-alt"></i></button>
+                         <button class="prompts-nav-btn" id="infinity-thread-manage-btn" title="管理"><i class="fas fa-ellipsis-h"></i></button>
+                    </div>
+                `;
+                
+                $('#infinity-thread-back-btn').onclick = () => {
+                    $('#infinity-view-thread').classList.remove('active');
+                    $('#page-infinity-app').classList.remove('hide-bottom-nav'); 
+                    $('#infinity-view-board').classList.add('active');
+                    this.renderThreadList(this.currentBoardId);
+                };
+                
+                $('#infinity-thread-refresh-btn').onclick = () => this.handleRefreshComments(threadId);
+                
+                // 新增：帖子管理菜单
+                $('#infinity-thread-manage-btn').onclick = () => this.showThreadManagementMenu(threadId);
+
+
+                const container = $('#infinity-thread-content');
+                
+                const opHtml = `
+                    <div class="thread-detail-op">
+                        <div class="thread-title" style="font-size:1.3rem; margin-bottom:15px; line-height:1.4;">${thread.title}</div>
+                        <div class="thread-op-header">
+                            <img src="${thread.authorAvatar}" data-asset-id="${thread.authorAvatarAssetId || ''}" class="thread-op-avatar lazy-avatar">
+                            <div class="thread-op-info">
+                                <div class="name">${thread.authorName}</div>
+                                <div class="meta">楼主 · ${Utils.formatTimestampSmartly(thread.timestamp)}</div>
+                            </div>
+                        </div>
+                        <div class="thread-op-content">${thread.content}</div>
+                        <div class="thread-meta" style="margin-top:20px; justify-content:flex-end; border-top: 1px solid #eee; padding-top:10px;">
+                             <span style="display:flex; align-items:center; gap:5px; color:#e74c3c;"><i class="fas fa-fire"></i> ${thread.likes} 热度</span>
+                        </div>
+                    </div>
+                    <div class="thread-comments-area" id="inf-comments-list" style="padding-top: 10px;">
+                    </div>
+                `;
+                container.innerHTML = opHtml;
+                // 加载楼主头像
+                this.loadLazyAvatars(container);
+                
+                this.renderComments(thread);
+                
+                // --- 核心修复：同时尝试移除旧的 chat-input-area 和 infinity-input-area ---
+                // 这样既能移除HTML初始的占位符，也能移除上次 JS 生成的输入框，防止ID冲突
+                const oldInputArea1 = $('#infinity-view-thread .chat-input-area');
+                if(oldInputArea1) oldInputArea1.remove(); 
+                const oldInputArea2 = $('#infinity-view-thread .infinity-input-area');
+                if(oldInputArea2) oldInputArea2.remove();
+
+                const newInputArea = document.createElement('div');
+                newInputArea.className = 'infinity-input-area';
+                newInputArea.innerHTML = `
+                    <div class="infinity-identity-tag">正在使用身份：${currentAccount.nickname}</div>
+                    <div class="infinity-input-row">
+                        <textarea id="infinity-reply-input" placeholder="说点什么..." rows="1"></textarea>
+                        <button id="infinity-reply-btn" class="infinity-send-btn">发送</button>
+                    </div>
+                `;
+                $('#infinity-view-thread').appendChild(newInputArea);
+
+                const textarea = newInputArea.querySelector('textarea');
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+                
+                newInputArea.querySelector('#infinity-reply-btn').onclick = () => this.handleReply();
+            },
+
+            renderComments(thread) {
+                const list = $('#inf-comments-list');
+                if (!thread.comments || thread.comments.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:30px; color:#ccc;">快来抢沙发吧~</div>`;
+                    return;
+                }
+                
+                list.innerHTML = thread.comments.map((c, idx) => {
+                    const replyInfo = c.replyTo 
+                        ? `<span class="thread-reply-target">回复 ${c.replyTo}：</span>` 
+                        : '';
+                    const likeCount = c.likes || 0;
+                    const isLiked = c.isLikedByPlayer || false; 
+                    
+                    return `
+                    <div class="thread-comment-refined" data-id="${c.id}" data-idx="${idx}">
+                        <img src="${c.authorAvatar}" data-asset-id="${c.authorAvatarAssetId || ''}" class="thread-comment-avatar lazy-avatar">
+                        <div class="thread-comment-main">
+                            <div class="thread-comment-user-row">
+                                <span class="thread-comment-nickname">${c.authorName}</span>
+                                <span class="thread-comment-floor">${idx + 1}楼</span>
+                            </div>
+                            <div class="thread-comment-content">${replyInfo}${c.content}</div>
+                            <div class="thread-comment-footer">
+                                <span style="margin-right:auto;">${Utils.formatTimestampSmartly(c.timestamp)}</span>
+                                <span class="thread-comment-action like-btn ${isLiked ? 'liked' : ''}"><i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${likeCount || '赞'}</span>
+                                <span class="thread-comment-action reply-btn"><i class="far fa-comment-dots"></i> 回复</span>
+                            </div>
+                        </div>
+                    </div>
+                `}).join('');
+                
+                this.loadLazyAvatars(list);
+
+                list.querySelectorAll('.reply-btn').forEach(btn => {
+                    btn.onclick = (e) => {
+                        const item = e.target.closest('.thread-comment-refined');
+                        const name = item.querySelector('.thread-comment-nickname').textContent;
+                        this.activateReplyMode(name);
+                    };
+                });
+
+                list.querySelectorAll('.like-btn').forEach(btn => {
+                    btn.onclick = (e) => {
+                        const item = e.target.closest('.thread-comment-refined');
+                        const idx = parseInt(item.dataset.idx);
+                        this.handleCommentLike(thread.id, idx);
+                    };
+                });
+            },
+
+            async loadLazyAvatars(container) {
+                const lazyImgs = container.querySelectorAll('img.lazy-avatar[data-asset-id]');
+                if (lazyImgs.length === 0) return;
+
+                // 收集所有ID去重
+                const assetIds = new Set();
+                lazyImgs.forEach(img => {
+                    if(img.dataset.assetId) assetIds.add(img.dataset.assetId);
+                });
+
+                // 批量获取 (虽然DBHelper.get是单个，但可以并行)
+                const assets = {};
+                await Promise.all(Array.from(assetIds).map(async (id) => {
+                    const asset = await DBHelper.get('photoAssets', id);
+                    if (asset) assets[id] = asset;
+                }));
+
+                // 应用
+                lazyImgs.forEach(img => {
+                    const id = img.dataset.assetId;
+                    if (id && assets[id]) {
+                        if (assets[id].type === 'blob') {
+                            img.src = URL.createObjectURL(assets[id].content);
+                        } else if (assets[id].type === 'url') {
+                            img.src = assets[id].content;
+                        }
+                    }
+                });
+            },
+
+            activateReplyMode(replyToName) {
+                const input = $('#infinity-reply-input');
+                // 优化：使用 closest 确保操作的是当前输入框所在的父级元素
+                const row = input.closest('.infinity-input-row');
+                
+                // 核心逻辑：如果当前已经是在回复这个人，则取消回复状态
+                if (this.currentReplyTarget === replyToName) {
+                    this.currentReplyTarget = null;
+                    input.placeholder = '说点什么...';
+                    row.classList.remove('replying');
+                } else {
+                    // 否则，切换为回复这个人
+                    this.currentReplyTarget = replyToName; 
+                    input.placeholder = `回复 ${replyToName}：`;
+                    input.focus();
+                    row.classList.add('replying');
+                }
+            },
+
+            async handleCommentLike(threadId, commentIdx) {
+                const thread = await DBHelper.get('forumThreads', threadId);
+                if (thread && thread.comments && thread.comments[commentIdx]) {
+                    const comment = thread.comments[commentIdx];
+                    if (!comment.isLikedByPlayer) {
+                        comment.likes = (comment.likes || 0) + 1;
+                        comment.isLikedByPlayer = true;
+                        UIManager.showToast("点赞成功");
+                    } else {
+                        comment.likes = Math.max(0, (comment.likes || 1) - 1);
+                        comment.isLikedByPlayer = false;
+                    }
+                    await DBHelper.put('forumThreads', thread);
+                    this.renderComments(thread); // 局部刷新太复杂，直接重绘评论区
+                }
+            },
+
+            async handleReply() {
+                const input = $('#infinity-reply-input');
+                const content = input.value.trim();
+                if (!content) return UIManager.showToast("请输入内容");
+                
+                const account = await DBHelper.get('forumAccounts', this.currentPlayerAccountId);
+                const thread = await DBHelper.get('forumThreads', this.currentThreadId);
+                
+                const newComment = {
+                    id: Utils.generateId('comment'),
+                    authorName: account.nickname,
+                    authorAvatar: account.avatar,
+                    authorId: account.id, // 玩家账号ID
+                    isPlayer: true,
+                    content: content,
+                    replyTo: this.currentReplyTarget || null, // 使用存储的回复对象
+                    timestamp: Date.now(),
+                    likes: 0
+                };
+                
+                if (!thread.comments) thread.comments = [];
+                thread.comments.push(newComment);
+                await DBHelper.put('forumThreads', thread);
+                
+                this.renderComments(thread);
+                
+                // 重置输入状态
+                input.value = '';
+                input.placeholder = '说点什么...';
+                input.style.height = 'auto';
+                this.currentReplyTarget = null;
+                $('.infinity-input-row').classList.remove('replying');
+                
+                UIManager.showToast("发送成功");
+            },
+
+            async handleRefreshComments(threadId) {
+                if (AIHandler.isAwaitingResponse) return UIManager.showToast("AI正在忙碌中...");
+
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "更新评论区",
+                    body: `
+                        <div class="form-group">
+                            <label>生成评论数量</label>
+                            <input type="number" id="inf-comment-gen-count" value="3" min="1" max="8" style="text-align:center;">
+                        </div>
+                        <p style="font-size:0.8rem; color:#888; text-align:center;">AI将根据帖子内容和现有评论，生成路人或入驻角色的新回复。</p>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '生成', class: 'btn-primary', handler: async () => {
+                            const count = parseInt($('#inf-comment-gen-count').value) || 3;
+                            UIManager.hideModal();
+                            this.executeCommentGeneration(threadId, count);
+                        }}
+                    ]
+                });
+            },
+
+
+            showThreadManagementMenu(threadId) {
+                UIManager.showBottomSheet({
+                    title: '帖子管理',
+                    customClass: 'ios-style',
+                    items: [
+                        { value: 'summary', text: 'AI 总结与感知设置' },
+                        { value: 'delete', text: '删除帖子' }
+                    ],
+                    onSelect: (value) => {
+                        if (value === 'delete') {
+                            UIManager.showModal({
+                                title: '删除帖子',
+                                body: '<p>确定要删除这个帖子吗？</p>',
+                                actions: [
+                                    { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                                    { text: '删除', class: 'btn-danger', handler: async () => {
+                                        await DBHelper.delete('forumThreads', threadId);
+                                        UIManager.hideModal();
+                                        $('#infinity-thread-back-btn').click(); // 返回列表
+                                    }}
+                                ]
+                            });
+                        } else if (value === 'summary') {
+                            this.handleThreadSummary(threadId);
+                        }
+                    }
+                });
+            },
+
+            async handleThreadSummary(threadId) {
+                const thread = await DBHelper.get('forumThreads', threadId);
+                if (!thread) return;
+
+                const existingSummary = thread.summary || '';
+                const useSummary = thread.useSummaryForPerception || false;
+
+                const renderSummaryModal = (summaryText, isThinking = false) => {
+                    const statusHtml = isThinking ? 
+                        `<div style="text-align:center; color:#999; margin:10px 0;"><i class="fas fa-spinner fa-spin"></i> AI正在阅读帖子并总结...</div>` : '';
+                    
+                    UIManager.showModal({
+                        title: "帖子总结与感知",
+                        body: `
+                            <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">
+                                总结内容将用于聊天时让AI角色感知自己发过的贴。当评论区过长时，推荐开启总结以节省Token。
+                            </p>
+                            <div class="form-group" style="display:flex; justify-content:space-between; align-items:center;">
+                                <label style="margin:0;">聊天时使用总结代替原文</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="use-summary-switch" ${useSummary ? 'checked' : ''}>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>总结内容 (可编辑)</label>
+                                <textarea id="thread-summary-input" rows="8" placeholder="点击下方按钮生成..." ${isThinking?'disabled':''}>${summaryText}</textarea>
+                            </div>
+                            ${statusHtml}
+                        `,
+                        actions: [
+                            { text: '生成/重新生成', class: 'btn-secondary', handler: async () => {
+                                if (isThinking) return;
+                                UIManager.hideModal();
+                                renderSummaryModal(summaryText, true); // 显示loading状态
+                                
+                                const board = await DBHelper.get('forumBoards', thread.boardId);
+                                const commentsText = (thread.comments || []).map(c => `${c.authorName}: ${c.content}`).join('\n');
+                                const prompt = `请对以下论坛帖子进行精炼总结。
+帖子标题：${thread.title}
+帖子内容：${thread.content}
+评论区内容：
+${commentsText.substring(0, 2000)} (截取部分)
+
+要求：
+1. 概括帖子核心话题。
+2. 总结评论区的主要观点、争议点或有趣回复。
+3. 200字以内。`;
+                                
+                                try {
+                                    const aiSummary = await AIHandler.getApiResponse(prompt, null, new AbortController().signal);
+                                    renderSummaryModal(aiSummary.trim(), false); // 刷新显示结果
+                                } catch(e) {
+                                    UIManager.showToast("生成失败: " + e.message);
+                                    renderSummaryModal(summaryText, false);
+                                }
+                            }},
+                            { text: '保存设置', class: 'btn-primary', handler: async () => {
+                                const newSummary = $('#thread-summary-input').value.trim();
+                                const newUseSummary = $('#use-summary-switch').checked;
+                                
+                                thread.summary = newSummary;
+                                thread.useSummaryForPerception = newUseSummary;
+                                await DBHelper.put('forumThreads', thread);
+                                
+                                UIManager.hideModal();
+                                UIManager.showToast("设置已保存");
+                            }}
+                        ]
+                    });
+                };
+                
+                renderSummaryModal(existingSummary);
+            },
+            
+            async executeCommentGeneration(threadId, count) {
+                const thread = await DBHelper.get('forumThreads', threadId);
+                const board = await DBHelper.get('forumBoards', thread.boardId);
+                const account = await DBHelper.get('forumAccounts', this.currentPlayerAccountId);
+                
+                // 获取已有评论作为上下文
+                const existingComments = (thread.comments || []).slice(-10).map(c => 
+                    `${c.authorName}: ${c.content}`
+                ).join('\n');
+
+                const prompt = `
+你是一个拟真的论坛评论区生成器。
+**当前帖子信息：**
+- 版块：${board.name} (世界观: ${board.description})
+- 标题：${thread.title}
+- 正文：${thread.content}
+- 楼主：${thread.authorName}
+
+**已有评论参考：**
+${existingComments || "(暂无评论)"}
+
+**任务：**
+请至少生成 ${count} 条新的评论。
+1. **角色多样性**：生成的评论者可以是“路人NPC”，也可以是符合世界观的特定角色。请赋予他们不同的身份
+2. **语言风格多样性**：评论风格多元化，可以是暴躁、阴阳怪气、萌新甚至弱智的回复、专业大佬；不同的语言打字习惯，如习惯在句末加句号、用句号代替省略号、用一些最近在社媒（如抖音、小红书）上很火的梗。允许个别评论出现几个错字增加活人感（评论的人可能会及时纠正，也可能会被其他评论纠正/嘲讽/忽略)
+3. **内容真实性**：评论可以是对楼主的回答、质疑、嘲讽，也可以是**回复楼里的其他人**（互怼或互动）。允许出现极少量的“广告”或“歪楼”内容，模拟真实互联网环境。
+4. **推进讨论**：评论应尽量围绕话题展开，或者引发新的争议点。
+5. **禁忌**：**绝对禁止**生成玩家当前使用的账号“${account.nickname}”的评论。
+
+**返回格式：**
+严格返回 JSON 数组，每个对象包含：
+- "nickname": 昵称
+- "content": 评论内容 (如果是回复某人，内容里不要带"回复xxx"，请放在replyTo字段)
+- "replyTo": 回复对象的昵称 (如果是直接回复楼主，此字段为空字符串或null)
+- "isSpecial": boolean (是否为特殊性格/入驻角色，仅作参考)
+
+**JSON示例：**
+[
+  {"nickname": "暴躁老哥", "content": "楼主纯属扯淡，鉴定完毕。", "replyTo": null},
+  {"nickname": "萌新求带", "content": "真的吗？我也想试试哎！", "replyTo": "暴躁老哥"},
+  {"nickname": "理中客", "content": "有一说一，这件事需要辩证看待...", "replyTo": null}
+]
+`;
+                
+                // --- 修复：添加打印语句 ---
+                console.log("--- INFINITY COMMENT GENERATION PROMPT ---\n", prompt);
+
+                const btn = $('#infinity-thread-refresh-btn i');
+                btn.className = 'fas fa-spinner fa-spin';
+
+                try {
+                    const response = await AIHandler.getApiResponse(prompt, null, new AbortController().signal);
+                    const jsonStr = response.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const newCommentsData = JSON.parse(jsonStr);
+                    
+                    if (Array.isArray(newCommentsData)) {
+                        // 获取头像逻辑
+                        let availableAssets = [];
+                        if (board && board.boundAvatarAlbumId) {
+                            availableAssets = await PhotosManager.getAssetsByAlbum(board.boundAvatarAlbumId);
+                        }
+                        const defaultGrayAvatar = "https://raw.githubusercontent.com/rain1593/rain/img/user_grey.png";
+                        const defaultAssetId = 'default_forum_avatar';
+
+                        const newComments = newCommentsData.map(c => {
+                            let avatar = defaultGrayAvatar;
+                            // 修改：默认为特殊ID
+                            let avatarAssetId = defaultAssetId;
+
+                            if (availableAssets.length > 0) {
+                                const randomAsset = availableAssets[Math.floor(Math.random() * availableAssets.length)];
+                                if (randomAsset.type === 'url') {
+                                    avatar = randomAsset.content;
+                                    avatarAssetId = null; // 网络图片不需要ID
+                                } else {
+                                    avatarAssetId = randomAsset.id;
+                                    avatar = defaultGrayAvatar;
+                                }
+                            }
+                            
+                            return {
+                                id: Utils.generateId('comment'),
+                                authorName: c.nickname,
+                                authorAvatar: avatar,
+                                authorAvatarAssetId: avatarAssetId, // 保存资源ID
+                                authorId: 'npc', 
+                                isPlayer: false,
+                                content: c.content,
+                                replyTo: c.replyTo || null,
+                                timestamp: Date.now() + Math.floor(Math.random() * 60000)
+                            };
+                        });
+                        
+                        if (!thread.comments) thread.comments = [];
+                        thread.comments.push(...newComments);
+                        await DBHelper.put('forumThreads', thread);
+                        
+                        this.renderComments(thread);
+                        UIManager.showToast(`已更新 ${newComments.length} 条评论`);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    UIManager.showToast("生成评论失败");
+                } finally {
+                    btn.className = 'fas fa-sync-alt';
+                }
+            },
         };
 
         const EventManager = {
@@ -27976,7 +30252,11 @@ async showMomentsSettingsModal() {
                 } else if (type === 'time') {
                     const updateTime = () => {
                         const now = new Date();
-                        const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+                        // 核心修复：手动格式化时间，强制 24小时制并补零 (00:46)
+                        const hours = String(now.getHours()).padStart(2, '0');
+                        const minutes = String(now.getMinutes()).padStart(2, '0');
+                        const timeStr = `${hours}:${minutes}`;
+                        
                         const dateStr = now.toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' });
                         container.innerHTML = `
                             <div class="widget-time-container">
@@ -36002,6 +38282,14 @@ async showGiftDetailsModal(messageId) {
                             $('#bottom-nav').style.display = 'none';
                             HeartbeatAppManager.init();
                             HeartbeatAppManager.renderCharacterList();    
+                        } else if (pageId === 'infinity-app') { // 新增：无垠论坛
+                            Object.values(pages).forEach(p => p.classList.remove('active'));
+                            // 这里我们没有在 pages 对象里预定义 infinity，需要动态加或者上面定义
+                            // 建议在 pages 定义处添加 'infinity-app': $('#page-infinity-app')
+                            $('#page-infinity-app').classList.add('active');
+                            $('#bottom-nav').style.display = 'none';
+                            // 默认进入首页
+                            $('#infinity-bottom-nav .prompts-nav-tab[data-target="infinity-view-home"]').click();
                         } else if (pageId === 'prompts-app') { // 新增
                         Object.values(pages).forEach(p => p.classList.remove('active'));
                         $('#page-prompts-app').classList.add('active');
@@ -36040,9 +38328,10 @@ async showGiftDetailsModal(messageId) {
                         MyInfoManager.renderCurrentPersona();
                     });
                 }
-                
+
+                // 修改：打开无垠
+                forumBtn.addEventListener('click', () => openApp('infinity-app'));
                 // 其他占位
-                forumBtn.addEventListener('click', () => UIManager.showToast("论坛功能开发中..."));
                 if (smsBtn) smsBtn.addEventListener('click', () => UIManager.showToast("短信功能开发中..."));
 
                 // 返回桌面
@@ -36307,6 +38596,9 @@ async showGiftDetailsModal(messageId) {
 
                 // 新增：初始化线下模式管理器
                 OfflineModeManager.init();
+
+                // 新增：初始化无垠论坛管理器
+                InfinityManager.init();
                 
                 await UIManager.navigateTo('messages');
                 
