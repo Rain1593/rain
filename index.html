@@ -25,29 +25,9 @@
     </script>
     <!-- PWA 配置结束 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#F7F8FA">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="33phone">
-    <link rel="apple-touch-icon" href="icon.png">
-    <script>
-        // 注册 Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registered'))
-                    .catch(err => console.log('SW failed', err));
-            });
-        }
-    </script>
-    <!-- PWA 配置结束 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- 新增：引入 ID3 标签解析库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Long+Cang&display=swap" rel="stylesheet">
     <style>
@@ -77,7 +57,7 @@
             --text-color-light: #A39B94;
             --text-color-white: #FFFFFF;
             --custom-page-font-color: var(--text-color-dark); /* 新增：专门用于页面字体的颜色 */
-        --page-icon-color: var(--ui-button-active-color); /* 新增：专门用于页面图标的颜色 */
+            --page-icon-color: var(--ui-button-active-color); /* 新增：专门用于页面图标的颜色 */
             --bg-main: #F7F8FA; /* 改为柔和的浅灰色背景 */
             --bg-light: rgba(255, 255, 255, 0.7);
             --border-color: rgba(0, 0, 0, 0.08);
@@ -98,9 +78,8 @@
             --friend-bubble-bg: var(--text-color-white);  /* 好友消息背景色 (A类气泡) */
             --player-bubble-text-color: var(--text-color-dark); /* 我的消息字体颜色 */
             --friend-bubble-text-color: var(--text-color-dark);  /* 好友消息字体颜色 */
-        }
-        :root {
-            /* ... existing variables ... */
+
+            /* --- UI 变量 --- */
             --ui-bg-color: rgba(255, 255, 255, 0.5); /* 页面UI背景色 */
             --ui-texture-image: none; /* UI纹理图片 */
         }
@@ -463,13 +442,7 @@
             padding: 15px;
             -webkit-overflow-scrolling: touch;
         }
-        .page-content::-webkit-scrollbar {
-            width: 4px;
-        }
-        .page-content::-webkit-scrollbar-thumb {
-            background: var(--theme-color-4);
-            border-radius: 2px;
-        }
+        
         
         /* --- 3. 底部导航栏 --- */
         #bottom-nav {
@@ -999,15 +972,17 @@
             border: 1px solid var(--player-bubble-bg); /* 边框颜色由变量控制 */
             border-top-right-radius: 5px;
         }
-        #app-container.app-bubble-style-default .message-row.sent .quote-block {
+        /* 合并基础样式 */
+        #app-container.app-bubble-style-default .quote-block {
             background-color: rgba(0, 0, 0, 0.04);
-            border-color: var(--player-bubble-bg); 
             color: var(--text-color-dark);
         }
+        /* 分别设置边框颜色 */
+        #app-container.app-bubble-style-default .message-row.sent .quote-block {
+            border-color: var(--player-bubble-bg); 
+        }
         #app-container.app-bubble-style-default .message-row.received .quote-block {
-            background-color: rgba(0, 0, 0, 0.04);
             border-color: var(--friend-bubble-bg);
-            color: var(--text-color-dark);
         }
         #app-container.app-bubble-style-default .voice-wave-bar { background-color: var(--friend-bubble-text-color); }
         #app-container.app-bubble-style-default .message-row.sent .voice-wave-bar { background-color: var(--player-bubble-text-color); }
@@ -1362,8 +1337,13 @@
         .bubble-emoji img { max-width: 100%; display: block; border-radius: 12px; }
         .bubble.quote-message-bubble { display: flex; flex-direction: column; gap: 8px; }
         .bubble.image-with-desc-bubble { max-width: 160px; /* 稍微增大最大宽度以容纳长图 */ max-height: none; /* 移除固定的最大高度限制 */ padding: 5px; /* 增加一点内边距 */ display: flex; flex-direction: column; gap: 8px; }
-        .bubble.image-with-desc-bubble img { max-width: 100%; height: auto; /* 关键：让高度自适应宽度 */ border-radius: 8px; display: block; background-color: var(--theme-color-1); }
-        .bubble.image-with-desc-bubble img { max-width: 100%; border-radius: 8px; display: block; background-color: var(--theme-color-1); }
+        .bubble.image-with-desc-bubble img { 
+            max-width: 100%; 
+            height: auto; /* 关键：让高度自适应宽度 */ 
+            border-radius: 8px; 
+            display: block; 
+            background-color: var(--theme-color-1); 
+        }
         .bubble.image-with-desc-bubble .description-text { display: none; padding: 0 4px; font-size: 0.9rem; line-height: 1.5; color: var(--text-color-dark); }
         .bubble.voice-message-bubble {
             display: flex;
@@ -1476,16 +1456,21 @@
             margin: 5px 0;
         }
 
+        /* 统一滚动条样式 */
+        .page-content::-webkit-scrollbar,
         .chat-area::-webkit-scrollbar {
-            width: 6px;
+            width: 4px; /* 统一使用较细的滚动条 */
         }
+        .page-content::-webkit-scrollbar-track,
         .chat-area::-webkit-scrollbar-track {
             background: rgba(0,0,0,0.02);
         }
+        .page-content::-webkit-scrollbar-thumb,
         .chat-area::-webkit-scrollbar-thumb {
             background-color: var(--theme-color-4);
             border-radius: 3px;
         }
+        .page-content::-webkit-scrollbar-thumb:hover,
         .chat-area::-webkit-scrollbar-thumb:hover {
             background-color: var(--accent-color);
         }
