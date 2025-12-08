@@ -8763,6 +8763,16 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
     color: #ccc;
 }
 
+.op-badge {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 0.65rem;
+            padding: 1px 4px;
+            border-radius: 4px;
+            margin-left: 5px;
+            vertical-align: middle;
+            font-weight: normal;
+        }
 /* 修复：帖子详情主楼内容支持换行 */
 .thread-op-content {
     font-size: 1rem;
@@ -8915,6 +8925,31 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
         .thread-comment-action.liked {
             color: #e74c3c;
         }
+
+        /* --- 论坛新增样式 --- */
+.op-badge {
+    background: transparent;
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    font-size: 0.65rem;
+    padding: 0 4px;
+    border-radius: 4px;
+    margin-left: 6px;
+    font-weight: normal;
+    vertical-align: middle;
+}
+
+/* 允许论坛内容显示HTML (重置部分样式以防冲突) */
+.thread-op-content iframe, .thread-comment-content iframe,
+.thread-op-content video, .thread-comment-content video,
+.thread-op-content img, .thread-comment-content img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 5px 0;
+}
+.thread-op-content p, .thread-comment-content p {
+    margin-bottom: 0.5em;
+}
 </style>
 <style id="exclusive-bubble-style"></style>
 <style id="offline-custom-css"></style>
@@ -14969,7 +15004,8 @@ const instantReplyEnabled = localStorage.getItem('momentsInstantReply') !== 'fal
 
             async getGlobalPromptsForContext(context) {
                 const chatSettings = await DBHelper.get('apiConfig', 'chatSettings') || {};
-                if (chatSettings.globalPromptsEnabled !== true) {
+                // 修改逻辑：只有明确设置为 false 时才不显示，undefined (默认) 视为开启
+                if (chatSettings.globalPromptsEnabled === false) {
                     return '';
                 }
 
@@ -16796,17 +16832,12 @@ async buildSummaryPrompt(chatId, turnCount = null) {
                 
                 let turns = [];
                 
-                // 逻辑分支：如果有指定的 turnCount（手动模式），则按轮次获取
-                // 否则（自动模式），按之前的条数逻辑获取
                 if (turnCount) {
-                    // 为了凑够轮次，我们先获取足够多的原始消息（假设一轮平均5条消息，这里取3倍余量+保底）
                     const rawLimit = Math.max(200, turnCount * 10); 
                     const history = await DBHelper.getMessages(chatId, rawLimit);
                     const allTurns = this.buildTurnsFromHistory(history, allContacts, myProfile);
-                    // 截取指定的最近 N 轮
                     turns = allTurns.slice(-turnCount);
                 } else {
-                    // 自动模式：读取配置的条数
                     const chatSettings = await DBHelper.get('apiConfig', 'chatSettings') || {};
                     const summaryInterval = chatSettings.summaryMessageInterval || 200;
                     const history = await DBHelper.getMessages(chatId, summaryInterval);
@@ -16815,7 +16846,6 @@ async buildSummaryPrompt(chatId, turnCount = null) {
                 
                 if (turns.length === 0) return null;
                 
-                // 新的 Prompt 模板
                 const userSummaryPrompt = `
 <requirement>
 - 合并应当遵循以下原则：
@@ -16844,11 +16874,10 @@ async buildSummaryPrompt(chatId, turnCount = null) {
 
 请根据上述规则，对以下【待总结的聊天记录】进行总结。
 `;
-
+                // 新增：调用并置顶全局提示词 (context: 'summary')
                 const globalPromptsSection = await this.getGlobalPromptsForContext('summary');
 
                 let prompt = `${globalPromptsSection}\n\n${userSummaryPrompt}\n\n`;
-                // 这里不再限制字数，传入完整内容的 turns
                 prompt += `--- 待总结的聊天记录 (${turnCount ? `最近 ${turnCount} 轮` : '自动触发区间'}) ---\n${turns.map(turn => `[${turn.time}] ${turn.role}: ${turn.content}`).join('\n')}\n\n`;
 
                 return prompt;
@@ -23599,12 +23628,14 @@ ${globalPromptsSection}
             // --- 核心 Prompt 构建 (修正版) ---
             async buildOfflinePrompt() {
                 const contact = await DBHelper.get('contacts', this.currentTargetId);
-                // 修改：使用 getPlayerProfileForContext 获取可能绑定的玩家人设
                 const myProfile = await EventManager.getPlayerProfileForContext(this.currentTargetId);
                 const settings = await this.getOfflineSettings();
                 
+                // 新增：最优先加载全局提示词 (Context: 'offline')
+                let globalPromptsStr = await AIHandler.getGlobalPromptsForContext('offline');
+                
                 // 1. 基础设定
-                let prompt = `你正在与玩家进行【线下模式】的长文对戏。\n`;
+                let prompt = `${globalPromptsStr}\n\n你正在与玩家进行【线下模式】的长文对戏。\n`;
                 
                 // 2. 时间设定
                 let timeStr = "";
@@ -23622,7 +23653,7 @@ ${globalPromptsSection}
                 const playerInfo = `玩家名：${myProfile.name}\n性别：${myProfile.gender}\n设定：${myProfile.background || '无'}\n`;
                 prompt += `\n--- 角色信息 ---\n${charInfo}\n--- 玩家信息 ---\n${playerInfo}`;
 
-                // 4. 绑定提示词 (省略部分代码，保持原样)
+                // 4. 绑定提示词 (移除原来的 globalPrompts 获取逻辑，因为它已经在最上面了)
                 let boundPromptsStr = "";
                 const allFolders = await DBHelper.getAll('promptFolders');
                 const allPrompts = await DBHelper.getAll('prompts');
@@ -23642,11 +23673,10 @@ ${globalPromptsSection}
                         boundPromptsStr += `\n--- 线下模式通用设定 ---\n${globalExplicitPrompts.map(p => p.content).join('\n\n')}\n`;
                     }
                 }
-                const globalPrompts = await AIHandler.getGlobalPromptsForContext('offline');
-                if (globalPrompts) boundPromptsStr += `\n${globalPrompts}`;
+                // (此处删除了原有的 AIHandler.getGlobalPromptsForContext 调用)
                 prompt += boundPromptsStr;
 
-                // 5. 普通聊天界面记录 (省略部分代码，保持原样)
+                // 5. 普通聊天界面记录
                 if (settings.includeChatHistory) {
                     const chatSettings = await DBHelper.get('apiConfig', 'chatSettings') || {};
                     const turnsToLoad = settings.chatHistoryTurns || 15;
@@ -23662,52 +23692,32 @@ ${globalPromptsSection}
                     prompt += chatContext;
                 }
 
-                // 6. 线下模式历史记录 (时间轴合并逻辑)
+                // 6. 线下模式历史记录
                 const messages = await DBHelper.getMessages(this.currentTargetId, 500);
-                
-                // 核心修复：DBHelper.getMessages 返回的是 [旧 -> 新] 的顺序。
-                // 之前使用了 .reverse() 变成了 [新 -> 旧]，导致最新的消息排在数组前面(索引小)，
-                // 从而被错误的判断为“摘要区”，且拼接字符串时也是先拼最新的，导致时间线倒错。
-                // 现在移除 .reverse()，保持 [旧 -> 新] 的顺序。
                 const offlineMessages = messages.filter(m => m.segmentType === 'offline_text'); 
 
-                const rawCount = settings.rawTurns || 3; // 保留完整内容的条数 (最新的N条)
-                const summaryCount = settings.summaryTurns || 10; // 往前追溯摘要的条数
+                const rawCount = settings.rawTurns || 3; 
+                const summaryCount = settings.summaryTurns || 10; 
                 
                 const total = offlineMessages.length;
-                
-                // 计算原始回复的起始索引：例如总共10条，留3条，则从索引 7 (10-3) 开始是原始回复
                 const rawStartIndex = Math.max(0, total - rawCount);
-                
-                // 计算摘要回复的起始索引：在原始回复之前 summaryCount 条
                 const summaryStartIndex = Math.max(0, rawStartIndex - summaryCount);
 
                 let historyText = "\n--- 历史线下记录 (按时间顺序) ---\n";
                 let hasContent = false;
 
-                // 从最旧的（摘要起始点）开始遍历到最新的
                 for (let i = summaryStartIndex; i < total; i++) {
                     const msg = offlineMessages[i];
                     const isPlayer = msg.type === 'sent';
                     
-                    // 判断当前索引是否进入了“原始回复区” (最新的部分)
                     const isRawZone = i >= rawStartIndex;
-
-                    // 在原始区使用“玩家”，在历史摘要区使用具体名字方便辨认（或者保持一致）
                     const name = isPlayer ? (isRawZone ? "玩家" : myProfile.name) : contact.name;
 
-                    // 逻辑分支：
                     if (isRawZone) {
-                        // --- 原始回复区 (最新的消息) ---
-                        // 应用正则处理：这里第二个参数传 true，表示这是发给AI的内容
-                        // 只有 applyToAi 为 true 的规则才会被应用
                         const processedContent = await this.processTextWithRegex(msg.content, true);
-                        
                         historyText += `[${name}]: ${processedContent}\n\n`;
                         hasContent = true;
                     } else {
-                        // --- 摘要区 (较旧的历史) ---
-                        // 只有AI的消息才有摘要字段
                         if (!isPlayer && msg.cardData && msg.cardData.summary) {
                             historyText += `[${name}]: ${msg.cardData.summary}\n`;
                             hasContent = true;
@@ -23721,7 +23731,7 @@ ${globalPromptsSection}
 
                 prompt += historyText;
                 
-                // 7. 最终指令 (加强剧情推动逻辑)
+                // 7. 最终指令
                 prompt += `
 --- 
 **回复规则 (最高优先级 - 严格遵守)**：
@@ -23781,6 +23791,7 @@ ${globalPromptsSection}
             currentBoardId: null,
             currentThreadId: null,
             currentPlayerAccountId: null,
+            loadingStates: { threads: {}, boards: false }, // 新增：追踪刷新状态
 
             async init() {
                 this.bindEvents();
@@ -23922,6 +23933,29 @@ ${globalPromptsSection}
                 };
             },
 
+            // --- 核心：版块内容处理 (正则+HTML) ---
+            async processBoardContent(text, boardId) {
+                if (!text) return '';
+                const board = await DBHelper.get('forumBoards', boardId);
+                const rules = board?.regexRules || [];
+
+                let processedText = text;
+
+                // 1. 应用正则替换
+                for (const rule of rules) {
+                    if (!rule.isActive) continue;
+                    try {
+                        const regex = new RegExp(rule.pattern, rule.flags || 'g');
+                        processedText = processedText.replace(regex, rule.replacement);
+                    } catch (e) {
+                        console.warn(`[Forum] 正则规则 ${rule.pattern} 执行失败:`, e);
+                    }
+                }
+                
+                // 2. 确保返回的内容被视为HTML (无需额外转义，innerHTML会自动处理)
+                return processedText;
+            },
+            
             async renderBoardList() {
                 const list = $('#infinity-board-list');
                 list.innerHTML = '';
@@ -23992,15 +24026,24 @@ ${globalPromptsSection}
                 const list = $('#infinity-thread-list');
                 list.innerHTML = '';
                 const threads = (await DBHelper.getAll('forumThreads')).filter(t => t.boardId === boardId);
-                threads.sort((a,b) => b.timestamp - a.timestamp); // 最新在前
+                threads.sort((a,b) => b.timestamp - a.timestamp); 
 
                 if(threads.length === 0) {
                     list.innerHTML = `<div style="text-align:center; padding:40px; color:#aaa;">暂无帖子<br>点击右下角按钮发帖或刷新</div>`;
                     return;
                 }
 
-                list.innerHTML = threads.map(t => {
+                // 异步处理所有帖子的内容预览
+                const threadItemsHtml = await Promise.all(threads.map(async t => {
                     const commentsCount = t.comments ? t.comments.length : 0;
+                    // 处理预览内容：应用正则 -> 截取 -> 再次确认HTML安全(虽然summary通常是纯文本，但为了支持正则替换后的效果)
+                    let processedContent = await this.processBoardContent(t.content, boardId);
+                    // 简单去除HTML标签用于列表预览，或者保留部分。这里为了列表整洁，去除标签取前50字
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = processedContent;
+                    const textContent = tempDiv.textContent || tempDiv.innerText || "";
+                    const summary = textContent.length > 60 ? textContent.substring(0, 60) + '...' : textContent;
+
                     return `
                         <div class="thread-item" data-id="${t.id}">
                             <div class="thread-header-row">
@@ -24012,7 +24055,7 @@ ${globalPromptsSection}
                             </div>
                             <div class="thread-content-row">
                                 <div class="thread-title">${t.title}</div>
-                                <div class="thread-summary">${t.content}</div>
+                                <div class="thread-summary">${summary}</div>
                             </div>
                             <div class="thread-meta">
                                 <span><i class="fas fa-fire"></i> ${t.likes || 0}</span>
@@ -24020,9 +24063,9 @@ ${globalPromptsSection}
                             </div>
                         </div>
                     `;
-                }).join('');
-                
-                // 渲染后加载本地头像
+                }));
+
+                list.innerHTML = threadItemsHtml.join('');
                 this.loadLazyAvatars(list);
             },
 
@@ -24043,12 +24086,16 @@ ${globalPromptsSection}
                                 <span>角色入驻管理</span>
                                 <i class="fas fa-chevron-right"></i>
                             </div>
+                            <div class="setting-item" id="inf-regex-manage">
+                                <i class="fas fa-code"></i>
+                                <span>版块正则替换</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
                             <div class="setting-item" id="inf-bind-prompts">
                                 <i class="fas fa-link"></i>
                                 <span>绑定提示词</span>
                                 <i class="fas fa-chevron-right"></i>
                             </div>
-                            <!-- 新增：绑定头像相册 -->
                             <div class="setting-item" id="inf-bind-avatars">
                                 <i class="fas fa-images"></i>
                                 <span>绑定NPC头像库</span>
@@ -24067,6 +24114,8 @@ ${globalPromptsSection}
                         </div>
                     `
                 });
+
+                $('#inf-regex-manage').onclick = () => this.showBoardRegexSettings(board);
 
                 // 新增：清空帖子
                 $('#inf-clear-threads').onclick = () => {
@@ -24138,6 +24187,119 @@ ${globalPromptsSection}
                 };
             },
 
+            // --- 版块正则管理 ---
+            async showBoardRegexSettings(board) {
+                const rules = board.regexRules || [];
+
+                const escapeHtml = (str) => {
+                    if (!str) return '';
+                    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                };
+
+                const renderRuleList = () => {
+                    if (rules.length === 0) return '<div style="text-align:center; color:#999; padding:20px;">暂无规则</div>';
+                    return rules.map((rule, index) => {
+                        const displayName = rule.name ? escapeHtml(rule.name) : `/${escapeHtml(rule.pattern)}/`;
+                        let displayReplacement = escapeHtml(rule.replacement || '');
+                        if (!displayReplacement) displayReplacement = '(空)';
+                        
+                        return `
+                        <div class="ios-list-item" style="padding: 10px; flex-direction: column; align-items: stretch; background: white; margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <span style="font-weight: bold; font-size: 0.95rem;">${displayName}</span>
+                                <div>
+                                    <button class="action-btn" data-action="edit" data-index="${index}" style="font-size: 0.8rem;">编辑</button>
+                                    <button class="action-btn" data-action="delete" data-index="${index}" style="font-size: 0.8rem; color: #e74c3c;">删除</button>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #666;">替换为: <strong style="color: var(--accent-color);">${displayReplacement}</strong></div>
+                            <div style="margin-top: 5px; padding-top: 5px; border-top: 1px dashed #eee; display: flex; justify-content: space-between;">
+                                <label style="font-size: 0.8rem;"><input type="checkbox" data-action="toggle-active" data-index="${index}" ${rule.isActive ? 'checked' : ''}> 启用</label>
+                            </div>
+                        </div>
+                    `}).join('');
+                };
+
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: `正则管理 (${board.name})`,
+                    body: `
+                        <div id="board-regex-list" style="max-height: 50vh; overflow-y: auto; background: #f9f9f9; padding: 10px; border-radius: 8px;">
+                            ${renderRuleList()}
+                        </div>
+                        <button id="add-board-regex-btn" class="modal-btn btn-primary" style="width: 100%; margin-top: 10px;">+ 新增规则</button>
+                    `,
+                    actions: [{ text: '关闭', class: 'btn-secondary', handler: () => UIManager.hideModal() }]
+                });
+
+                $('#board-regex-list').onclick = async (e) => {
+                    const target = e.target;
+                    const index = parseInt(target.dataset.index);
+                    if (isNaN(index)) return;
+
+                    const action = target.dataset.action;
+                    if (action === 'toggle-active') {
+                        rules[index].isActive = target.checked;
+                    } else if (action === 'delete') {
+                        rules.splice(index, 1);
+                    } else if (action === 'edit') {
+                        this.showEditBoardRegexModal(board, rules[index], index);
+                        return;
+                    }
+
+                    board.regexRules = rules;
+                    await DBHelper.put('forumBoards', board);
+                    if(action === 'delete') $('#board-regex-list').innerHTML = renderRuleList();
+                };
+
+                $('#add-board-regex-btn').onclick = () => this.showEditBoardRegexModal(board);
+            },
+
+            showEditBoardRegexModal(board, rule = null, index = -1) {
+                const isEditing = rule !== null;
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: isEditing ? "编辑规则" : "新增规则",
+                    body: `
+                        <div class="form-group"><label>规则名称</label><input type="text" id="breg-name"></div>
+                        <div class="form-group"><label>正则式 (Pattern)</label><input type="text" id="breg-pattern"></div>
+                        <div class="form-group"><label>替换内容 (Replacement, 支持HTML)</label><input type="text" id="breg-rep"></div>
+                        <div class="form-group"><label>修饰符</label><input type="text" id="breg-flags" placeholder="g"></div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => { UIManager.hideModal(); this.showBoardRegexSettings(board); } },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const pattern = $('#breg-pattern').value;
+                            if (!pattern) return UIManager.showToast("正则式不能为空");
+                            const newRule = {
+                                name: $('#breg-name').value.trim(),
+                                pattern: pattern,
+                                replacement: $('#breg-rep').value || '',
+                                flags: $('#breg-flags').value || 'g',
+                                isActive: true
+                            };
+                            if (!board.regexRules) board.regexRules = [];
+                            if (isEditing) board.regexRules[index] = newRule;
+                            else board.regexRules.push(newRule);
+
+                            await DBHelper.put('forumBoards', board);
+                            UIManager.hideModal();
+                            this.showBoardRegexSettings(board);
+                            // 如果在版块内，刷新显示
+                            if($('#infinity-view-board').classList.contains('active')) this.renderThreadList(board.id);
+                        }}
+                    ]
+                });
+                if(rule) {
+                    $('#breg-name').value = rule.name || '';
+                    $('#breg-pattern').value = rule.pattern;
+                    $('#breg-rep').value = rule.replacement;
+                    $('#breg-flags').value = rule.flags || 'g';
+                } else {
+                    $('#breg-flags').value = 'g';
+                }
+            },
+            
             async showBoardPromptBinding(board) {
                 const allFolders = await DBHelper.getAll('promptFolders');
                 const boundIds = board.boundPromptFolderIds || [];
@@ -24619,6 +24781,18 @@ ${globalPromptsSection}
                 const fabIcon = $('#infinity-fab i');
                 if (fabIcon) fabIcon.className = 'fas fa-spinner fa-spin';
 
+                // 1. 获取全局提示词并去除分隔符
+                let globalPrompts = await AIHandler.getGlobalPromptsForContext('forum');
+                globalPrompts = globalPrompts.replace(/--- 全局提示词 ---\n|\n---/g, ''); // 去除固定格式
+
+                // 2. 获取绑定提示词
+                let boundPrompts = "";
+                if (board.boundPromptFolderIds && board.boundPromptFolderIds.length > 0) {
+                     const allPrompts = await DBHelper.getAll('prompts');
+                     boundPrompts = allPrompts.filter(p => board.boundPromptFolderIds.includes(p.folderId) && p.isActive).map(p=>p.content).join('\n\n');
+                }
+
+                // 3. 构建入驻角色信息
                 let residentsInfo = "";
                 for (let reg of regs) {
                     const contact = await DBHelper.get('contacts', reg.contactId);
@@ -24629,18 +24803,12 @@ ${globalPromptsSection}
                     const puppets = reg.sockpuppets.map(sp => `${sp.name}(${sp.isMain?'大号':'小号'}, 人设:${sp.bio})`).join('; ');
                     residentsInfo += `\n- 角色:${contact.name}, 设定:${contact.background}, 马甲:[${puppets}]。\n  最近聊天状态参考:\n${history}\n`;
                 }
-                
-                let boundPrompts = "";
-                if (board.boundPromptFolderIds && board.boundPromptFolderIds.length > 0) {
-                     const allPrompts = await DBHelper.getAll('prompts');
-                     boundPrompts = allPrompts.filter(p => board.boundPromptFolderIds.includes(p.folderId) && p.isActive).map(p=>p.content).join('\n');
-                }
 
-                // 新增：获取全局提示词
-                const globalPrompts = await AIHandler.getGlobalPromptsForContext('forum');
-
+                // 4. 构建最终 Prompt (全局 -> 绑定 -> 内容 -> 规则)
                 const prompt = `
 ${globalPrompts}
+
+${boundPrompts ? `\n${boundPrompts}\n` : ''}
 
 你是一个论坛帖子生成器。当前论坛版块是“${board.name}”，世界观/背景是：“${board.description}”。
 你需要生成 ${count} 个帖子。
@@ -24649,10 +24817,12 @@ ${globalPrompts}
 ${residentsInfo}
 
 **生成规则：**
-1. 请从入驻角色中随机选择几位发帖（可以使用他们的大号或小号），也可以生成一些符合世界观的“路人”发帖。
-2. 帖子内容要符合版块世界观和角色当下状态（参考最近聊天记录）。
-3. 如果是入驻角色发帖，"authorId" 必须填入该角色的 contactId (即信息中的角色ID，如 "char-xxxx")，"identityIndex" 填入马甲在列表中的索引(0是第一个/大号, 1是第二个等)。如果是路人，authorId 填 "npc"。
-4. 必须返回严格的 JSON 数组格式。
+1. **角色选择**：请从入驻角色中随机选择几位发帖（可以使用他们的大号或小号），也可以生成一些符合世界观的“路人”发帖。
+2. **风云人物**：如果发帖角色设定为“风云人物”或“知名ID”，请给予较高的初始热度（likes > 100），并生成较多的初始评论（> 10条）。
+3. **内容真实性**：帖子内容要符合版块世界观和角色当下状态。对于求助帖、分享帖或争议贴，可以在初始评论中包含**楼主(Author)的回复或后续更新**，增加真实感。
+4. **初始评论**：每个帖子必须附带 0-5 条初始评论（JSON中的 comments 数组）。评论可以是路人回复，也可以是楼主互动。
+5. **楼主标识**：在 comments 数组中，如果是楼主本人回复，务必将 "isOp" 字段设为 true。
+6. **ID关联**：如果是入驻角色发帖，"authorId" 必须填入该角色的 contactId (如 "char-xxxx")，"identityIndex" 填入马甲索引。路人填 "npc"。
 
 **JSON 格式示例：**
 [
@@ -24662,21 +24832,13 @@ ${residentsInfo}
     "authorName": "马甲昵称",
     "authorId": "char-12345", 
     "identityIndex": 0,
-    "likes": 5,
-    "commentsCount": 2
-  },
-  {
-    "title": "另一个路人贴",
-    "content": "...",
-    "authorName": "路人甲",
-    "authorId": "npc",
-    "identityIndex": -1,
-    "likes": 12,
-    "commentsCount": 0
+    "likes": 56,
+    "comments": [
+        { "nickname": "路人A", "content": "前排围观", "replyTo": null, "isOp": false },
+        { "nickname": "马甲昵称", "content": "统一回复一下大家...", "replyTo": null, "isOp": true }
+    ]
   }
 ]
-
-${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
 `;
                 console.log("--- INFINITY THREAD REFRESH PROMPT ---\n", prompt);
 
@@ -24720,6 +24882,28 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                                 }
                             }
                             
+                            // 处理初始评论 (支持 isOp 逻辑)
+                            const initialComments = (tData.comments || []).map(c => {
+                                // 判定楼主：优先信赖 isOp，其次对比名字
+                                const isOp = c.isOp === true || c.nickname === tData.authorName;
+                                // 如果是楼主，头像和ID跟随楼主；否则随机/默认
+                                const commentAuthorId = isOp ? tData.authorId : 'npc';
+                                const commentAvatar = isOp ? avatar : defaultGrayAvatar;
+                                const commentAvatarId = isOp ? avatarAssetId : defaultAssetId;
+
+                                return {
+                                    id: Utils.generateId('comment'),
+                                    authorName: c.nickname,
+                                    authorAvatar: commentAvatar,
+                                    authorAvatarAssetId: commentAvatarId,
+                                    authorId: commentAuthorId,
+                                    isPlayer: false,
+                                    content: c.content,
+                                    replyTo: c.replyTo || null,
+                                    timestamp: Date.now()
+                                };
+                            });
+
                             const newThread = {
                                 id: Utils.generateId('thread'),
                                 boardId: this.currentBoardId,
@@ -24733,7 +24917,7 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                                 content: tData.content,
                                 timestamp: Date.now(),
                                 likes: tData.likes || 0,
-                                comments: [] 
+                                comments: initialComments
                             };
                             await DBHelper.put('forumThreads', newThread);
                         }
@@ -24752,7 +24936,7 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
             // --- 详情 & 回复 ---
             async openThread(threadId) {
                 this.currentThreadId = threadId;
-                this.currentReplyTarget = null; // 新增：进入新帖子时重置回复对象，防止串台
+                this.currentReplyTarget = null;
                 const thread = await DBHelper.get('forumThreads', threadId);
                 if (!thread) return;
 
@@ -24775,15 +24959,18 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
 
                 $('#infinity-view-board').classList.remove('active');
                 $('#infinity-view-thread').classList.add('active');
-                
                 $('#page-infinity-app').classList.add('hide-bottom-nav');
+
+                // 检查是否正在刷新中，恢复Spinner状态
+                const isRefreshing = this.loadingStates.threads[threadId];
+                const refreshIconClass = isRefreshing ? 'fas fa-spinner fa-spin' : 'fas fa-sync-alt';
 
                 const navBar = $('#infinity-view-thread .prompts-nav-bar');
                 navBar.innerHTML = `
                     <button class="prompts-nav-btn" id="infinity-thread-back-btn"><i class="fas fa-chevron-left"></i> 返回</button>
                     <div class="prompts-nav-title">帖子详情</div>
                     <div class="prompts-nav-actions">
-                         <button class="prompts-nav-btn" id="infinity-thread-refresh-btn" title="AI生成新评论"><i class="fas fa-sync-alt"></i></button>
+                         <button class="prompts-nav-btn" id="infinity-thread-refresh-btn" title="AI生成新评论"><i class="${refreshIconClass}"></i></button>
                          <button class="prompts-nav-btn" id="infinity-thread-manage-btn" title="管理"><i class="fas fa-ellipsis-h"></i></button>
                     </div>
                 `;
@@ -24796,13 +24983,13 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                 };
                 
                 $('#infinity-thread-refresh-btn').onclick = () => this.handleRefreshComments(threadId);
-                
-                // 新增：帖子管理菜单
                 $('#infinity-thread-manage-btn').onclick = () => this.showThreadManagementMenu(threadId);
-
 
                 const container = $('#infinity-thread-content');
                 
+                // 处理主楼内容的正则与HTML
+                const opContent = await this.processBoardContent(thread.content, thread.boardId);
+
                 const opHtml = `
                     <div class="thread-detail-op">
                         <div class="thread-title" style="font-size:1.3rem; margin-bottom:15px; line-height:1.4;">${thread.title}</div>
@@ -24813,7 +25000,7 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                                 <div class="meta">楼主 · ${Utils.formatTimestampSmartly(thread.timestamp)}</div>
                             </div>
                         </div>
-                        <div class="thread-op-content">${thread.content}</div>
+                        <div class="thread-op-content">${opContent}</div>
                         <div class="thread-meta" style="margin-top:20px; justify-content:flex-end; border-top: 1px solid #eee; padding-top:10px;">
                              <span style="display:flex; align-items:center; gap:5px; color:#e74c3c;"><i class="fas fa-fire"></i> ${thread.likes} 热度</span>
                         </div>
@@ -24822,13 +25009,12 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                     </div>
                 `;
                 container.innerHTML = opHtml;
-                // 加载楼主头像
                 this.loadLazyAvatars(container);
                 
-                this.renderComments(thread);
+                // 渲染评论区
+                await this.renderComments(thread);
                 
-                // --- 核心修复：同时尝试移除旧的 chat-input-area 和 infinity-input-area ---
-                // 这样既能移除HTML初始的占位符，也能移除上次 JS 生成的输入框，防止ID冲突
+                // 输入框逻辑
                 const oldInputArea1 = $('#infinity-view-thread .chat-input-area');
                 if(oldInputArea1) oldInputArea1.remove(); 
                 const oldInputArea2 = $('#infinity-view-thread .infinity-input-area');
@@ -24854,29 +25040,36 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                 newInputArea.querySelector('#infinity-reply-btn').onclick = () => this.handleReply();
             },
 
-            renderComments(thread) {
+            async renderComments(thread) {
                 const list = $('#inf-comments-list');
                 if (!thread.comments || thread.comments.length === 0) {
                     list.innerHTML = `<div style="text-align:center; padding:30px; color:#ccc;">快来抢沙发吧~</div>`;
                     return;
                 }
                 
-                list.innerHTML = thread.comments.map((c, idx) => {
+                const commentsHtmlPromises = thread.comments.map(async (c, idx) => {
                     const replyInfo = c.replyTo 
                         ? `<span class="thread-reply-target">回复 ${c.replyTo}：</span>` 
                         : '';
                     const likeCount = c.likes || 0;
                     const isLiked = c.isLikedByPlayer || false; 
                     
+                    // 正则处理评论内容
+                    const commentContent = await this.processBoardContent(c.content, thread.boardId);
+
+                    // 楼主标识判断
+                    const isOp = (c.authorId === thread.authorId) || (c.authorName === thread.authorName);
+                    const opBadge = isOp ? `<span class="op-badge">楼主</span>` : '';
+
                     return `
                     <div class="thread-comment-refined" data-id="${c.id}" data-idx="${idx}">
                         <img src="${c.authorAvatar}" data-asset-id="${c.authorAvatarAssetId || ''}" class="thread-comment-avatar lazy-avatar">
                         <div class="thread-comment-main">
                             <div class="thread-comment-user-row">
-                                <span class="thread-comment-nickname">${c.authorName}</span>
+                                <span class="thread-comment-nickname">${c.authorName}${opBadge}</span>
                                 <span class="thread-comment-floor">${idx + 1}楼</span>
                             </div>
-                            <div class="thread-comment-content">${replyInfo}${c.content}</div>
+                            <div class="thread-comment-content">${replyInfo}${commentContent}</div>
                             <div class="thread-comment-footer">
                                 <span style="margin-right:auto;">${Utils.formatTimestampSmartly(c.timestamp)}</span>
                                 <span class="thread-comment-action like-btn ${isLiked ? 'liked' : ''}"><i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> ${likeCount || '赞'}</span>
@@ -24884,14 +25077,17 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                             </div>
                         </div>
                     </div>
-                `}).join('');
+                `});
+
+                const commentsHtml = await Promise.all(commentsHtmlPromises);
+                list.innerHTML = commentsHtml.join('');
                 
                 this.loadLazyAvatars(list);
 
                 list.querySelectorAll('.reply-btn').forEach(btn => {
                     btn.onclick = (e) => {
                         const item = e.target.closest('.thread-comment-refined');
-                        const name = item.querySelector('.thread-comment-nickname').textContent;
+                        const name = item.querySelector('.thread-comment-nickname').childNodes[0].textContent.trim(); // 获取纯文本名字，排除badge
                         this.activateReplyMode(name);
                     };
                 });
@@ -25008,6 +25204,7 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
             },
 
             async handleRefreshComments(threadId) {
+                if (this.loadingStates.threads[threadId]) return UIManager.showToast("正在生成中...");
                 if (AIHandler.isAwaitingResponse) return UIManager.showToast("AI正在忙碌中...");
 
                 UIManager.showModal({
@@ -25018,7 +25215,7 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                             <label>生成评论数量</label>
                             <input type="number" id="inf-comment-gen-count" value="8" min="1" max="20" style="text-align:center;">
                         </div>
-                        <p style="font-size:0.8rem; color:#888; text-align:center;">AI将根据帖子内容和现有评论，生成路人或入驻角色的新回复。</p>
+                        <p style="font-size:0.8rem; color:#888; text-align:center;">AI将根据帖子内容和现有评论，生成路人、入驻角色或楼主的互动回复。</p>
                     `,
                     actions: [
                         { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
@@ -25099,7 +25296,12 @@ ${boundPrompts ? `\n**附加风格要求：**\n${boundPrompts}` : ''}
                                 
                                 const board = await DBHelper.get('forumBoards', thread.boardId);
                                 const commentsText = (thread.comments || []).map(c => `${c.authorName}: ${c.content}`).join('\n');
-                                const prompt = `请对以下论坛帖子进行精炼总结。
+                                
+                                // 新增：插入全局提示词 (summary 上下文)
+                                const globalPrompts = await AIHandler.getGlobalPromptsForContext('summary');
+                                
+                                const prompt = `${globalPrompts}
+请对以下论坛帖子进行精炼总结。
 帖子标题：${thread.title}
 帖子内容：${thread.content}
 评论区内容：
@@ -25137,6 +25339,13 @@ ${commentsText.substring(0, 2000)} (截取部分)
             },
             
             async executeCommentGeneration(threadId, count) {
+                this.loadingStates.threads[threadId] = true;
+                // 更新UI状态
+                if(this.currentThreadId === threadId) {
+                    const btn = $('#infinity-thread-refresh-btn i');
+                    if(btn) btn.className = 'fas fa-spinner fa-spin';
+                }
+
                 const thread = await DBHelper.get('forumThreads', threadId);
                 const board = await DBHelper.get('forumBoards', thread.boardId);
                 const account = await DBHelper.get('forumAccounts', this.currentPlayerAccountId);
@@ -25145,11 +25354,22 @@ ${commentsText.substring(0, 2000)} (截取部分)
                     `${c.authorName}: ${c.content}`
                 ).join('\n');
 
-                // 新增：获取全局提示词
-                const globalPrompts = await AIHandler.getGlobalPromptsForContext('forum');
+                // 1. 获取全局提示词并去除分隔符
+                let globalPrompts = await AIHandler.getGlobalPromptsForContext('forum');
+                globalPrompts = globalPrompts.replace(/--- 全局提示词 ---\n|\n---/g, '');
 
+                // 2. 获取绑定提示词 (版块级)
+                let boundPrompts = "";
+                if (board.boundPromptFolderIds && board.boundPromptFolderIds.length > 0) {
+                     const allPrompts = await DBHelper.getAll('prompts');
+                     boundPrompts = allPrompts.filter(p => board.boundPromptFolderIds.includes(p.folderId) && p.isActive).map(p=>p.content).join('\n\n');
+                }
+
+                // 3. 组装 Prompt (全局 -> 绑定 -> 内容 -> 规则)
                 const prompt = `
 ${globalPrompts}
+
+${boundPrompts ? `\n${boundPrompts}\n` : ''}
 
 你是一个拟真的论坛评论区生成器。
 **当前帖子信息：**
@@ -25162,35 +25382,32 @@ ${globalPrompts}
 ${existingComments || "(暂无评论)"}
 
 **任务：**
-请至少生成 ${count} 条新的评论。
-1. **角色多样性**：生成的评论者可以是“路人NPC”，也可以是符合世界观的特定角色。请赋予他们不同的身份
-2. **语言风格多样性**：评论风格多元化，可以是暴躁、阴阳怪气、萌新甚至弱智的回复、专业大佬；不同的语言打字习惯，如习惯在句末加句号、用句号代替省略号、用一些最近在社媒（如抖音、小红书）上很火的梗。允许个别评论出现几个错字增加活人感（评论的人可能会及时纠正，也可能会被其他评论纠正/嘲讽/忽略)
-3. **内容真实性**：评论可以是对楼主的回答、质疑、嘲讽，也可以是**回复楼里的其他人**（互怼或互动）。允许出现极少量的“广告”或“歪楼”内容，模拟真实互联网环境。
-4. **推进讨论**：评论应尽量围绕话题展开，或者引发新的争议点。
-5. **禁忌**：**绝对禁止**生成玩家当前使用的账号“${account.nickname}”的评论。
+请生成 ${count} 条新的评论。
 
+**生成规则：**
+1. **互动原则**：楼主（${thread.authorName}）可能会在评论区回复他人，进行互动、解释、甚至互怼。对于求助/分享贴，楼主可能会发布后续更新。
+2. **角色多样性**：生成的评论者可以是“路人NPC”，也可以是楼主本人。
+3. **语言风格多样性**：评论风格多元化，可以是暴躁、阴阳怪气、萌新、专业大佬。允许使用网络梗、甚至个别错别字增加真实感。
+4. **内容真实性**：评论可以是对楼主的回答、质疑、嘲讽，也可以是**回复楼里的其他人**（互怼或互动）。
+5. **楼主标识**：如果是楼主本人回复，请将 JSON 中的 "isOp" 字段设为 true。
+6. **禁忌**：**绝对禁止**生成玩家当前使用的账号“${account.nickname}”的评论。
 
 **返回格式：**
 严格返回 JSON 数组，每个对象包含：
-- "nickname": 昵称
+- "nickname": 昵称 (如果是楼主回复，必须填 "${thread.authorName}")
 - "content": 评论内容 (如果是回复某人，内容里不要带"回复xxx"，请放在replyTo字段)
-- "replyTo": 回复对象的昵称 (如果是直接回复楼主，此字段为空字符串或null)
-- "isSpecial": boolean (是否为特殊性格/入驻角色，仅作参考)
+- "replyTo": 回复对象的昵称 (如果是直接回复楼主或发新帖，此字段为空字符串或null)
+- "isOp": boolean (是否为楼主本人)
 
 **JSON示例：**
 [
-  {"nickname": "暴躁老哥", "content": "楼主纯属扯淡，鉴定完毕。", "replyTo": null},
-  {"nickname": "萌新求带", "content": "真的吗？我也想试试哎！", "replyTo": "暴躁老哥"},
-  {"nickname": "理中客", "content": "有一说一，这件事需要辩证看待...", "replyTo": null}
+  {"nickname": "暴躁老哥", "content": "楼主纯属扯淡，鉴定完毕。", "replyTo": null, "isOp": false},
+  {"nickname": "${thread.authorName}", "content": "爱看不看，不看划走！", "replyTo": "暴躁老哥", "isOp": true},
+  {"nickname": "理中客", "content": "有一说一...", "replyTo": null, "isOp": false}
 ]
 `;
 
-                
-                // --- 修复：添加打印语句 ---
                 console.log("--- INFINITY COMMENT GENERATION PROMPT ---\n", prompt);
-
-                const btn = $('#infinity-thread-refresh-btn i');
-                btn.className = 'fas fa-spinner fa-spin';
 
                 try {
                     const response = await AIHandler.getApiResponse(prompt, null, new AbortController().signal);
@@ -25208,17 +25425,26 @@ ${existingComments || "(暂无评论)"}
 
                         const newComments = newCommentsData.map(c => {
                             let avatar = defaultGrayAvatar;
-                            // 修改：默认为特殊ID
                             let avatarAssetId = defaultAssetId;
 
-                            if (availableAssets.length > 0) {
-                                const randomAsset = availableAssets[Math.floor(Math.random() * availableAssets.length)];
-                                if (randomAsset.type === 'url') {
-                                    avatar = randomAsset.content;
-                                    avatarAssetId = null; // 网络图片不需要ID
-                                } else {
-                                    avatarAssetId = randomAsset.id;
-                                    avatar = defaultGrayAvatar;
+                            // 判定是否楼主 (依据AI返回的isOp 或 名字匹配)
+                            const isOp = c.isOp === true || c.nickname === thread.authorName;
+
+                            if (isOp) {
+                                // 楼主使用主贴的头像和ID
+                                avatar = thread.authorAvatar;
+                                avatarAssetId = thread.authorAvatarAssetId;
+                            } else {
+                                // 路人随机头像
+                                if (availableAssets.length > 0) {
+                                    const randomAsset = availableAssets[Math.floor(Math.random() * availableAssets.length)];
+                                    if (randomAsset.type === 'url') {
+                                        avatar = randomAsset.content;
+                                        avatarAssetId = null;
+                                    } else {
+                                        avatarAssetId = randomAsset.id;
+                                        avatar = defaultGrayAvatar;
+                                    }
                                 }
                             }
                             
@@ -25226,8 +25452,8 @@ ${existingComments || "(暂无评论)"}
                                 id: Utils.generateId('comment'),
                                 authorName: c.nickname,
                                 authorAvatar: avatar,
-                                authorAvatarAssetId: avatarAssetId, // 保存资源ID
-                                authorId: 'npc', 
+                                authorAvatarAssetId: avatarAssetId, 
+                                authorId: isOp ? thread.authorId : 'npc', // 关键修正：确保楼主ID一致
                                 isPlayer: false,
                                 content: c.content,
                                 replyTo: c.replyTo || null,
@@ -25244,10 +25470,13 @@ ${existingComments || "(暂无评论)"}
                     }
                 } catch (e) {
                     console.error(e);
-                    // 修改：显示具体错误原因
                     UIManager.showToast(`生成评论失败: ${e.message}`);
                 } finally {
-                    btn.className = 'fas fa-sync-alt';
+                    this.loadingStates.threads[threadId] = false;
+                    if(this.currentThreadId === threadId) {
+                        const btn = $('#infinity-thread-refresh-btn i');
+                        if(btn) btn.className = 'fas fa-sync-alt';
+                    }
                 }
             },
         };
@@ -35612,48 +35841,75 @@ async handleAddCircle() {
 
             async handleExportPrompts() {
                 const folders = await DBHelper.getAll('promptFolders');
-                if (folders.length === 0) {
-                    return UIManager.showToast("没有可导出的文件夹");
+                const globalPrompts = await DBHelper.getAll('globalPrompts');
+
+                if (folders.length === 0 && globalPrompts.length === 0) {
+                    return UIManager.showToast("没有可导出的提示词");
                 }
-                const folderListHtml = folders.map(f => `
+                
+                let listHtml = '';
+                
+                // 添加全局提示词选项
+                if (globalPrompts.length > 0) {
+                    listHtml += `
+                    <label class="folder-selection-item" style="border-bottom: 1px dashed var(--border-color); margin-bottom: 8px; padding-bottom: 8px;">
+                        <input type="checkbox" name="export-target" value="global_prompts">
+                        <i class="fas fa-globe" style="color: #FF9500;"></i>
+                        <span>全局提示词 (${globalPrompts.length})</span>
+                    </label>
+                    `;
+                }
+
+                listHtml += folders.map(f => `
                     <label class="folder-selection-item">
-                        <input type="checkbox" name="export-folder" value="${f.id}">
+                        <input type="checkbox" name="export-target" value="${f.id}">
                         <i class="fas fa-folder"></i>
                         <span>${f.name}</span>
                     </label>
                 `).join('');
 
                 UIManager.showModal({
-                    title: "选择要导出的文件夹",
-                    body: `<div class="folder-selection-list">${folderListHtml}</div>`,
+                    title: "选择要导出的内容",
+                    body: `<div class="folder-selection-list">${listHtml}</div>`,
                     actions: [
                         { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
                         { text: '生成文件', class: 'btn-primary', handler: async () => {
-                            const selectedFolderIds = [...$$('input[name="export-folder"]:checked')].map(cb => cb.value);
-                            if (selectedFolderIds.length === 0) {
-                                return UIManager.showToast("请至少选择一个文件夹");
+                            const selectedValues = [...$$('input[name="export-target"]:checked')].map(cb => cb.value);
+                            if (selectedValues.length === 0) {
+                                return UIManager.showToast("请至少选择一项");
                             }
 
                             const allPrompts = await DBHelper.getAll('prompts');
                             
-                            
-                            let filenamePart;
-                            if (selectedFolderIds.length === 1) {
-                                const folder = folders.find(f => f.id === selectedFolderIds[0]);
-                                filenamePart = folder ? folder.name : '未知文件夹';
-                            } else {
-                                filenamePart = '多个文件夹_提示词导出';
-                            }
-                            const finalFilename = `${filenamePart}_${new Date().toISOString().slice(0,10)}.json`;
-                            
-                            
-                            const foldersToExport = folders.filter(f => selectedFolderIds.includes(f.id));
-                            const promptsToExport = allPrompts.filter(p => selectedFolderIds.includes(p.folderId));
-                            
                             const exportData = {
-                                folders: foldersToExport,
-                                prompts: promptsToExport
+                                version: 2, // 标记版本以支持全局提示词
+                                folders: [],
+                                prompts: [],
+                                globalPrompts: []
                             };
+                            
+                            let filenamePart = '提示词导出';
+
+                            // 处理全局提示词
+                            if (selectedValues.includes('global_prompts')) {
+                                exportData.globalPrompts = globalPrompts;
+                                if (selectedValues.length === 1) filenamePart = '全局提示词';
+                            }
+
+                            // 处理局部文件夹
+                            const folderIds = selectedValues.filter(v => v !== 'global_prompts');
+                            if (folderIds.length > 0) {
+                                exportData.folders = folders.filter(f => folderIds.includes(f.id));
+                                exportData.prompts = allPrompts.filter(p => folderIds.includes(p.folderId));
+                                
+                                if (folderIds.length === 1 && !selectedValues.includes('global_prompts')) {
+                                    filenamePart = exportData.folders[0].name;
+                                } else if (selectedValues.length > 1) {
+                                    filenamePart = '多个文件夹';
+                                }
+                            }
+                            
+                            const finalFilename = `${filenamePart}_${new Date().toISOString().slice(0,10)}.json`;
                             
                             const jsonString = JSON.stringify(exportData, null, 2);
                             const blob = new Blob([jsonString], {type: "application/json"});
@@ -36281,50 +36537,93 @@ async handleAddCircle() {
                         try {
                             const importedData = JSON.parse(event.target.result);
                             
-                            if (!importedData.folders || !importedData.prompts) {
-                                return UIManager.showToast("文件格式不正确");
-                            }
-                            
-                            const existingFolders = await DBHelper.getAll('promptFolders');
-                            let importedCount = 0;
+                            // 检查数据有效性：允许仅有全局或仅有局部提示词的情况
+                            const hasFolders = importedData.folders && Array.isArray(importedData.folders);
+                            const hasGlobals = importedData.globalPrompts && Array.isArray(importedData.globalPrompts);
 
-                            for (const [index, importedFolder] of importedData.folders.entries()) {
-                                if (existingFolders.some(f => f.name === importedFolder.name)) {
-                                    UIManager.showToast(`已跳过：文件夹 "${importedFolder.name}" 已存在`);
-                                    continue;
-                                }
+                            if (!hasFolders && !hasGlobals) {
+                                return UIManager.showToast("文件格式不正确或为空");
+                            }
+                            
+                            let importedCount = 0;
+                            let globalCount = 0;
+
+                            // 1. 导入全局提示词
+                            if (hasGlobals) {
+                                const existingGlobals = await DBHelper.getAll('globalPrompts');
+                                const existingNames = existingGlobals.map(g => g.name);
                                 
-                                const oldFolderId = importedFolder.id;
-                                const newFolder = {
-                                    ...importedFolder,
-                                    id: Utils.generateId('folder'), 
-                                    createdAt: Date.now(),
-                                    order: (existingFolders.length) + index // 分配新的顺序
-                                };
-                                await DBHelper.put('promptFolders', newFolder);
-                                
-                                const promptsToImport = importedData.prompts.filter(p => p.folderId === oldFolderId);
-                                for (const [promptIndex, importedPrompt] of promptsToImport.entries()) {
-                                    const newPrompt = {
-                                        ...importedPrompt,
-                                        id: Utils.generateId('prompt'), 
-                                        folderId: newFolder.id, 
-                                        createdAt: Date.now(),
-                                        order: importedPrompt.order ?? promptIndex // 尊重导入的顺序，否则按文件顺序
+                                for (const gp of importedData.globalPrompts) {
+                                    let newName = gp.name;
+                                    // 简单的冲突处理：重名则添加后缀
+                                    if (existingNames.includes(newName)) {
+                                        newName = `${newName} (导入)`;
+                                    }
+
+                                    const newGlobal = {
+                                        ...gp,
+                                        id: Utils.generateId('global-prompt'),
+                                        name: newName,
+                                        order: existingGlobals.length + globalCount // 追加到末尾
                                     };
-                                    await DBHelper.put('prompts', newPrompt);
-                                    importedCount++;
+                                    await DBHelper.put('globalPrompts', newGlobal);
+                                    globalCount++;
+                                }
+                            }
+
+                            // 2. 导入文件夹及局部提示词
+                            if (hasFolders) {
+                                const existingFolders = await DBHelper.getAll('promptFolders');
+                                
+                                for (const [index, importedFolder] of importedData.folders.entries()) {
+                                    if (existingFolders.some(f => f.name === importedFolder.name)) {
+                                        UIManager.showToast(`已跳过：文件夹 "${importedFolder.name}" 已存在`);
+                                        continue;
+                                    }
+                                    
+                                    const oldFolderId = importedFolder.id;
+                                    const newFolder = {
+                                        ...importedFolder,
+                                        id: Utils.generateId('folder'), 
+                                        createdAt: Date.now(),
+                                        order: (existingFolders.length) + index 
+                                    };
+                                    await DBHelper.put('promptFolders', newFolder);
+                                    
+                                    if (importedData.prompts) {
+                                        const promptsToImport = importedData.prompts.filter(p => p.folderId === oldFolderId);
+                                        for (const [promptIndex, importedPrompt] of promptsToImport.entries()) {
+                                            const newPrompt = {
+                                                ...importedPrompt,
+                                                id: Utils.generateId('prompt'), 
+                                                folderId: newFolder.id, 
+                                                createdAt: Date.now(),
+                                                order: importedPrompt.order ?? promptIndex 
+                                            };
+                                            await DBHelper.put('prompts', newPrompt);
+                                            importedCount++;
+                                        }
+                                    }
                                 }
                             }
                             
-                            UIManager.showToast(`导入完成，共导入 ${importedCount} 条提示词`);
-                            this.renderPromptsPage();
+                            let msg = `导入完成`;
+                            if (globalCount > 0) msg += `，${globalCount} 条全局提示词`;
+                            if (importedCount > 0) msg += `，${importedCount} 条局部提示词`;
+
+                            UIManager.showToast(msg);
+                            
+                            // 刷新相关页面
+                            if (typeof PromptsAppManager !== 'undefined') {
+                                PromptsAppManager.renderGlobalList();
+                                PromptsAppManager.renderFolderList();
+                                PromptsAppManager.renderPromptsPage();
+                            }
 
                         } catch (error) {
                             console.error("导入失败: ", error);
                             UIManager.showToast("导入失败，文件可能已损坏");
                         } finally {
-                            
                             fileInput.value = '';
                         }
                     };
