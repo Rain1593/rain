@@ -24898,6 +24898,7 @@ ${residentsInfo}
                                     authorAvatarAssetId: commentAvatarId,
                                     authorId: commentAuthorId,
                                     isPlayer: false,
+                                    isOp: isOp, // 新增：写入楼主属性
                                     content: c.content,
                                     replyTo: c.replyTo || null,
                                     timestamp: Date.now()
@@ -25057,8 +25058,13 @@ ${residentsInfo}
                     // 正则处理评论内容
                     const commentContent = await this.processBoardContent(c.content, thread.boardId);
 
-                    // 楼主标识判断
-                    const isOp = (c.authorId === thread.authorId) || (c.authorName === thread.authorName);
+                    // 楼主标识判断：优先读取 isOp 属性；若未定义，则严格对比 authorId
+                    let isOp = false;
+                    if (typeof c.isOp !== 'undefined') {
+                        isOp = c.isOp === true;
+                    } else {
+                        isOp = c.authorId === thread.authorId;
+                    }
                     const opBadge = isOp ? `<span class="op-badge">楼主</span>` : '';
 
                     return `
@@ -25181,6 +25187,7 @@ ${residentsInfo}
                     authorAvatar: account.avatar,
                     authorId: account.id, // 玩家账号ID
                     isPlayer: true,
+                    isOp: account.id === thread.authorId, // 新增：写入楼主属性
                     content: content,
                     replyTo: this.currentReplyTarget || null, // 使用存储的回复对象
                     timestamp: Date.now(),
@@ -25455,6 +25462,7 @@ ${existingComments || "(暂无评论)"}
                                 authorAvatarAssetId: avatarAssetId, 
                                 authorId: isOp ? thread.authorId : 'npc', // 关键修正：确保楼主ID一致
                                 isPlayer: false,
+                                isOp: isOp, // 新增：写入楼主属性
                                 content: c.content,
                                 replyTo: c.replyTo || null,
                                 timestamp: Date.now() + Math.floor(Math.random() * 60000)
