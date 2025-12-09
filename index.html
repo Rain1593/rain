@@ -10023,8 +10023,18 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <p style="color: #666; font-size: 0.8rem; text-align: center; margin-top: 20px;">Music v1.1.0</p>
+                            <!-- 新增：导入歌单按钮 -->
+                            <div class="setting-item" id="music-import-playlist-btn" style="cursor: pointer;">
+                                <div style="display: flex; align-items: center;">
+                                    <i class="fas fa-file-import" style="color: #007AFF; margin-right: 10px; font-size: 1.2rem;"></i>
+                                    <span>导入歌单</span>
+                                </div>
+                                <i class="fas fa-chevron-right" style="color: #ccc;"></i>
+                            </div>
+                            <p style="color: #666; font-size: 0.8rem; text-align: center; margin-top: 20px;">Music v1.2.0</p>
                         </div>
+                        <!-- 隐藏的导入文件输入框 -->
+                        <input type="file" id="music-playlist-import-input" accept=".json" style="display: none;">
                     </div>
                 </div>
 
@@ -19806,6 +19816,14 @@ ${globalPromptsSection}
                         if (songData) this.addToPlaylistFromApi(songData);
                     }
                 });
+
+            // --- 歌单导入事件 ---
+                const importBtn = $('#music-import-playlist-btn');
+                const importInput = $('#music-playlist-import-input');
+                if (importBtn && importInput) {
+                    importBtn.onclick = () => importInput.click();
+                    importInput.onchange = (e) => this.handleImportPlaylist(e);
+                }
             },
 
             renderPlaylistQueue() {
@@ -20173,6 +20191,28 @@ ${globalPromptsSection}
                 const playlist = this.playlists.find(p => p.id === id);
                 if (!playlist) return;
 
+                // --- 修改开始：在Header中添加导出按钮 ---
+                const headerHtml = `
+                    <div class="playlist-detail-header">
+                        <i class="fas fa-arrow-left pd-back-btn" id="pd-back-btn"></i>
+                        <div style="position: absolute; top: 15px; right: 15px;">
+                             <i class="fas fa-file-export pd-export-btn" title="导出歌单" style="font-size: 1.2rem; cursor: pointer; color: white;"></i>
+                        </div>
+                        <img src="" id="pd-cover" class="pd-cover">
+                        <div class="pd-info">
+                            <h2 id="pd-name">歌单名</h2>
+                            <p id="pd-count">0 首歌曲</p>
+                            <button class="modal-btn btn-primary" id="pd-add-song-btn" style="margin-top: 10px; padding: 5px 15px; font-size: 0.8rem;">+ 添加歌曲</button>
+                        </div>
+                    </div>
+                    <div class="song-list" id="pd-song-list"></div>
+                `;
+                
+                const overlay = $('#playlist-detail-overlay');
+                overlay.innerHTML = headerHtml;
+                // --- 修改结束 ---
+
+                // 重新获取元素引用并赋值
                 $('#pd-name').textContent = playlist.name;
                 $('#pd-cover').src = playlist.cover || this.defaultCover;
                 
@@ -20182,7 +20222,6 @@ ${globalPromptsSection}
 
                 const listEl = $('#pd-song-list');
                 
-                // 修改：移除旧的按钮，换成 font-awesome 的小尺寸 3点按钮
                 listEl.innerHTML = playlistSongs.map((s, index) => `
                     <div class="song-item" data-id="${s.id}">
                         <div class="song-index">${index + 1}</div>
@@ -20196,40 +20235,45 @@ ${globalPromptsSection}
                     </div>
                 `).join('');
 
-                // 绑定点击播放
-                $$('#pd-song-list .song-item').forEach(item => {
-                    // 单击播放
-                    item.addEventListener('click', (e) => {
-                        if (e.target.classList.contains('song-menu-btn')) return; // 忽略菜单按钮点击
-                        this.playSongInList(item.dataset.id);
-                    });
+                // --- 重新绑定事件 ---
+                $('#pd-back-btn').onclick = () => overlay.classList.remove('active');
+                $('#pd-add-song-btn').onclick = () => this.showAddSongModal();
+                
+                // 绑定导出按钮事件
+                overlay.querySelector('.pd-export-btn').onclick = () => this.exportPlaylist(id);
 
-                    // 长按事件
-                    let longPressTimer;
-                    const startLongPress = () => {
-                        longPressTimer = setTimeout(() => {
-                            this.showSongOptions(item.dataset.id);
-                        }, 600); // 600ms 长按
-                    };
-                    const cancelLongPress = () => clearTimeout(longPressTimer);
-
-                    item.addEventListener('touchstart', startLongPress, {passive: true});
-                    item.addEventListener('touchend', cancelLongPress);
-                    item.addEventListener('touchmove', cancelLongPress);
-                    item.addEventListener('mousedown', startLongPress);
-                    item.addEventListener('mouseup', cancelLongPress);
-                    item.addEventListener('mouseleave', cancelLongPress);
-                });
-
-                // 绑定菜单按钮点击
-                $$('.song-menu-btn').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
+                // 绑定歌曲列表点击
+                listEl.onclick = (e) => {
+                    // 处理菜单按钮点击
+                    const menuBtn = e.target.closest('.song-menu-btn');
+                    if (menuBtn) {
                         e.stopPropagation();
-                        this.showSongOptions(btn.dataset.id);
-                    });
+                        this.showSongOptions(menuBtn.dataset.id);
+                        return;
+                    }
+                    
+                    // 处理歌曲项点击
+                    const item = e.target.closest('.song-item');
+                    if (item) {
+                        this.playSongInList(item.dataset.id);
+                    }
+                };
+                
+                // 长按事件 (可选，保留原有逻辑)
+                const items = listEl.querySelectorAll('.song-item');
+                items.forEach(item => {
+                     let longPressTimer;
+                     const start = () => longPressTimer = setTimeout(() => this.showSongOptions(item.dataset.id), 600);
+                     const cancel = () => clearTimeout(longPressTimer);
+                     item.addEventListener('touchstart', start, {passive: true});
+                     item.addEventListener('touchend', cancel);
+                     item.addEventListener('touchmove', cancel);
+                     item.addEventListener('mousedown', start);
+                     item.addEventListener('mouseup', cancel);
+                     item.addEventListener('mouseleave', cancel);
                 });
 
-                $('#playlist-detail-overlay').classList.add('active');
+                overlay.classList.add('active');
             },
 
             async showSongOptions(songId) {
@@ -20693,6 +20737,151 @@ ${globalPromptsSection}
                 if (lyricEl.textContent !== currentLineText) {
                     lyricEl.textContent = currentLineText;
                 }
+            },
+
+            // --- 歌单导出功能 ---
+            async exportPlaylist(playlistId) {
+                const playlist = await DBHelper.get('musicPlaylists', playlistId);
+                if (!playlist) return;
+
+                UIManager.showModal({
+                    isPersistent: true,
+                    title: "正在导出",
+                    body: `<div style="text-align:center;"><div class="loader-spinner"></div><p>正在打包音频数据，请稍候...</p></div>`,
+                    actions: []
+                });
+
+                try {
+                    const allSongs = await DBHelper.getAll('musicSongs');
+                    const playlistSongs = allSongs.filter(s => s.playlistId === playlistId);
+                    
+                    const exportSongs = [];
+
+                    for (const song of playlistSongs) {
+                        const songData = { ...song };
+                        // 如果是本地上传的 Blob 音频，转换为 Base64 字符串以便存储到 JSON
+                        if (song.sourceType === 'local' && song.content instanceof Blob) {
+                            songData.contentBase64 = await Utils.fileToBase64(song.content);
+                            delete songData.content; // 移除 blob 对象，JSON 无法序列化
+                            delete songData.blob; // 兼容旧数据字段
+                        }
+                        // 如果是本地封面 Blob
+                        if (song.cover instanceof Blob) {
+                            songData.coverBase64 = await Utils.fileToBase64(song.cover);
+                            delete songData.cover;
+                        }
+                        exportSongs.push(songData);
+                    }
+
+                    const exportData = {
+                        type: '33_music_playlist',
+                        version: 1,
+                        playlistInfo: {
+                            name: playlist.name,
+                            createdAt: playlist.createdAt,
+                            cover: playlist.cover // 歌单封面通常是 Base64 字符串
+                        },
+                        songs: exportSongs
+                    };
+
+                    const blob = new Blob([JSON.stringify(exportData)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const filename = `歌单_${playlist.name}_${new Date().toISOString().slice(0, 10)}.json`;
+
+                    UIManager.hideModal();
+                    UIManager.showModal({
+                        title: '导出成功',
+                        body: `<a href="${url}" download="${filename}" class="modal-btn btn-primary" style="display:block; text-align:center; margin-top:20px;">点击下载歌单文件</a>`,
+                        actions: [{ text: '关闭', class: 'btn-secondary', handler: () => { URL.revokeObjectURL(url); UIManager.hideModal(); } }]
+                    });
+
+                } catch (error) {
+                    console.error("导出失败:", error);
+                    UIManager.hideModal();
+                    UIManager.showToast("导出失败: " + error.message);
+                }
+            },
+
+            // --- 歌单导入功能 ---
+            handleImportPlaylist(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                UIManager.showModal({
+                    isPersistent: true,
+                    title: "正在导入",
+                    body: `<div style="text-align:center;"><div class="loader-spinner"></div><p>正在解析音频数据...</p></div>`,
+                    actions: []
+                });
+
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        if (data.type !== '33_music_playlist' || !data.playlistInfo || !Array.isArray(data.songs)) {
+                            throw new Error("文件格式不正确");
+                        }
+
+                        // 1. 创建新歌单
+                        const newPlaylistId = Utils.generateId('pl');
+                        const newPlaylist = {
+                            id: newPlaylistId,
+                            name: data.playlistInfo.name + " (导入)",
+                            cover: data.playlistInfo.cover || '',
+                            songCount: data.songs.length,
+                            createdAt: Date.now()
+                        };
+                        await DBHelper.put('musicPlaylists', newPlaylist);
+
+                        // 2. 恢复歌曲数据
+                        for (const songData of data.songs) {
+                            const newSong = {
+                                ...songData,
+                                id: Utils.generateId('song'), // 生成新ID避免冲突
+                                playlistId: newPlaylistId,
+                                createdAt: Date.now()
+                            };
+
+                            // 恢复本地音频 Blob
+                            if (songData.sourceType === 'local' && songData.contentBase64) {
+                                newSong.content = this._base64ToBlob(songData.contentBase64);
+                                delete newSong.contentBase64;
+                            }
+                            // 恢复本地封面 Blob
+                            if (songData.coverBase64) {
+                                newSong.cover = this._base64ToBlob(songData.coverBase64);
+                                delete newSong.coverBase64;
+                            }
+
+                            await DBHelper.put('musicSongs', newSong);
+                        }
+
+                        UIManager.hideModal();
+                        UIManager.showToast(`成功导入歌单: ${newPlaylist.name}`);
+                        this.loadPlaylists(); // 刷新列表
+
+                    } catch (error) {
+                        console.error("导入失败:", error);
+                        UIManager.hideModal();
+                        UIManager.showToast("导入失败: " + error.message);
+                    } finally {
+                        $('#music-playlist-import-input').value = '';
+                    }
+                };
+                reader.readAsText(file);
+            },
+
+            // 辅助：Base64 转 Blob
+            _base64ToBlob(base64) {
+                const arr = base64.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], { type: mime });
             },
 
             // --- 音乐搜索与在线播放逻辑 ---
