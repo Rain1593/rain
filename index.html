@@ -8935,6 +8935,85 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 .thread-op-content p, .thread-comment-content p {
     margin-bottom: 0.5em;
 }
+
+/* --- 音乐搜索页面样式 --- */
+        .music-search-header {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+        }
+        #music-search-input {
+            flex-grow: 1;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+        }
+        #music-search-btn {
+            background: var(--accent-color);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .online-song-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 15px;
+        }
+        .online-song-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .online-song-cover {
+            width: 45px;
+            height: 45px;
+            border-radius: 6px;
+            object-fit: cover;
+            margin-right: 12px;
+            background-color: #333;
+        }
+        .online-song-info {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        .online-song-title {
+            color: white;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .online-song-artist {
+            color: #888;
+            font-size: 0.8rem;
+            margin-top: 3px;
+        }
+        .online-song-actions {
+            display: flex;
+            gap: 15px;
+        }
+        .online-action-btn {
+            color: #aaa;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 5px;
+        }
+        .online-action-btn:hover { color: white; }
 </style>
 <style id="exclusive-bubble-style"></style>
 <style id="offline-custom-css"></style>
@@ -9891,6 +9970,21 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                         </div>
                     </div>
 
+                    <!-- 1.5 搜索界面 (Search) -->
+                    <div id="music-view-search" class="music-view">
+                        <div class="music-player-header" style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <div class="song-title">搜索音乐</div>
+                        </div>
+                        <div class="music-search-header">
+                            <input type="text" id="music-search-input" placeholder="搜索歌曲、歌手...">
+                            <button id="music-search-btn"><i class="fas fa-search"></i></button>
+                        </div>
+                        <div class="online-song-list" id="online-song-results">
+                            <!-- JS 生成结果 -->
+                            <div style="text-align:center; color:#666; margin-top:50px;">输入关键词开始搜索<br>支持在线试听与收藏</div>
+                        </div>
+                    </div>
+
                     <!-- 2. 我的音乐 (歌单) -->
                     <div id="music-view-library" class="music-view">
                         <div class="library-header">
@@ -9938,6 +10032,10 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                     <div class="music-nav-item active" data-view="player">
                         <i class="fas fa-compact-disc"></i>
                         <span>播放</span>
+                    </div>
+                    <div class="music-nav-item" data-view="search">
+                        <i class="fas fa-search"></i>
+                        <span>搜索</span>
                     </div>
                     <div class="music-nav-item" data-view="library">
                         <i class="fas fa-music"></i>
@@ -11242,6 +11340,41 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             },
         };
 
+        // --- 新增：音乐API封装 ---
+        const MusicApi = {
+            baseUrl: 'https://wyapi-1.toubiec.cn',
+
+            async request(endpoint, body) {
+                try {
+                    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error("Music API Request Failed:", error);
+                    throw error;
+                }
+            },
+
+            async search(keywords, page = 1) {
+                return this.request('/api/music/search', { keywords, page });
+            },
+
+            async getUrl(id, level = 'exhigh') {
+                return this.request('/api/music/url', { id, level });
+            },
+
+            async getDetail(id) {
+                return this.request('/api/music/detail', { id });
+            },
+
+            async getLyric(id) {
+                return this.request('/api/music/lyric', { id });
+            }
+        };
         
         const Utils = {
             generateId(prefix) {
@@ -15852,8 +15985,33 @@ ${promptLines.join('\n\n')}
                 // 新增：获取线下模式摘要
                 const offlineContext = await this.getOfflineContext(chatId);
 
-                // --- 新增：论坛感知上下文 (升级版) ---
+                // --- 新增：论坛感知上下文 (升级版 + 转发注入) ---
                 let forumContext = '';
+                
+                // 1. 注入玩家最近转发的帖子
+                if (chatEntity && chatEntity.lastForwardedForumThreadId) {
+                    const forwardedThread = await DBHelper.get('forumThreads', chatEntity.lastForwardedForumThreadId);
+                    if (forwardedThread) {
+                        const board = await DBHelper.get('forumBoards', forwardedThread.boardId);
+                        const boardName = board ? board.name : '未知版块';
+                        
+                        let threadContentDisplay = "";
+                        // 优先使用总结
+                        if (forwardedThread.useSummaryForPerception && forwardedThread.summary) {
+                             threadContentDisplay = `\n  【内容总结】: ${forwardedThread.summary}`;
+                        } else {
+                             const rawContent = forwardedThread.content.length > 100 ? forwardedThread.content.substring(0, 100) + '...' : forwardedThread.content;
+                             threadContentDisplay = `\n  【内容预览】: ${rawContent}`;
+                        }
+
+                        const commentsPreview = (forwardedThread.comments || []).slice(-3).map(c => `${c.authorName}: ${c.content}`).join('; ');
+                        const commentsDisplay = commentsPreview ? `\n  【最新评论】: ${commentsPreview}` : `\n  【评论】: 暂无`;
+
+                        forumContext += `\n---以下是最近玩家转发给你的帖子---\n标题：《${forwardedThread.title}》\n版块：${boardName}\n楼主：${forwardedThread.authorName}${threadContentDisplay}${commentsDisplay}\n----------------------------\n`;
+                    }
+                }
+
+                // 2. 注入角色自己发的贴
                 const forumSettings = await DBHelper.get('forumSettings', 'config') || { perceptionCount: 0 };
                 const perceptionCount = parseInt(forumSettings.perceptionCount);
 
@@ -19626,6 +19784,28 @@ ${globalPromptsSection}
                 $('#music-file-input').onchange = (e) => this.handleSongUpload(e);
                 $('#playlist-cover-input').onchange = (e) => this.handleCoverUpload(e);
                 $('#music-lrc-input').onchange = (e) => this.handleLrcUpload(e);
+
+                // --- 搜索相关事件 ---
+                $('#music-search-btn').onclick = () => this.handleMusicSearch();
+                $('#music-search-input').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.handleMusicSearch();
+                });
+                
+                // 在线歌曲列表点击代理
+                $('#online-song-results').addEventListener('click', (e) => {
+                    const playBtn = e.target.closest('.play-online-btn');
+                    const addBtn = e.target.closest('.add-online-btn');
+                    
+                    if (playBtn) {
+                        const index = parseInt(playBtn.dataset.index);
+                        const songData = this.currentSearchResults[index];
+                        if (songData) this.playOnlineSong(songData);
+                    } else if (addBtn) {
+                        const index = parseInt(addBtn.dataset.index);
+                        const songData = this.currentSearchResults[index];
+                        if (songData) this.addToPlaylistFromApi(songData);
+                    }
+                });
             },
 
             renderPlaylistQueue() {
@@ -20513,6 +20693,223 @@ ${globalPromptsSection}
                 if (lyricEl.textContent !== currentLineText) {
                     lyricEl.textContent = currentLineText;
                 }
+            },
+
+            // --- 音乐搜索与在线播放逻辑 ---
+            async handleMusicSearch() {
+                const input = $('#music-search-input');
+                const keyword = input.value.trim();
+                const resultContainer = $('#online-song-results');
+                
+                if (!keyword) return UIManager.showToast("请输入关键词");
+                
+                resultContainer.innerHTML = '<div style="text-align:center; padding:20px;"><div class="loader-spinner"></div></div>';
+                
+                try {
+                    const res = await MusicApi.search(keyword);
+                    console.log("搜索API返回数据:", res);
+
+                    let songs = [];
+                    
+                    if (res.data && Array.isArray(res.data.songs)) {
+                        songs = res.data.songs;
+                    } else if (res.result && Array.isArray(res.result.songs)) {
+                        songs = res.result.songs;
+                    } else if (res.data && Array.isArray(res.data.list)) {
+                        songs = res.data.list;
+                    } else if (res.data && Array.isArray(res.data)) {
+                        songs = res.data;
+                    } else if (Array.isArray(res)) {
+                        songs = res;
+                    }
+                    
+                    if (!Array.isArray(songs)) {
+                        songs = [];
+                    }
+                    
+                    // 核心修改1：保存当前搜索结果到 MusicManager 实例中
+                    this.currentSearchResults = songs;
+
+                    if (songs.length === 0) {
+                        resultContainer.innerHTML = '<div style="text-align:center; color:#aaa; margin-top:50px;">未找到相关歌曲</div>';
+                        return;
+                    }
+                    
+                    resultContainer.innerHTML = songs.map((song, index) => {
+                        const name = song.name || '未知歌曲';
+                        
+                        let artist = '未知歌手';
+                        if (typeof song.artists === 'string') artist = song.artists;
+                        else if (song.ar && Array.isArray(song.ar)) artist = song.ar.map(a => a.name).join('/');
+                        else if (song.artists && Array.isArray(song.artists)) artist = song.artists.map(a => a.name).join('/');
+                        else if (song.artist) artist = song.artist;
+                        
+                        let album = '';
+                        if (typeof song.album === 'string') album = song.album;
+                        else if (song.al && song.al.name) album = song.al.name;
+                        else if (song.album && song.album.name) album = song.album.name;
+
+                        let cover = MusicManager.defaultCover;
+                        if (song.picUrl) cover = song.picUrl;
+                        else if (song.al && song.al.picUrl) cover = song.al.picUrl;
+                        else if (song.album && song.album.picUrl) cover = song.album.picUrl;
+                        else if (song.pic) cover = song.pic;
+                        
+                        const id = song.id;
+
+                        // 核心修改2：在按钮上添加 data-index 属性
+                        return `
+                            <div class="online-song-item">
+                                <img src="${cover}" class="online-song-cover" onerror="this.src='${MusicManager.defaultCover}'">
+                                <div class="online-song-info">
+                                    <div class="online-song-title">${name}</div>
+                                    <div class="online-song-artist">${artist} ${album ? `- ${album}` : ''}</div>
+                                </div>
+                                <div class="online-song-actions">
+                                    <button class="online-action-btn play-online-btn" data-index="${index}" title="立即播放"><i class="fas fa-play"></i></button>
+                                    <button class="online-action-btn add-online-btn" data-index="${index}" title="添加到歌单"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                } catch (error) {
+                    console.error("搜索处理出错:", error);
+                    resultContainer.innerHTML = `<div style="text-align:center; color:#e74c3c; margin-top:50px;">搜索失败: ${error.message}</div>`;
+                }
+            },
+
+            // 获取完整歌曲信息（链接、详情、歌词）
+            // 修改：允许传入完整的 rawSongObject (搜索结果)，避免重新请求详情失败
+            async fetchFullSongData(rawSongObject) {
+                UIManager.showToast("正在获取歌曲资源...");
+                
+                // 核心修复：API强制要求ID必须是字符串类型，搜索结果返回的是数字，必须转换！
+                const id = String(rawSongObject.id);
+
+                // 仅仅请求 播放链接 和 歌词
+                const [urlRes, lyricRes] = await Promise.all([
+                    MusicApi.getUrl(id).catch(e => null),
+                    MusicApi.getLyric(id).catch(e => null)
+                ]);
+
+                if (!urlRes || !urlRes.data || !urlRes.data[0] || !urlRes.data[0].url) {
+                    throw new Error("无法获取播放链接 (可能需VIP或版权限制)");
+                }
+
+                const songUrl = urlRes.data[0].url;
+                
+                // --- 核心修复：增强歌词解析逻辑 ---
+                let lyric = "";
+                if (lyricRes) {
+                    console.log("歌词API原始返回:", lyricRes); // 方便调试
+                    
+                    // 1. 优先匹配当前API返回格式: { data: { lrc: "歌词内容..." } }
+                    if (lyricRes.data && typeof lyricRes.data.lrc === 'string') {
+                        lyric = lyricRes.data.lrc;
+                    }
+                    // 2. 匹配网易云标准格式: { lrc: { lyric: "..." } }
+                    else if (lyricRes.lrc && lyricRes.lrc.lyric) {
+                        lyric = lyricRes.lrc.lyric;
+                    } 
+                    // 3. 匹配嵌套在data中的标准格式: { data: { lrc: { lyric: "..." } } }
+                    else if (lyricRes.data && lyricRes.data.lrc && lyricRes.data.lrc.lyric) {
+                        lyric = lyricRes.data.lrc.lyric;
+                    }
+                    // 4. 匹配result格式
+                    else if (lyricRes.result && lyricRes.result.lrc && lyricRes.result.lrc.lyric) {
+                        lyric = lyricRes.result.lrc.lyric;
+                    }
+                }
+                
+                if (!lyric) {
+                    console.warn("未解析到歌词，原始数据:", lyricRes);
+                    lyric = "[00:00.00] 暂无歌词或纯音乐";
+                }
+
+                // 解析搜索结果中的数据 (复用 handleMusicSearch 中的逻辑)
+                const name = rawSongObject.name || "未知歌曲";
+                
+                let artist = '未知歌手';
+                if (typeof rawSongObject.artists === 'string') artist = rawSongObject.artists;
+                else if (rawSongObject.ar && Array.isArray(rawSongObject.ar)) artist = rawSongObject.ar.map(a => a.name).join('/');
+                else if (rawSongObject.artists && Array.isArray(rawSongObject.artists)) artist = rawSongObject.artists.map(a => a.name).join('/');
+                else if (rawSongObject.artist) artist = rawSongObject.artist;
+
+                let cover = MusicManager.defaultCover;
+                if (rawSongObject.picUrl) cover = rawSongObject.picUrl;
+                else if (rawSongObject.al && rawSongObject.al.picUrl) cover = rawSongObject.al.picUrl;
+                else if (rawSongObject.album && rawSongObject.album.picUrl) cover = rawSongObject.album.picUrl;
+                else if (rawSongObject.pic) cover = rawSongObject.pic;
+
+                return {
+                    id: Utils.generateId('song'), // 生成本地ID
+                    sourceType: 'url',
+                    name: name,
+                    artist: artist,
+                    url: songUrl,
+                    cover: cover,
+                    lrc: lyric,
+                    createdAt: Date.now()
+                };
+            },
+
+            async playOnlineSong(rawSongObject) {
+                try {
+                    const songData = await this.fetchFullSongData(rawSongObject);
+                    
+                    // 临时添加到当前播放列表并播放
+                    if (this.currentIndex === -1) {
+                        this.currentPlaylist.push(songData);
+                        this.currentIndex = 0;
+                    } else {
+                        // 插入到当前播放歌曲的后面
+                        this.currentPlaylist.splice(this.currentIndex + 1, 0, songData);
+                        this.currentIndex++;
+                    }
+                    
+                    this.loadSong(this.currentPlaylist[this.currentIndex], true);
+                    
+                    // 自动跳转到播放界面
+                    $('[data-view="player"]').click();
+                    
+                } catch (error) {
+                    UIManager.showToast(error.message || "播放失败");
+                }
+            },
+
+            async addToPlaylistFromApi(rawSongObject) {
+                const playlists = await DBHelper.getAll('musicPlaylists');
+                if (playlists.length === 0) {
+                    return UIManager.showToast("请先在'我的'页面创建歌单");
+                }
+
+                UIManager.showBottomSheet({
+                    title: '添加到歌单',
+                    items: playlists.map(p => ({ value: p.id, text: p.name })),
+                    onSelect: async (playlistId) => {
+                        try {
+                            const songData = await this.fetchFullSongData(rawSongObject);
+                            songData.playlistId = playlistId; // 绑定歌单ID
+                            
+                            await DBHelper.put('musicSongs', songData);
+                            
+                            // 更新歌单计数
+                            const playlist = await DBHelper.get('musicPlaylists', playlistId);
+                            playlist.songCount = (playlist.songCount || 0) + 1;
+                            // 如果歌单没有封面，用这首歌的封面
+                            if ((!playlist.cover || playlist.cover === MusicManager.defaultCover) && songData.cover !== MusicManager.defaultCover) {
+                                playlist.cover = songData.cover;
+                            }
+                            await DBHelper.put('musicPlaylists', playlist);
+                            
+                            this.loadPlaylists(); // 刷新列表UI
+                            UIManager.showToast(`已添加到 "${playlist.name}"`);
+                        } catch (error) {
+                            UIManager.showToast(error.message || "添加失败");
+                        }
+                    }
+                });
             },
         };
         
@@ -24956,6 +25353,7 @@ ${residentsInfo}
                     <button class="prompts-nav-btn" id="infinity-thread-back-btn"><i class="fas fa-chevron-left"></i> 返回</button>
                     <div class="prompts-nav-title">帖子详情</div>
                     <div class="prompts-nav-actions">
+                         <button class="prompts-nav-btn" id="infinity-thread-forward-btn" title="转发给好友"><i class="fas fa-share-alt"></i></button>
                          <button class="prompts-nav-btn" id="infinity-thread-refresh-btn" title="AI生成新评论"><i class="${refreshIconClass}"></i></button>
                          <button class="prompts-nav-btn" id="infinity-thread-manage-btn" title="管理"><i class="fas fa-ellipsis-h"></i></button>
                     </div>
@@ -24968,6 +25366,8 @@ ${residentsInfo}
                     this.renderThreadList(this.currentBoardId);
                 };
                 
+                // 绑定转发按钮
+                $('#infinity-thread-forward-btn').onclick = () => this.handleForwardThread(threadId);
                 $('#infinity-thread-refresh-btn').onclick = () => this.handleRefreshComments(threadId);
                 $('#infinity-thread-manage-btn').onclick = () => this.showThreadManagementMenu(threadId);
 
@@ -25075,20 +25475,27 @@ ${residentsInfo}
                 
                 this.loadLazyAvatars(list);
 
+                // 绑定回复按钮
                 list.querySelectorAll('.reply-btn').forEach(btn => {
                     btn.onclick = (e) => {
                         const item = e.target.closest('.thread-comment-refined');
-                        const name = item.querySelector('.thread-comment-nickname').childNodes[0].textContent.trim(); // 获取纯文本名字，排除badge
+                        const name = item.querySelector('.thread-comment-nickname').childNodes[0].textContent.trim(); 
                         this.activateReplyMode(name);
                     };
                 });
 
+                // 绑定点赞按钮
                 list.querySelectorAll('.like-btn').forEach(btn => {
                     btn.onclick = (e) => {
                         const item = e.target.closest('.thread-comment-refined');
                         const idx = parseInt(item.dataset.idx);
                         this.handleCommentLike(thread.id, idx);
                     };
+                });
+
+                // --- 修改：绑定长按删除事件 ---
+                list.querySelectorAll('.thread-comment-refined').forEach(item => {
+                    this.bindCommentLongPress(item, thread, parseInt(item.dataset.idx));
                 });
             },
 
@@ -25141,6 +25548,128 @@ ${residentsInfo}
                 }
             },
 
+            // 新增：评论长按删除绑定
+            bindCommentLongPress(element, thread, commentIndex) {
+                let timer;
+                const start = () => {
+                    timer = setTimeout(() => {
+                        this.showDeleteCommentModal(thread, commentIndex);
+                    }, 600);
+                };
+                const cancel = () => clearTimeout(timer);
+
+                element.addEventListener('touchstart', start, {passive: true});
+                element.addEventListener('touchend', cancel);
+                element.addEventListener('touchmove', cancel);
+                element.addEventListener('mousedown', start);
+                element.addEventListener('mouseup', cancel);
+                element.addEventListener('mouseleave', cancel);
+            },
+
+            // 新增：删除评论确认弹窗
+            showDeleteCommentModal(thread, commentIndex) {
+                const comment = thread.comments[commentIndex];
+                if (!comment) return;
+
+                UIManager.showModal({
+                    customClass: 'ios-style',
+                    title: "删除评论",
+                    body: `<p style="font-size:0.9rem; color:#666; margin-bottom:10px;">确定要删除这条评论吗？</p>
+                           <div style="background:#f5f5f5; padding:8px; border-radius:6px; font-size:0.85rem; color:#333; max-height:60px; overflow:hidden;">${comment.authorName}: ${comment.content}</div>`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '删除', class: 'btn-danger', handler: async () => {
+                            thread.comments.splice(commentIndex, 1);
+                            await DBHelper.put('forumThreads', thread);
+                            this.renderComments(thread);
+                            UIManager.hideModal();
+                            UIManager.showToast("评论已删除");
+                        }}
+                    ]
+                });
+            },
+
+            // 新增：转发帖子给好友/群聊 (同时注入Prompt)
+            async handleForwardThread(threadId) {
+                const thread = await DBHelper.get('forumThreads', threadId);
+                const allContacts = await DBHelper.getAll('contacts');
+                const allGroups = await DBHelper.getAll('groups');
+
+                const targetListHtml = [
+                    ...allContacts.map(c => ({ id: c.id, name: c.remark || c.name, avatar: c.avatar, type: 'contact' })),
+                    ...allGroups.map(g => ({ id: g.id, name: g.name, avatar: g.avatar, type: 'group' }))
+                ].map(item => `
+                    <label class="member-select-item" data-name="${item.name.toLowerCase()}">
+                        <input type="radio" name="forward-thread-target" value="${item.id}" data-type="${item.type}">
+                        <img src="${item.avatar}" class="contact-item-avatar" style="width:40px;height:40px;margin-right:10px; border-radius:8px;">
+                        <span>${item.name}</span>
+                    </label>
+                `).join('');
+
+                UIManager.showModal({
+                    title: "转发帖子",
+                    body: `
+                        <input type="text" id="forward-thread-search" class="forward-target-search-bar" placeholder="搜索转发对象...">
+                        <div class="member-select-list" style="max-height: 40vh;">${targetListHtml}</div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '发送', class: 'btn-primary', handler: async () => {
+                            const selected = $('input[name="forward-thread-target"]:checked');
+                            if (!selected) return UIManager.showToast("请选择转发对象");
+                            
+                            const targetId = selected.value;
+                            const type = selected.dataset.type;
+                            
+                            // 1. 发送一条可见的聊天消息 (作为记录)
+                            const myProfile = await DBHelper.get('profile', 'myProfile');
+                            const board = await DBHelper.get('forumBoards', thread.boardId);
+                            
+                            // 简单的 summary
+                            const contentPreview = thread.summary || (thread.content.length > 30 ? thread.content.substring(0, 30) + '...' : thread.content);
+                            
+                            const messageContent = `[转发帖子] 《${thread.title}》\n版块：${board ? board.name : '未知'}\n楼主：${thread.authorName}\n内容：${contentPreview}`;
+                            
+                            const message = {
+                                messageId: Utils.generateId('msg'),
+                                chatId: targetId,
+                                senderId: myProfile.id,
+                                timestamp: Date.now(),
+                                type: 'sent',
+                                segmentType: 'forward_custom',
+                                content: `<转发帖子>${thread.title}</转发帖子>`, // 简略
+                                cardData: {
+                                    title: `帖子: ${thread.title}`,
+                                    content: messageContent
+                                }
+                            };
+                            
+                            await DBHelper.put('messages', message);
+                            await UIManager.updateChatMetadata(targetId, message);
+
+                            // 2. 更新实体的 lastForwardedForumThreadId 以供 Prompt 使用
+                            const storeName = type === 'group' ? 'groups' : 'contacts';
+                            const entity = await DBHelper.get(storeName, targetId);
+                            if (entity) {
+                                entity.lastForwardedForumThreadId = threadId;
+                                await DBHelper.put(storeName, entity);
+                            }
+
+                            UIManager.hideModal();
+                            UIManager.showToast("已转发并更新AI感知");
+                        }}
+                    ]
+                });
+
+                // 搜索功能
+                $('#forward-thread-search').oninput = (e) => {
+                    const term = e.target.value.toLowerCase();
+                    $$('.member-select-item').forEach(item => {
+                        item.style.display = item.dataset.name.includes(term) ? 'flex' : 'none';
+                    });
+                };
+            },
+
             async handleCommentLike(threadId, commentIdx) {
                 const thread = await DBHelper.get('forumThreads', threadId);
                 if (thread && thread.comments && thread.comments[commentIdx]) {
@@ -25179,12 +25708,23 @@ ${residentsInfo}
                     likes: 0
                 };
                 
+                // --- 修改开始：增加热度 ---
+                const heatIncrease = Math.floor(Math.random() * 6) + 5; // 5-10
+                thread.likes = (thread.likes || 0) + heatIncrease;
+                // --- 修改结束 ---
+
                 if (!thread.comments) thread.comments = [];
                 thread.comments.push(newComment);
                 await DBHelper.put('forumThreads', thread);
                 
                 this.renderComments(thread);
                 
+                // 刷新界面上的热度显示
+                const metaEl = $('.thread-meta');
+                if (metaEl) {
+                     metaEl.innerHTML = `<span style="display:flex; align-items:center; gap:5px; color:#e74c3c;"><i class="fas fa-fire"></i> ${thread.likes} 热度</span>`;
+                }
+
                 // 重置输入状态
                 input.value = '';
                 input.placeholder = '说点什么...';
@@ -25192,7 +25732,7 @@ ${residentsInfo}
                 this.currentReplyTarget = null;
                 $('.infinity-input-row').classList.remove('replying');
                 
-                UIManager.showToast("发送成功");
+                UIManager.showToast(`发送成功 (热度+${heatIncrease})`);
             },
 
             async handleRefreshComments(threadId) {
@@ -25456,10 +25996,25 @@ ${existingComments || "(暂无评论)"}
                         
                         if (!thread.comments) thread.comments = [];
                         thread.comments.push(...newComments);
+                        
+                        // --- 修改开始：批量增加热度 ---
+                        let totalHeatIncrease = 0;
+                        for(let i=0; i<newComments.length; i++) {
+                            totalHeatIncrease += Math.floor(Math.random() * 6) + 5;
+                        }
+                        thread.likes = (thread.likes || 0) + totalHeatIncrease;
+                        // --- 修改结束 ---
+
                         await DBHelper.put('forumThreads', thread);
                         
                         this.renderComments(thread);
-                        UIManager.showToast(`已更新 ${newComments.length} 条评论`);
+                         // 刷新界面上的热度显示
+                        const metaEl = $('.thread-meta');
+                        if (metaEl) {
+                             metaEl.innerHTML = `<span style="display:flex; align-items:center; gap:5px; color:#e74c3c;"><i class="fas fa-fire"></i> ${thread.likes} 热度</span>`;
+                        }
+
+                        UIManager.showToast(`已更新 ${newComments.length} 条评论，热度+${totalHeatIncrease}`);
                     }
                 } catch (e) {
                     console.error(e);
