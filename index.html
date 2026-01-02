@@ -30,7 +30,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.1.0/style.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Long+Cang&display=swap" rel="stylesheet">
-    <style>
+    
+    
+<style>
+
         @import url('https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap');
         /* --- 引入京华老宋体 --- */
         @font-face {
@@ -9014,7 +9017,9 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             padding: 5px;
         }
         .online-action-btn:hover { color: white; }
-</style>
+
+</style>    
+
 <style id="exclusive-bubble-style"></style>
 <style id="offline-custom-css"></style>
 </head>
@@ -31508,18 +31513,18 @@ async showMomentsSettingsModal() {
                     const file = e.target.files[0];
                     if (!file) return;
                     try {
-                        // 直接转Base64，不压缩
                         const base64 = await Utils.fileToBase64(file);
-                        this.saveDesktopWallpaper(base64);
+                        await EventManager.saveDesktopWallpaper(base64);
                     } catch (err) {
+                        console.error(err);
                         UIManager.showToast("图片读取失败");
                     }
                 };
 
                 // URL 上传
-                $('#desktop-wp-url-btn').onclick = () => {
+                $('#desktop-wp-url-btn').onclick = async () => {
                     const url = prompt("请输入图片链接 (URL):");
-                    if (url) this.saveDesktopWallpaper(url);
+                    if (url) await EventManager.saveDesktopWallpaper(url);
                 };
 
                 // 重置
@@ -31757,6 +31762,22 @@ async showMomentsSettingsModal() {
                 };
             },
 
+
+            async saveDesktopWallpaper(src) {
+                const settingsToSave = await DBHelper.get('apiConfig', 'themeSettings') || { id: 'themeSettings' };
+                settingsToSave.desktopWallpaper = src;
+                await DBHelper.put('apiConfig', settingsToSave);
+                await this.applyDesktopSettings();
+                
+                const preview = $('#desktop-wp-preview');
+                const placeholder = $('#desktop-wp-placeholder');
+                if (preview && placeholder) {
+                    preview.src = src;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                UIManager.showToast("壁纸设置成功");
+            },
 
 
             async applyDesktopSettings() {
