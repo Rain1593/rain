@@ -9018,6 +9018,72 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
         }
         .online-action-btn:hover { color: white; }
 
+        /* 阅读App特定样式 */
+        .novel-card {
+            background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px;
+            display: flex; gap: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer;
+        }
+        .novel-cover-mock {
+            width: 70px; height: 95px; background: #e0e0e0; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; color: #888; text-align: center; padding: 5px;
+            flex-shrink: 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+            background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .novel-info-right { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; overflow: hidden;}
+        .novel-title-text { font-weight: bold; font-size: 1.1rem; color: #333; }
+        .novel-author-text { font-size: 0.85rem; color: var(--accent-color-deep); }
+        .novel-intro-text {
+            font-size: 0.8rem; color: #888; line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        
+        /* 阅读App 搜索栏美化 */
+        #reading-view-search .music-search-header {
+            background-color: transparent !important;
+            padding: 15px;
+        }
+
+        #reading-search-input {
+            background-color: #e3e3e8 !important;
+            border: none !important;
+            border-radius: 12px !important;
+            height: 40px !important;
+            padding: 0 15px !important;
+            font-size: 0.95rem !important;
+            color: #333 !important;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        #reading-search-input::placeholder {
+            color: #999;
+        }
+
+        #reading-advanced-search-btn {
+            background-color: #8E8E93 !important;
+            transition: opacity 0.2s;
+        }
+
+        #reading-search-btn {
+            background-color: #5D534A !important;
+            transition: opacity 0.2s;
+        }
+
+        #reading-advanced-search-btn:active, #reading-search-btn:active {
+            opacity: 0.7;
+        }
+        
+        .reader-chapter-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 25px; text-align: center; color: #000; }
+        .reader-body-text { font-size: 1.05rem; white-space: pre-wrap; margin-bottom: 40px; }
+        .author-note {
+            background: rgba(0,0,0,0.03); border-left: 4px solid #ccc;
+            padding: 15px; margin: 30px 0; font-size: 0.9rem; color: #666;
+        }
+        .reader-comments-section { border-top: 1px solid #eee; padding-top: 20px; }
+        .reader-comment-item { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee; }
+        .reader-comment-user { font-weight: bold; font-size: 0.85rem; color: #5D534A; margin-bottom: 4px; }
+        .reader-comment-content { font-size: 0.9rem; color: #444; line-height: 1.4; }
+
 </style>    
 
 <style id="exclusive-bubble-style"></style>
@@ -9092,7 +9158,13 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                 </div>
                 <span class="app-name">心跳</span>
             </div>
-            <!-- 这里可以继续添加更多占位APP以填满 4x6 -->
+            <!-- 新增：阅读 App 图标 -->
+            <div class="app-item" id="open-reading-btn">
+                <div class="app-icon icon-reading" style="background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); color: #5D534A;">
+                    <i class="fas fa-book-open"></i>
+                </div>
+                <span class="app-name">阅读</span>
+            </div>
         </div>
 
         <!-- 底部 Dock 栏 -->
@@ -10736,6 +10808,101 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                 </nav>
             </div>
 
+
+            <!-- 阅读 App 页面 -->
+            <div id="page-reading-app" class="page">
+                <div id="reading-sub-view-container" style="flex-grow: 1; position: relative; overflow: hidden;">
+                    
+                    <!-- 1. 书架视图 (首页) -->
+                    <div id="reading-view-shelf" class="prompts-view active" style="background-color: #F2F2F7;">
+                        <div class="prompts-nav-bar">
+                            <button class="prompts-nav-btn" id="reading-exit-btn">退出</button>
+                            <div class="prompts-nav-title">我的书架</div>
+                            <div style="width: 40px;"></div>
+                        </div>
+                        <div class="prompts-list-container" id="reading-shelf-list">
+                            <!-- JS 生成书架列表 -->
+                        </div>
+                    </div>
+
+                    <!-- 2. 搜索视图 -->
+                    <div id="reading-view-search" class="prompts-view" style="background-color: #F2F2F7;">
+                        <div class="prompts-nav-bar">
+                            <div style="width: 40px;"></div>
+                            <div class="prompts-nav-title">搜书</div>
+                            <div style="width: 40px;"></div>
+                        </div>
+                        <div class="music-search-header" style="gap: 10px;">
+                            <input type="text" id="reading-search-input" placeholder="书名、主角或题材关键字..." style="flex-grow: 1; outline: none;">
+                            <button id="reading-advanced-search-btn" title="高级搜索" style="background: #8E8E93; border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;"><i class="fas fa-sliders-h"></i></button>
+                            <button id="reading-search-btn" style="background: #5D534A; border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer;"><i class="fas fa-search"></i></button>
+                        </div>
+                        <div class="prompts-list-container" id="reading-search-results">
+                            <div style="text-align:center; color:#aaa; margin-top:50px;">想看点什么？<br>输入关键词，AI为你即时创作</div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 设置视图 -->
+                    <div id="reading-view-settings" class="prompts-view" style="background-color: #F2F2F7;">
+                        <div class="prompts-nav-bar">
+                            <div style="width: 40px;"></div>
+                            <div class="prompts-nav-title">设置</div>
+                            <div style="width: 40px;"></div>
+                        </div>
+                        <div class="prompts-list-container">
+                            <div class="ios-list-section">
+                                <div class="ios-list-item" id="reading-bind-search-prompts" style="cursor: pointer;">
+                                    <div class="ios-list-icon" style="background: #5856D6;"><i class="fas fa-link"></i></div>
+                                    <div class="ios-list-content">
+                                        <div class="ios-list-title">搜索绑定提示词</div>
+                                        <div class="ios-list-subtitle">影响AI构思新书的风格</div>
+                                    </div>
+                                    <i class="fas fa-chevron-right ios-list-arrow"></i>
+                                </div>
+                            </div>
+                            <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">Reading App v1.1.0</p>
+                        </div>
+                    </div>
+
+                    <!-- 3. 阅读界面 (覆盖层) -->
+                    <div id="reading-view-reader" class="prompts-view" style="background-color: #fdf6e3; z-index: 100;">
+                        <div class="prompts-nav-bar" style="background: rgba(253, 246, 227, 0.9);">
+                            <button class="prompts-nav-btn" id="reader-back-btn" style="color: #5D534A;"><i class="fas fa-chevron-left"></i> 书架</button>
+                            <div class="prompts-nav-title" id="reader-top-title" style="color: #5D534A;">阅读中</div>
+                            <button class="prompts-nav-btn" id="reader-manage-btn" style="color: #5D534A;"><i class="fas fa-ellipsis-h"></i></button>
+                        </div>
+                        <div class="page-content" id="reader-content-area" style="padding: 20px; font-family: var(--font-main); line-height: 1.8; color: #333; overflow-y: auto;">
+                            <!-- 小说正文渲染区 -->
+                        </div>
+                        <!-- 阅读器底部工具栏 -->
+                        <div class="offline-bottom-bar" style="background: rgba(253, 246, 227, 0.95); border-top: 1px solid rgba(0,0,0,0.05);">
+                            <div class="offline-action-row" style="justify-content: space-between;">
+                                <button id="reader-prev-btn" class="offline-action-btn">上一章</button>
+                                <span id="reader-progress-label" style="font-size: 0.8rem; color: #888;">第 0 章</span>
+                                <button id="reader-next-btn" class="offline-action-btn generate">下一章</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- 底部导航 -->
+                <nav id="reading-bottom-nav" style="height: 83px; padding-bottom: 20px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-around; align-items: flex-start; padding-top: 10px; flex-shrink: 0;">
+                    <div class="prompts-nav-tab active" data-target="reading-view-shelf">
+                        <i class="fas fa-book"></i>
+                        <span>书架</span>
+                    </div>
+                    <div class="prompts-nav-tab" data-target="reading-view-search">
+                        <i class="fas fa-search"></i>
+                        <span>搜书</span>
+                    </div>
+                    <div class="prompts-nav-tab" data-target="reading-view-settings">
+                        <i class="fas fa-cog"></i>
+                        <span>设置</span>
+                    </div>
+                </nav>
+            </div>
+
         </main>
 
             <!-- 转发历史页面 (新) -->
@@ -10866,6 +11033,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
             'heartbeat-app': $('#page-heartbeat-app'), // 新增：心跳App
             'offline-mode': $('#page-offline-mode'), // 新增：线下模式
             'infinity-app': $('#page-infinity-app'),
+            'reading-app': $('#page-reading-app'),
         };
 
         
@@ -10989,7 +11157,7 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
 
             async init() {
                 // 升级版本号以触发更新
-                this.DB_VERSION = 28; 
+                this.DB_VERSION = 29; 
 
                 return new Promise((resolve, reject) => {
                     if (this.db) {
@@ -11166,6 +11334,18 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                             // 论坛全局设置 (简单kv)
                             if (!db.objectStoreNames.contains('forumSettings')) {
                                 db.createObjectStore('forumSettings', { keyPath: 'id' });
+                            }
+                        }
+
+                        // --- 新增：阅读App相关表 (版本 29) ---
+                        if (event.oldVersion < 29) {
+                            console.log("数据库升级至版本 29: 创建 novelShelf 和 novelChapters 表...");
+                            if (!db.objectStoreNames.contains('novelShelf')) {
+                                db.createObjectStore('novelShelf', { keyPath: 'id' });
+                            }
+                            if (!db.objectStoreNames.contains('novelChapters')) {
+                                const chapterStore = db.createObjectStore('novelChapters', { keyPath: 'id' }); // id 格式为 novelId_index
+                                chapterStore.createIndex('novelId', 'novelId', { unique: false });
                             }
                         }
 
@@ -11558,8 +11738,8 @@ input:checked + .ios-slider:before { transform: translateX(20px); }
                 return;
             }
             
-            // 修改：将设置相关的子页面加入列表，进入这些页面时隐藏底部导航栏
-            if (['chat', 'prompts', 'moments', 'tutorial', 'pomodoro', 'gifts', 'forwarded-history', 'video-call', 'video-call-history', 'video-call-log-detail', 'chat-settings', 'api-settings', 'theme-settings', 'bubble-settings', 'os-settings', 'desktop-settings', 'music', 'my-info', 'offline-mode'].includes(pageId)) {
+            // 修改：将阅读App和论坛App以及设置相关的子页面加入列表，进入这些页面时隐藏系统底部导航栏
+            if (['chat', 'prompts', 'moments', 'tutorial', 'pomodoro', 'gifts', 'forwarded-history', 'video-call', 'video-call-history', 'video-call-log-detail', 'chat-settings', 'api-settings', 'theme-settings', 'bubble-settings', 'os-settings', 'desktop-settings', 'music', 'my-info', 'offline-mode', 'reading-app', 'infinity-app'].includes(pageId)) {
                 bottomNav.style.display = 'none';
             } else {
                 bottomNav.style.display = 'flex';
@@ -26223,6 +26403,462 @@ ${existingComments || "(暂无评论)"}
             },
         };
 
+
+        const ReadingManager = {
+            currentNovelId: null,
+            currentChapterIndex: 0,
+            searchResults: [],
+
+            async init() {
+                this.bindEvents();
+            },
+
+            bindEvents() {
+                // 底部导航
+                $('#reading-bottom-nav').onclick = (e) => {
+                    const tab = e.target.closest('.prompts-nav-tab');
+                    if (!tab) return;
+                    $$('#reading-bottom-nav .prompts-nav-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    $$('#reading-sub-view-container .prompts-view').forEach(v => {
+                        if(v.id !== 'reading-view-reader') v.classList.remove('active');
+                    });
+                    $(`#${tab.dataset.target}`).classList.add('active');
+                    if(tab.dataset.target === 'reading-view-shelf') this.renderShelf();
+                };
+
+                $('#reading-exit-btn').onclick = () => {
+                    const appContainer = $('#app-container');
+                    appContainer.classList.remove('app-active');
+                    setTimeout(() => { appContainer.style.display = 'none'; }, 300);
+                    $('#ios-desktop').style.display = 'flex';
+                    $('#ios-desktop').classList.add('active');
+                };
+
+                $('#reading-search-btn').onclick = () => this.handleSearch();
+                $('#reading-search-input').onkeypress = (e) => { if(e.key === 'Enter') this.handleSearch(); };
+
+                $('#reader-back-btn').onclick = () => {
+                    $('#reading-view-reader').classList.remove('active');
+                    // 重新显示阅读App的底部导航栏
+                    $('#reading-bottom-nav').style.display = 'flex';
+                    this.renderShelf();
+                };
+
+                // 新增：高级搜索按钮
+                $('#reading-advanced-search-btn').onclick = () => this.showAdvancedSearchModal();
+
+                // 新增：搜索提示词绑定
+                const bindSearchBtn = $('#reading-bind-search-prompts');
+                if (bindSearchBtn) {
+                    bindSearchBtn.onclick = () => this.showSearchPromptBinding();
+                }
+
+                // 新增：阅读器管理按钮（侧边栏）
+                $('#reader-manage-btn').onclick = () => this.showReaderManagementSidebar();
+
+                // 新增：处理搜索结果中的“加入书架”按钮点击（修正之前的事件委托）
+                $('#reading-search-results').onclick = (e) => {
+                    const btn = e.target.closest('.add-to-shelf-btn');
+                    if (btn) {
+                        const index = parseInt(btn.dataset.index);
+                        this.addToShelf(index);
+                    }
+                };
+
+                // 新增：处理搜索结果中的“加入书架”按钮点击
+                $('#reading-search-results').onclick = (e) => {
+                    const btn = e.target.closest('.add-to-shelf-btn');
+                    if (btn) {
+                        const index = parseInt(btn.dataset.index);
+                        this.addToShelf(index);
+                    }
+                };
+
+                $('#reader-next-btn').onclick = () => this.generateNextChapter();
+                $('#reader-prev-btn').onclick = () => this.loadChapter(this.currentChapterIndex - 1);
+            },
+
+            async renderShelf() {
+                const list = $('#reading-shelf-list');
+                list.innerHTML = '';
+                const novels = await DBHelper.getAll('novelShelf');
+                if (novels.length === 0) {
+                    list.innerHTML = `<div style="text-align:center; padding:40px; color:#aaa;">书架空空的<br>去搜书看看吧</div>`;
+                    return;
+                }
+                novels.forEach(n => {
+                    const div = document.createElement('div');
+                    div.className = 'novel-card';
+                    div.innerHTML = `
+                        <div class="novel-cover-mock">${n.title}</div>
+                        <div class="novel-info-right">
+                            <div class="novel-title-text">${n.title}</div>
+                            <div class="novel-author-text">${n.author} · ${n.genre}</div>
+                            <div class="novel-intro-text">${n.summary}</div>
+                        </div>
+                    `;
+                    div.onclick = () => this.openNovel(n.id);
+                    list.appendChild(div);
+                });
+            },
+
+            async handleSearch(advancedOptions = null) {
+                const query = $('#reading-search-input').value.trim();
+                if (!query && !advancedOptions) return;
+                
+                const resultsContainer = $('#reading-search-results');
+                resultsContainer.innerHTML = '<div style="text-align:center; padding:20px;"><div class="loader-spinner"></div><p>AI正在构思中...</p></div>';
+
+                // 1. 获取全局提示词 (Context: reading)
+                const globalPrompts = await AIHandler.getGlobalPromptsForContext('reading');
+                
+                // 2. 获取绑定提示词
+                let boundPrompts = "";
+                const config = await DBHelper.get('apiConfig', 'readingSettings') || {};
+                if (config.boundPromptFolderIds && config.boundPromptFolderIds.length > 0) {
+                     const allPrompts = await DBHelper.getAll('prompts');
+                     boundPrompts = allPrompts.filter(p => config.boundPromptFolderIds.includes(p.folderId) && p.isActive).map(p=>p.content).join('\n\n');
+                }
+
+                let searchRequirement = `关键词：“${query}”`;
+                if (advancedOptions) {
+                    searchRequirement += `\n额外要求：类型[${advancedOptions.genre}]，主角[${advancedOptions.protagonist}]，篇幅[${advancedOptions.length}]，剧情偏好[${advancedOptions.plot}]`;
+                }
+
+                const prompt = `${globalPrompts}\n\n${boundPrompts}\n\n你是一个小说推荐引擎。请根据以下要求，构思3本完全不同的小说：\n${searchRequirement}
+                // 新增：打印搜索Prompt
+                console.log("--- READING APP: SEARCH PROMPT ---\n", prompt);
+要求：
+1. 包含：小说名、作者、类型、简介(50字内)。
+2. **核心大纲 (Hidden Outline)**：必须包含主角身份、大概剧情走向、预期在多少章内完结。
+3. 严格返回JSON数组格式。
+[
+  {
+    "title": "书名", "author": "作者", "genre": "类型", "summary": "简介",
+    "outline": { "protagonist": "身份设定", "arc": "剧情发展关键点", "totalChapters": 100 }
+  }
+]`;
+                try {
+                    const response = await AIHandler.getApiResponse(prompt, null, new AbortController().signal);
+                    const jsonStr = response.replace(/```json/g, '').replace(/```/g, '').trim();
+                    this.searchResults = JSON.parse(jsonStr);
+                    
+                    resultsContainer.innerHTML = this.searchResults.map((n, i) => `
+                        <div class="novel-card">
+                            <div class="novel-cover-mock">${n.title}</div>
+                            <div class="novel-info-right">
+                                <div class="novel-title-text">${n.title}</div>
+                                <div class="novel-author-text">${n.author} · ${n.genre}</div>
+                                <div class="novel-intro-text">${n.summary}</div>
+                                <button class="modal-btn btn-primary add-to-shelf-btn" style="align-self:flex-end; padding:4px 12px; font-size:0.8rem;" data-index="${i}">加入书架</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (e) {
+                    resultsContainer.innerHTML = `<div style="color:red; padding:20px;">搜索失败：${e.message}</div>`;
+                }
+            },
+
+            async addToShelf(index) {
+                const novel = this.searchResults[index];
+                if (!novel) return;
+                novel.id = Utils.generateId('novel');
+                novel.lastReadIndex = 0;
+                novel.totalGenerated = 0;
+                await DBHelper.put('novelShelf', novel);
+                UIManager.showToast("已加入书架");
+                this.openNovel(novel.id);
+            },
+
+            // --- 高级搜索弹窗 ---
+            showAdvancedSearchModal() {
+                UIManager.showModal({
+                    title: "高级搜索定制",
+                    body: `
+                        <div class="form-group"><label>小说类型</label><input type="text" id="adv-genre" placeholder="例如：无限流、赛博朋克、纯爱"></div>
+                        <div class="form-group"><label>主角姓名/设定</label><input type="text" id="adv-prota" placeholder="例如：江然 (高冷剑修)"></div>
+                        <div class="form-group"><label>剧情偏好</label><input type="text" id="adv-plot" placeholder="例如：破镜重圆、强强、系统"></div>
+                        <div class="form-group"><label>预期篇幅</label><select id="adv-len"><option value="短篇">短篇</option><option value="中篇" selected>中篇</option><option value="长篇">长篇</option></select></div>
+                    `,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '开始构思', class: 'btn-primary', handler: () => {
+                            const options = {
+                                genre: $('#adv-genre').value || '不限',
+                                protagonist: $('#adv-prota').value || '随机',
+                                plot: $('#adv-plot').value || '随机',
+                                length: $('#adv-len').value
+                            };
+                            UIManager.hideModal();
+                            this.handleSearch(options);
+                        }}
+                    ]
+                });
+            },
+
+            // --- 搜索提示词绑定 ---
+            async showSearchPromptBinding() {
+                const config = await DBHelper.get('apiConfig', 'readingSettings') || { id: 'readingSettings' };
+                const boundIds = config.boundPromptFolderIds || [];
+                const allFolders = await DBHelper.getAll('promptFolders');
+
+                const listHtml = allFolders.map(f => `
+                    <label class="folder-selection-item">
+                        <input type="checkbox" name="read-search-folder" value="${f.id}" ${boundIds.includes(f.id) ? 'checked' : ''}>
+                        <i class="fas fa-folder"></i><span>${f.name}</span>
+                    </label>
+                `).join('');
+
+                UIManager.showModal({
+                    title: "绑定搜索提示词",
+                    body: `<p style="font-size:0.8rem; color:#999; margin-bottom:10px;">这些提示词将影响AI推荐新书时的偏好。</p><div class="folder-selection-list">${listHtml}</div>`,
+                    actions: [
+                        { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                        { text: '保存', class: 'btn-primary', handler: async () => {
+                            const selectedIds = [...$$('input[name="read-search-folder"]:checked')].map(cb => cb.value);
+                            config.boundPromptFolderIds = selectedIds;
+                            await DBHelper.put('apiConfig', config);
+                            UIManager.hideModal();
+                            UIManager.showToast("搜索绑定已更新");
+                        }}
+                    ]
+                });
+            },
+
+            // --- 阅读器侧边管理栏 ---
+            async showReaderManagementSidebar() {
+                const novel = await DBHelper.get('novelShelf', this.currentNovelId);
+                UIManager.showSidebar({
+                    position: 'right',
+                    title: "小说管理",
+                    body: `
+                        <div class="settings-list" style="padding:0; margin:0 -10px;">
+                            <div class="setting-item" id="read-bind-prompts">
+                                <i class="fas fa-magic"></i><span>绑定写作提示词</span><i class="fas fa-chevron-right"></i>
+                            </div>
+                            <div class="setting-item" id="read-delete-novel">
+                                <i class="fas fa-trash-alt" style="color:#e74c3c;"></i><span style="color:#e74c3c;">移出书架</span><i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    `
+                });
+
+                $('#read-bind-prompts').onclick = async () => {
+                    UIManager.hideSidebar();
+                    const allFolders = await DBHelper.getAll('promptFolders');
+                    const boundIds = novel.boundPromptFolderIds || [];
+                    const listHtml = allFolders.map(f => `
+                        <label class="folder-selection-item">
+                            <input type="checkbox" name="read-novel-folder" value="${f.id}" ${boundIds.includes(f.id) ? 'checked' : ''}>
+                            <i class="fas fa-folder"></i><span>${f.name}</span>
+                        </label>
+                    `).join('');
+
+                    UIManager.showModal({
+                        title: "绑定写作提示词",
+                        body: `<p style="font-size:0.8rem; color:#999; margin-bottom:10px;">影响本书后续章节的文风、剧情逻辑等。</p><div class="folder-selection-list">${listHtml}</div>`,
+                        actions: [
+                            { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                            { text: '保存', class: 'btn-primary', handler: async () => {
+                                novel.boundPromptFolderIds = [...$$('input[name="read-novel-folder"]:checked')].map(cb => cb.value);
+                                await DBHelper.put('novelShelf', novel);
+                                UIManager.hideModal();
+                                UIManager.showToast("书籍绑定已更新");
+                            }}
+                        ]
+                    });
+                };
+
+                $('#read-delete-novel').onclick = () => {
+                    UIManager.showModal({
+                        title: "确认删除",
+                        body: "<p>确定要将本书从书架移除吗？相关章节记录也将被清空。</p>",
+                        actions: [
+                            { text: '取消', class: 'btn-secondary', handler: () => UIManager.hideModal() },
+                            { text: '删除', class: 'btn-danger', handler: async () => {
+                                await DBHelper.delete('novelShelf', this.currentNovelId);
+                                const allChapters = await DBHelper.getAll('novelChapters');
+                                for(let c of allChapters.filter(ch => ch.novelId === this.currentNovelId)) await DBHelper.delete('novelChapters', c.id);
+                                UIManager.hideModal();
+                                UIManager.hideSidebar();
+                                $('#reader-back-btn').click();
+                            }}
+                        ]
+                    });
+                };
+            },
+
+            async openNovel(novelId) {
+                this.currentNovelId = novelId;
+                const novel = await DBHelper.get('novelShelf', novelId);
+                if (!novel) return;
+
+                $('#reader-top-title').textContent = novel.title;
+                
+                // 核心修复：进入前清空旧内容并显示加载状态
+                $('#reader-content-area').innerHTML = '<div style="text-align:center; padding:100px 0; color:#aaa;"><div class="loader-spinner" style="margin-bottom:15px;"></div><p>正在准备书籍内容...</p></div>';
+                
+                $('#reading-view-reader').classList.add('active');
+                // 进入阅读模式时，隐藏阅读App的底部导航栏
+                $('#reading-bottom-nav').style.display = 'none';
+                
+                if (novel.totalGenerated === 0) {
+                    this.generateNextChapter(); // 第一次看，生成第一章
+                } else {
+                    this.loadChapter(novel.lastReadIndex); // 看上次的
+                }
+            },
+
+            async loadChapter(index) {
+                if (index < 0) return;
+                const id = `${this.currentNovelId}_${index}`;
+                const chapter = await DBHelper.get('novelChapters', id);
+                if (!chapter) return;
+
+                this.currentChapterIndex = index;
+                this.renderReaderUI(chapter);
+                
+                // 更新书架最后阅读位置
+                const novel = await DBHelper.get('novelShelf', this.currentNovelId);
+                novel.lastReadIndex = index;
+                await DBHelper.put('novelShelf', novel);
+            },
+
+            async generateNextChapter() {
+                if (AIHandler.isAwaitingResponse) return;
+                const novel = await DBHelper.get('novelShelf', this.currentNovelId);
+                const nextIndex = novel.totalGenerated;
+                
+                const nextBtn = $('#reader-next-btn');
+                nextBtn.textContent = "生成中...";
+                AIHandler.isAwaitingResponse = true;
+
+                // 1. 获取全局提示词 (Context: novel)
+                const globalPrompts = await AIHandler.getGlobalPromptsForContext('novel');
+
+                // 2. 获取该书籍绑定的提示词
+                let boundPrompts = "";
+                if (novel.boundPromptFolderIds && novel.boundPromptFolderIds.length > 0) {
+                     const allPrompts = await DBHelper.getAll('prompts');
+                     boundPrompts = allPrompts.filter(p => novel.boundPromptFolderIds.includes(p.folderId) && p.isActive).map(p=>p.content).join('\n\n');
+                }
+
+                // 获取历史摘要
+                const chapters = await DBHelper.getAll('novelChapters');
+                const prevSummaries = chapters
+                    .filter(c => c.novelId === this.currentNovelId)
+                    .sort((a,b) => a.index - b.index)
+                    .map(c => `[第${c.index+1}章摘要]: ${c.summary}`)
+                    .join('\n');
+
+                const prompt = `${globalPrompts}\n\n${boundPrompts}\n\n你是一位网络小说作家。请根据大纲和历史记录，撰写下一章节。
+---
+小说名：《${novel.title}》
+类型：${novel.genre}
+大纲：${JSON.stringify(novel.outline)}
+---
+【前情提要（章节摘要）】：
+${prevSummaries || "暂无，这是第一章。"}
+---
+任务：
+1. 撰写第 ${nextIndex + 1} 章。包含标题和至少800字的正式正文。
+2. 撰写一段“作者有话说”（可选，谈谈创作思路或卖萌）。
+3. 模拟3-6条读者评论，语气要多样（催更、吐槽、赞美、分析伏笔）。
+4. **章节摘要 (Chapter Summary)**：严格按照以下格式：
+<摘要>
+第X章 | 出场角色：A, B | 地点：XXX | 时间：YYY
+主要剧情：100字内概述。
+是否伏笔：(若有则写明) | 是否收回伏笔：(若有则写明) | 是否结束该剧情节点：(是/否)
+</摘要>
+
+输出格式：
+[章节标题]
+(正文内容...)
+[作者有话说]
+(内容...)
+[评论区]
+用户A：内容
+用户B：内容...
+<摘要>...</摘要>`;
+
+                try {
+                    const response = await AIHandler.getApiResponse(prompt, null, new AbortController().signal);
+                    
+                    // 解析回复
+                    const summaryMatch = response.match(/<摘要>([\s\S]*?)<\/摘要>/);
+                    const summary = summaryMatch ? summaryMatch[1].trim() : "摘要提取失败";
+                    let cleanText = response.replace(summaryMatch ? summaryMatch[0] : '', '').trim();
+
+                    const chapterData = {
+                        id: `${this.currentNovelId}_${nextIndex}`,
+                        novelId: this.currentNovelId,
+                        index: nextIndex,
+                        content: cleanText,
+                        summary: summary,
+                        timestamp: Date.now()
+                    };
+
+                    await DBHelper.put('novelChapters', chapterData);
+                    novel.totalGenerated++;
+                    novel.lastReadIndex = nextIndex;
+                    await DBHelper.put('novelShelf', novel);
+
+                    this.currentChapterIndex = nextIndex;
+                    this.renderReaderUI(chapterData);
+                } catch (e) {
+                    UIManager.showToast("生成失败: " + e.message);
+                } finally {
+                    AIHandler.isAwaitingResponse = false;
+                    nextBtn.textContent = "下一章";
+                }
+            },
+
+            renderReaderUI(chapter) {
+                const area = $('#reader-content-area');
+                area.scrollTop = 0;
+                
+                // 处理文本显示
+                let text = chapter.content;
+                const sections = { title: '', body: '', note: '', comments: [] };
+
+                // 简单的正则拆分
+                const titleMatch = text.match(/\[第.*?章\s+(.*?)\]/);
+                sections.title = titleMatch ? titleMatch[0] : `第${chapter.index+1}章`;
+                
+                const noteMatch = text.match(/\[作者有话说\]([\s\S]*?)(\[|$)/);
+                sections.note = noteMatch ? noteMatch[1].trim() : '';
+
+                const commentMatch = text.match(/\[评论区\]([\s\S]*?)($)/);
+                if (commentMatch) {
+                    sections.comments = commentMatch[1].trim().split('\n').filter(l => l.includes('：') || l.includes(':'));
+                }
+
+                // 获取正文 (移除其他部分)
+                let body = text.replace(/\[第.*?章.*?\]/, '')
+                               .replace(/\[作者有话说\][\s\S]*?(\[评论区\]|$)/, '')
+                               .replace(/\[评论区\][\s\S]*$/, '')
+                               .trim();
+
+                area.innerHTML = `
+                    <div class="reader-chapter-title">${sections.title}</div>
+                    <div class="reader-body-text">${body}</div>
+                    ${sections.note ? `<div class="author-note"><strong>作者碎碎念：</strong><br>${sections.note}</div>` : ''}
+                    <div class="reader-comments-section">
+                        <h4 style="margin-bottom:15px; font-size:0.9rem; color:#888;">最新评论 (${sections.comments.length})</h4>
+                        ${sections.comments.map(c => {
+                            const [u, msg] = c.split(/[：:]/);
+                            return `<div class="reader-comment-item"><div class="reader-comment-user">${u}</div><div class="reader-comment-content">${msg}</div></div>`;
+                        }).join('')}
+                    </div>
+                `;
+
+                $('#reader-progress-label').textContent = `第 ${chapter.index + 1} 章`;
+                $('#reader-prev-btn').style.display = chapter.index > 0 ? 'block' : 'none';
+            }
+        };
+
+        
         const EventManager = {
 
             async showAnnouncementModal(isFromTutorial = false) {
@@ -39444,12 +40080,15 @@ async showGiftDetailsModal(messageId) {
                             // 默认进入首页
                             $('#infinity-bottom-nav .prompts-nav-tab[data-target="infinity-view-home"]').click();
                         } else if (pageId === 'prompts-app') { // 新增
-                        Object.values(pages).forEach(p => p.classList.remove('active'));
-                        $('#page-prompts-app').classList.add('active');
-                        $('#bottom-nav').style.display = 'none';
-                        PromptsAppManager.init();
-                        // 默认打开全局页面
-                        $('#prompts-bottom-nav .prompts-nav-tab[data-target="prompts-view-global"]').click();
+                            Object.values(pages).forEach(p => p.classList.remove('active'));
+                            $('#page-prompts-app').classList.add('active');
+                            $('#bottom-nav').style.display = 'none';
+                            PromptsAppManager.init();
+                            // 默认打开全局页面
+                            $('#prompts-bottom-nav .prompts-nav-tab[data-target="prompts-view-global"]').click();
+                        } else if (pageId === 'reading-app') { // 新增：阅读 App 跳转逻辑
+                            UIManager.navigateTo('reading-app');
+                            ReadingManager.renderShelf(); // 确保打开时渲染书架
                         } else {
                             // 默认进聊天列表 (33Chat)
                             UIManager.navigateTo('messages');
@@ -39484,6 +40123,10 @@ async showGiftDetailsModal(messageId) {
 
                 // 修改：打开无垠
                 forumBtn.addEventListener('click', () => openApp('infinity-app'));
+                
+                // 新增：打开阅读
+                const readingBtn = $('#open-reading-btn');
+                if (readingBtn) readingBtn.onclick = () => openApp('reading-app');
                 // 其他占位
                 if (smsBtn) smsBtn.addEventListener('click', () => UIManager.showToast("短信功能开发中..."));
 
@@ -39752,6 +40395,9 @@ async showGiftDetailsModal(messageId) {
 
                 // 新增：初始化无垠论坛管理器
                 InfinityManager.init();
+
+                // 新增：初始化阅读App
+                ReadingManager.init();
                 
                 await UIManager.navigateTo('messages');
                 
